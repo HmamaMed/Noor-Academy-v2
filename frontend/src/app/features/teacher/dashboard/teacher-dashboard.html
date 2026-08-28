@@ -1,0 +1,46 @@
+<div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+  <h1 class="text-2xl font-bold text-ink">My Groups</h1>
+
+  @if (loading()) {
+    <p class="mt-6 text-gray-500">Loading&hellip;</p>
+  } @else if (groups().length === 0) {
+    <p class="mt-6 text-gray-500">You have no assigned groups yet.</p>
+  } @else {
+    <ul class="mt-6 space-y-4">
+      @for (group of groups(); track group.id) {
+        <li class="rounded-lg border border-gray-200 bg-white p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold text-ink">{{ group.groupName }}</p>
+              <p class="text-sm text-gray-500">{{ group.courseTitle }} · Room {{ group.roomName }}</p>
+            </div>
+            <app-status-badge [status]="group.status" />
+          </div>
+
+          <ul class="mt-2 space-y-0.5 text-sm text-gray-600">
+            @for (session of group.sessions; track session.id) {
+              <li>{{ session.dayOfWeek }} · {{ session.startTime }} - {{ session.endTime }}</li>
+            }
+          </ul>
+
+          <button
+            (click)="toggleRoster(group)"
+            class="mt-3 rounded-md border border-primary-500 px-3 py-1.5 text-sm font-semibold text-primary-500 hover:bg-primary-50"
+          >
+            {{ expandedGroupId() === group.id ? 'Hide roster' : 'View roster' }}
+          </button>
+
+          @if (expandedGroupId() === group.id) {
+            <div class="mt-4">
+              @if (rosterLoading()) {
+                <p class="text-sm text-gray-500">Loading roster&hellip;</p>
+              } @else {
+                <app-group-roster-table [enrollments]="roster()" />
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

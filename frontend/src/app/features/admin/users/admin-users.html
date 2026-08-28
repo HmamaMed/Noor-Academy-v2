@@ -1,0 +1,76 @@
+<h1 class="text-2xl font-bold text-ink">Users</h1>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="mt-6 space-y-3 rounded-lg border border-gray-200 bg-white p-4"
+>
+  <h2 class="font-semibold text-ink">Create Teacher / Admin Account</h2>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <input formControlName="firstName" placeholder="First name" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
+    <input formControlName="lastName" placeholder="Last name" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
+    <input formControlName="email" type="email" placeholder="Email" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
+    <input formControlName="phone" placeholder="Phone (optional)" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
+    <input formControlName="password" type="password" placeholder="Password" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
+    <select formControlName="role" class="rounded-md border border-gray-300 px-3 py-2 text-sm">
+      <option value="TEACHER">Teacher</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+  </div>
+
+  @if (errorMessage(); as error) {
+    <p class="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{{ error }}</p>
+  }
+
+  <button
+    type="submit"
+    [disabled]="saving()"
+    class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
+  >
+    Create Account
+  </button>
+</form>
+
+<div class="mt-6 flex items-center gap-2">
+  <label class="text-sm font-medium text-ink">Filter by role:</label>
+  <select
+    (change)="filterByRole($any($event.target).value)"
+    class="rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+  >
+    <option value="">All</option>
+    @for (role of roles; track role) {
+      <option [value]="role">{{ role }}</option>
+    }
+  </select>
+</div>
+
+<div class="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-3">Name</th>
+        <th class="px-4 py-3">Email</th>
+        <th class="px-4 py-3">Role</th>
+        <th class="px-4 py-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      @if (loading()) {
+        <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">Loading&hellip;</td></tr>
+      } @else {
+        @for (user of users(); track user.id) {
+          <tr>
+            <td class="px-4 py-3 font-medium text-ink">{{ user.firstName }} {{ user.lastName }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ user.email }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ user.role }}</td>
+            <td class="px-4 py-3 text-right">
+              <button (click)="delete(user)" class="font-semibold text-danger hover:underline">Delete</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">No users found.</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

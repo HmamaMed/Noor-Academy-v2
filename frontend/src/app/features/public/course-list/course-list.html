@@ -1,0 +1,16 @@
+<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold text-ink">All Courses</h1>
+  <p class="mt-2 text-gray-500">Browse our courses and find an available group to join.</p>
+
+  @if (loading()) {
+    <p class="mt-6 text-gray-500">Loading courses&hellip;</p>
+  } @else if (courses().length === 0) {
+    <p class="mt-6 text-gray-500">No courses available yet. Check back soon.</p>
+  } @else {
+    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (course of courses(); track course.id) {
+        <app-course-card [course]="course" />
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,36 @@
+<nav class="bg-primary-500 text-white shadow-md">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <a routerLink="/" class="text-xl font-bold tracking-tight">Noor Academy</a>
+
+    <div class="flex items-center gap-6 text-sm font-medium">
+      <a routerLink="/courses" class="hover:text-accent-300">Courses</a>
+
+      @if (authService.currentUser$ | async; as user) {
+        @if (user.role === 'STUDENT') {
+          <a routerLink="/student/dashboard" class="hover:text-accent-300">My Dashboard</a>
+        }
+        @if (user.role === 'TEACHER') {
+          <a routerLink="/teacher/dashboard" class="hover:text-accent-300">My Groups</a>
+        }
+        @if (user.role === 'ADMIN') {
+          <a routerLink="/admin/courses" class="hover:text-accent-300">Admin</a>
+        }
+        <span class="hidden text-primary-100 sm:inline">{{ user.firstName }} {{ user.lastName }}</span>
+        <button
+          (click)="logout()"
+          class="rounded-md bg-primary-600 px-3 py-1.5 hover:bg-primary-700"
+        >
+          Logout
+        </button>
+      } @else {
+        <a routerLink="/login" class="hover:text-accent-300">Login</a>
+        <a
+          routerLink="/register"
+          class="rounded-md bg-accent-500 px-3 py-1.5 font-semibold text-primary-900 hover:bg-accent-600"
+        >
+          Enroll Now
+        </a>
+      }
+    </div>
+  </div>
+</nav>

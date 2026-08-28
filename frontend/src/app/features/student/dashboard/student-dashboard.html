@@ -1,0 +1,59 @@
+<div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+  <h1 class="text-2xl font-bold text-ink">My Dashboard</h1>
+
+  @if (loading()) {
+    <p class="mt-6 text-gray-500">Loading&hellip;</p>
+  } @else {
+    <section class="mt-8">
+      <h2 class="text-lg font-semibold text-ink">Pending Applications</h2>
+      @if (pending().length === 0) {
+        <p class="mt-2 text-sm text-gray-500">No pending applications.</p>
+      } @else {
+        <ul class="mt-4 space-y-3">
+          @for (enrollment of pending(); track enrollment.id) {
+            <li class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
+              <div>
+                <p class="font-semibold text-ink">{{ enrollment.groupName }}</p>
+                <p class="text-sm text-gray-500">{{ enrollment.courseTitle }}</p>
+                @if (enrollment.expiresAt) {
+                  <p class="mt-1 text-sm">
+                    <app-countdown-timer [expiresAt]="enrollment.expiresAt" />
+                  </p>
+                }
+              </div>
+              <div class="flex items-center gap-3">
+                <app-status-badge [status]="enrollment.status" />
+                <button
+                  (click)="cancel(enrollment.id)"
+                  [disabled]="cancellingId() === enrollment.id"
+                  class="rounded-md border border-danger px-3 py-1.5 text-sm font-semibold text-danger hover:bg-danger hover:text-white disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-lg font-semibold text-ink">Confirmed Courses</h2>
+      @if (confirmed().length === 0) {
+        <p class="mt-2 text-sm text-gray-500">No confirmed courses yet.</p>
+      } @else {
+        <ul class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          @for (enrollment of confirmed(); track enrollment.id) {
+            <li class="rounded-lg border border-gray-200 bg-white p-4">
+              <div class="flex items-center justify-between">
+                <p class="font-semibold text-ink">{{ enrollment.groupName }}</p>
+                <app-status-badge [status]="enrollment.status" />
+              </div>
+              <p class="text-sm text-gray-500">{{ enrollment.courseTitle }}</p>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>

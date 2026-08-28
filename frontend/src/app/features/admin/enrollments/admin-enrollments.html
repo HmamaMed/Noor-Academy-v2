@@ -1,0 +1,29 @@
+<h1 class="text-2xl font-bold text-ink">Enrollments</h1>
+
+<div class="mt-6 max-w-md">
+  <label class="block text-sm font-medium text-ink">Select a group</label>
+  <select
+    (change)="onGroupChange($any($event.target).value)"
+    class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+  >
+    <option value="" disabled selected>Choose a group&hellip;</option>
+    @for (group of groups(); track group.id) {
+      <option [value]="group.id">{{ group.groupName }} · {{ group.courseTitle }}</option>
+    }
+  </select>
+</div>
+
+@if (selectedGroupId()) {
+  <div class="mt-6">
+    @if (loading()) {
+      <p class="text-gray-500">Loading roster&hellip;</p>
+    } @else {
+      <app-group-roster-table
+        [enrollments]="enrollments()"
+        [showActions]="true"
+        (confirm)="confirm($event)"
+        (cancel)="cancel($event)"
+      />
+    }
+  </div>
+}

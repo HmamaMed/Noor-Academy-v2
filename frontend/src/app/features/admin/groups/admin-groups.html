@@ -1,0 +1,180 @@
+<h1 class="text-2xl font-bold text-ink">Groups</h1>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="mt-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4"
+>
+  <h2 class="font-semibold text-ink">{{ editingId() ? 'Edit Group' : 'New Group' }}</h2>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div>
+      <label class="block text-sm font-medium text-ink">Course</label>
+      <select
+        formControlName="courseId"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      >
+        <option [value]="0" disabled>Select course</option>
+        @for (course of courses(); track course.id) {
+          <option [value]="course.id">{{ course.title }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-ink">Teacher</label>
+      <select
+        formControlName="teacherId"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      >
+        <option [value]="0" disabled>Select teacher</option>
+        @for (teacher of teachers(); track teacher.id) {
+          <option [value]="teacher.id">{{ teacher.firstName }} {{ teacher.lastName }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-ink">Room</label>
+      <select
+        formControlName="roomId"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      >
+        <option [value]="0" disabled>Select room</option>
+        @for (room of rooms(); track room.id) {
+          <option [value]="room.id">{{ room.name }} ({{ room.maxCapacity }} seats)</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div>
+      <label class="block text-sm font-medium text-ink">Group name</label>
+      <input
+        formControlName="groupName"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-ink">Start date</label>
+      <input
+        type="date"
+        formControlName="startDate"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-ink">End date</label>
+      <input
+        type="date"
+        formControlName="endDate"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      />
+    </div>
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between">
+      <label class="block text-sm font-medium text-ink">Weekly sessions</label>
+      <button
+        type="button"
+        (click)="addSession()"
+        class="text-sm font-semibold text-primary-500 hover:underline"
+      >
+        + Add session
+      </button>
+    </div>
+
+    <div formArrayName="sessions" class="mt-2 space-y-2">
+      @for (sessionGroup of sessions.controls; track $index) {
+        <div [formGroupName]="$index" class="flex items-center gap-2">
+          <select formControlName="dayOfWeek" class="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
+            @for (day of days; track day) {
+              <option [value]="day">{{ day }}</option>
+            }
+          </select>
+          <input type="time" formControlName="startTime" class="rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
+          <span class="text-gray-400">to</span>
+          <input type="time" formControlName="endTime" class="rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
+          @if (sessions.length > 1) {
+            <button type="button" (click)="removeSession($index)" class="text-sm text-danger hover:underline">
+              Remove
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (errorMessage(); as error) {
+    <p class="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{{ error }}</p>
+  }
+
+  <div class="flex gap-2">
+    <button
+      type="submit"
+      [disabled]="saving()"
+      class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
+    >
+      {{ editingId() ? 'Save Changes' : 'Create Group' }}
+    </button>
+    @if (editingId()) {
+      <button
+        type="button"
+        (click)="cancelEdit()"
+        class="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-ink hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+    }
+  </div>
+</form>
+
+<div class="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-3">Group</th>
+        <th class="px-4 py-3">Course</th>
+        <th class="px-4 py-3">Teacher</th>
+        <th class="px-4 py-3">Room</th>
+        <th class="px-4 py-3">Seats</th>
+        <th class="px-4 py-3">Status</th>
+        <th class="px-4 py-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      @if (loading()) {
+        <tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">Loading&hellip;</td></tr>
+      } @else {
+        @for (group of groups(); track group.id) {
+          <tr>
+            <td class="px-4 py-3 font-medium text-ink">{{ group.groupName }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ group.courseTitle }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ group.teacherName }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ group.roomName }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ group.confirmedSeats }}/{{ group.roomCapacity }}</td>
+            <td class="px-4 py-3">
+              <select
+                [value]="group.status"
+                (change)="changeStatus(group, $any($event.target).value)"
+                class="rounded-md border border-gray-300 px-2 py-1 text-xs"
+              >
+                @for (status of statuses; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <button (click)="startEdit(group)" class="mr-2 font-semibold text-primary-500 hover:underline">
+                Edit
+              </button>
+              <button (click)="delete(group)" class="font-semibold text-danger hover:underline">Delete</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">No groups yet.</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

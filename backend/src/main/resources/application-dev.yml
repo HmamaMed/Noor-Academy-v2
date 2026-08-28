@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/noor_academy
+    username: ${DB_USERNAME:noor_academy}
+    password: ${DB_PASSWORD:noor_academy}
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    com.nooracademy: DEBUG

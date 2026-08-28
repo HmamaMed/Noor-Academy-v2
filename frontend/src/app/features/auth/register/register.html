@@ -1,0 +1,72 @@
+<div class="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-10">
+  <h1 class="text-2xl font-bold text-ink">Create your account</h1>
+  <p class="mt-1 text-sm text-gray-500">Register as a student to apply for classes.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="firstName" class="block text-sm font-medium text-ink">First name</label>
+        <input
+          id="firstName"
+          formControlName="firstName"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+        />
+      </div>
+      <div>
+        <label for="lastName" class="block text-sm font-medium text-ink">Last name</label>
+        <input
+          id="lastName"
+          formControlName="lastName"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label for="email" class="block text-sm font-medium text-ink">Email</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+      />
+    </div>
+
+    <div>
+      <label for="phone" class="block text-sm font-medium text-ink">Phone (optional)</label>
+      <input
+        id="phone"
+        formControlName="phone"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+      />
+    </div>
+
+    <div>
+      <label for="password" class="block text-sm font-medium text-ink">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+      />
+      <p class="mt-1 text-xs text-gray-400">At least 8 characters.</p>
+    </div>
+
+    @if (errorMessage(); as error) {
+      <p class="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{{ error }}</p>
+    }
+
+    <button
+      type="submit"
+      [disabled]="loading()"
+      class="w-full rounded-md bg-primary-500 px-4 py-2 font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
+    >
+      {{ loading() ? 'Creating account…' : 'Create Account' }}
+    </button>
+  </form>
+
+  <p class="mt-6 text-center text-sm text-gray-500">
+    Already have an account?
+    <a routerLink="/login" class="font-semibold text-primary-500 hover:underline">Log in</a>
+  </p>
+</div>
