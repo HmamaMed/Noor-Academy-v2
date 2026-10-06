@@ -1,5 +1,9 @@
-import { Routes } from '@angular/router';
+import { CanDeactivateFn, Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+
+const keepUnsavedChanges: CanDeactivateFn<{ canLeave: () => boolean | Promise<boolean> }> = (
+  component,
+) => component.canLeave();
 
 export const routes: Routes = [
   {
@@ -47,18 +51,20 @@ export const routes: Routes = [
       { path: '', redirectTo: 'courses', pathMatch: 'full' },
       {
         path: 'courses',
+        canDeactivate: [keepUnsavedChanges],
         loadComponent: () =>
           import('./features/admin/courses/admin-courses').then((m) => m.AdminCourses),
       },
       {
         path: 'groups',
+        canDeactivate: [keepUnsavedChanges],
         loadComponent: () =>
           import('./features/admin/groups/admin-groups').then((m) => m.AdminGroups),
       },
       {
         path: 'rooms',
-        loadComponent: () =>
-          import('./features/admin/rooms/admin-rooms').then((m) => m.AdminRooms),
+        canDeactivate: [keepUnsavedChanges],
+        loadComponent: () => import('./features/admin/rooms/admin-rooms').then((m) => m.AdminRooms),
       },
       {
         path: 'enrollments',
@@ -67,10 +73,30 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        loadComponent: () =>
-          import('./features/admin/users/admin-users').then((m) => m.AdminUsers),
+        canDeactivate: [keepUnsavedChanges],
+        loadComponent: () => import('./features/admin/users/admin-users').then((m) => m.AdminUsers),
       },
     ],
+  },
+  {
+    path: 'classroom/:groupId',
+    canActivate: [authGuard],
+    canDeactivate: [keepUnsavedChanges],
+    loadComponent: () => import('./features/workspace/workspace').then((m) => m.ClassWorkspace),
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    canDeactivate: [keepUnsavedChanges],
+    loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/recovery/recovery').then((m) => m.Recovery),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./features/auth/recovery/recovery').then((m) => m.Recovery),
   },
   { path: '**', redirectTo: '' },
 ];

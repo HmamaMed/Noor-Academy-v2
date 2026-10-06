@@ -1,59 +1,281 @@
-<div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-  <h1 class="text-2xl font-bold text-ink">My Dashboard</h1>
-
+<div class="app-content learning-dashboard">
+  <header class="page-heading">
+    <div>
+      <h1>Your learning, organized.</h1>
+      <p>{{ today | date: 'EEEE, d MMMM y' }}</p>
+      <p class="meta">Today and upcoming classes use your local time ({{ localZone }}).</p>
+    </div>
+  </header>
   @if (loading()) {
-    <p class="mt-6 text-gray-500">Loading&hellip;</p>
+    <div role="status" aria-live="polite">
+      <p class="muted">Loading your classes…</p>
+      <div class="dashboard-skeleton panel" aria-hidden="true">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+    </div>
+  } @else if (error()) {
+    <div class="notice notice-error" role="alert">
+      <app-icon name="info" />
+      <div>
+        <p>{{ error() }}</p>
+        <button class="text-link" (click)="load()">Try again</button>
+      </div>
+    </div>
   } @else {
-    <section class="mt-8">
-      <h2 class="text-lg font-semibold text-ink">Pending Applications</h2>
-      @if (pending().length === 0) {
-        <p class="mt-2 text-sm text-gray-500">No pending applications.</p>
-      } @else {
-        <ul class="mt-4 space-y-3">
-          @for (enrollment of pending(); track enrollment.id) {
-            <li class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
+    <nav class="tabs dashboard-sections" aria-label="Dashboard sections">
+      <a
+        [routerLink]="[]"
+        fragment="this-week"
+        [attr.aria-current]="!section() || section() === 'this-week' ? 'location' : null"
+        >This week</a
+      ><a
+        [routerLink]="[]"
+        fragment="applications"
+        [attr.aria-current]="section() === 'applications' ? 'location' : null"
+        >Applications</a
+      ><a
+        [routerLink]="[]"
+        fragment="past-groups"
+        [attr.aria-current]="section() === 'past-groups' ? 'location' : null"
+        >Past groups</a
+      >
+    </nav>
+    <div class="dashboard-grid">
+      <section class="panel panel-soft next-class" aria-labelledby="next-class-heading">
+        @if (next(); as nextClass) {
+          <div class="next-label">
+            <span class="eyebrow">Next class</span><app-status-badge status="CONFIRMED" />
+          </div>
+          <h2 id="next-class-heading">{{ nextClass.group.courseTitle }}</h2>
+          <p class="meta">{{ nextClass.group.groupName }}</p>
+          <ul class="class-facts">
+            <li>
+              <app-icon name="calendar" /><span
+                >{{ nextClass.date | date: 'EEE, d MMM y' }}<br />{{
+                  nextClass.session.startTime.slice(0, 5)
+                }}–{{ nextClass.session.endTime.slice(0, 5) }}</span
+              >
+            </li>
+            <li><app-icon name="user" />{{ nextClass.group.teacherName }}</li>
+            <li><app-icon name="pin" />{{ nextClass.group.roomName }}</li>
+          </ul>
+          <a class="btn-primary" [routerLink]="['/classroom', nextClass.group.groupId]"
+            >Open workspace <app-icon name="arrow"
+          /></a>
+          <app-course-motif class="next-decoration" [title]="nextClass.group.courseTitle" />
+        } @else {
+          <app-icon name="calendar" />
+          <h2 id="next-class-heading">
+            {{
+              confirmed().length
+                ? 'No upcoming sessions scheduled'
+                : 'Find a class that fits your week'
+            }}
+          </h2>
+          <p class="muted">
+            {{
+              confirmed().length
+                ? 'Your enrolled groups and materials are available below.'
+                : 'Explore the courses and choose a group that works for you.'
+            }}
+          </p>
+          @if (!confirmed().length) {
+            <a routerLink="/courses" class="btn-primary"
+              >Explore courses <app-icon name="arrow"
+            /></a>
+          }
+        }
+      </section>
+      <section id="applications" class="panel applications" aria-labelledby="applications-heading">
+        <h2 id="applications-heading">Pending applications</h2>
+        @for (enrollment of pending(); track enrollment.id) {
+          <article class="application-card">
+            <div class="group-intro">
+              <app-course-motif [title]="enrollment.courseTitle" />
               <div>
-                <p class="font-semibold text-ink">{{ enrollment.groupName }}</p>
-                <p class="text-sm text-gray-500">{{ enrollment.courseTitle }}</p>
-                @if (enrollment.expiresAt) {
-                  <p class="mt-1 text-sm">
-                    <app-countdown-timer [expiresAt]="enrollment.expiresAt" />
-                  </p>
+                <h3>{{ enrollment.courseTitle }}</h3>
+                <p class="meta">{{ enrollment.groupName }}</p>
+                <app-status-badge status="PENDING" />
+              </div>
+            </div>
+            @if (enrollment.expiresAt) {
+              <p class="deadline">
+                Expires {{ enrollment.expiresAt | date: "d MMM y 'at' HH:mm" : 'UTC' }} UTC.
+              </p>
+            }
+            <p class="meta">
+              Awaiting manual payment and administrator approval. A seat is not guaranteed.
+            </p>
+            <button class="btn-secondary" (click)="viewApplication(enrollment)">
+              View application
+            </button>
+          </article>
+        } @empty {
+          <p class="muted section-empty">No pending applications.</p>
+        }
+      </section>
+      <section id="this-week" class="panel agenda" aria-labelledby="agenda-heading">
+        <h2 id="agenda-heading">This week’s agenda</h2>
+        <ul class="agenda-list">
+          @for (
+            slot of agenda();
+            track slot.group.id + '-' + slot.session.id + '-' + slot.date.getTime()
+          ) {
+            <li>
+              <a [routerLink]="['/classroom', slot.group.groupId]" class="agenda-row"
+                ><span class="agenda-date"
+                  ><span>{{ slot.date | date: 'EEE' }}</span
+                  ><strong>{{ slot.date | date: 'dd' }}</strong
+                  ><span>{{ slot.date | date: 'MMM' }}</span></span
+                ><span class="agenda-copy"
+                  ><strong>{{ slot.group.courseTitle }}</strong
+                  ><span class="meta">{{ slot.group.groupName }}</span
+                  ><span class="meta">{{ slot.group.teacherName }} · {{ slot.group.roomName }}</span
+                  ><span class="agenda-time"
+                    >{{ slot.session.startTime.slice(0, 5) }}–{{
+                      slot.session.endTime.slice(0, 5)
+                    }}</span
+                  ></span
+                ><app-icon name="arrow"
+              /></a>
+            </li>
+          } @empty {
+            <li class="muted section-empty">No classes scheduled this week.</li>
+          }
+        </ul>
+      </section>
+      <section class="panel current-groups" aria-labelledby="groups-heading">
+        <h2 id="groups-heading">Your enrolled groups</h2>
+        <ul class="group-list">
+          @for (enrollment of confirmed(); track enrollment.id) {
+            <li>
+              <div class="group-intro">
+                <app-course-motif [title]="enrollment.courseTitle" />
+                <div>
+                  <h3>{{ enrollment.courseTitle }}</h3>
+                  <p class="meta">{{ enrollment.groupName }}</p>
+                  <app-status-badge status="CONFIRMED" />
+                </div>
+              </div>
+              <a class="text-link" [routerLink]="['/classroom', enrollment.groupId]"
+                >Open workspace <app-icon name="arrow"
+              /></a>
+            </li>
+          } @empty {
+            <li class="muted section-empty">Your confirmed groups will appear here.</li>
+          }
+        </ul>
+      </section>
+      <section id="past-groups" class="panel past-groups" aria-labelledby="past-heading">
+        <h2 id="past-heading">Past groups and applications</h2>
+        <ul class="history-list">
+          @for (enrollment of history(); track enrollment.id) {
+            <li>
+              <div>
+                <h3>{{ enrollment.courseTitle }}</h3>
+                <p class="meta">{{ enrollment.groupName }}</p>
+                @if (enrollment.status === 'CANCELLED') {
+                  <p class="meta">This application was cancelled.</p>
                 }
               </div>
-              <div class="flex items-center gap-3">
-                <app-status-badge [status]="enrollment.status" />
-                <button
-                  (click)="cancel(enrollment.id)"
-                  [disabled]="cancellingId() === enrollment.id"
-                  class="rounded-md border border-danger px-3 py-1.5 text-sm font-semibold text-danger hover:bg-danger hover:text-white disabled:opacity-50"
+              <app-status-badge
+                [status]="enrollment.status === 'CANCELLED' ? 'CANCELLED' : enrollment.groupStatus"
+              />
+              @if (enrollment.status === 'CONFIRMED') {
+                <a class="btn-secondary" [routerLink]="['/classroom', enrollment.groupId]"
+                  >View materials</a
                 >
-                  Cancel
-                </button>
-              </div>
+              } @else {
+                <a class="text-link" routerLink="/courses">View available groups</a>
+              }
             </li>
+          } @empty {
+            <li class="muted section-empty">No past groups or applications.</li>
           }
         </ul>
-      }
-    </section>
-
-    <section class="mt-10">
-      <h2 class="text-lg font-semibold text-ink">Confirmed Courses</h2>
-      @if (confirmed().length === 0) {
-        <p class="mt-2 text-sm text-gray-500">No confirmed courses yet.</p>
-      } @else {
-        <ul class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          @for (enrollment of confirmed(); track enrollment.id) {
-            <li class="rounded-lg border border-gray-200 bg-white p-4">
-              <div class="flex items-center justify-between">
-                <p class="font-semibold text-ink">{{ enrollment.groupName }}</p>
-                <app-status-badge [status]="enrollment.status" />
-              </div>
-              <p class="text-sm text-gray-500">{{ enrollment.courseTitle }}</p>
-            </li>
-          }
-        </ul>
-      }
-    </section>
+      </section>
+    </div>
   }
 </div>
+@if (selectedApplication(); as enrollment) {
+  <app-dialog
+    label="Application details"
+    [busy]="cancellingId() !== null"
+    (closed)="selectedApplication.set(null)"
+  >
+    <div class="dialog-heading">
+      <div>
+        <h2>Application details</h2>
+        <p class="meta">{{ enrollment.groupName }}</p>
+      </div>
+      <button
+        class="icon-button"
+        aria-label="Close application details"
+        [disabled]="cancellingId() !== null"
+        (click)="selectedApplication.set(null)"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    <div class="stack">
+      <h3>{{ enrollment.courseTitle }}</h3>
+      <app-status-badge [status]="enrollment.status" />
+      <p>
+        {{ enrollment.teacherName }} · {{ enrollment.roomName }}<br />{{
+          enrollment.startDate | date: 'd MMM y'
+        }}–{{ enrollment.endDate | date: 'd MMM y' }}
+      </p>
+      <ul>
+        @for (session of enrollment.sessions; track session.id) {
+          <li>
+            {{ session.dayOfWeek | titlecase }} · {{ session.startTime.slice(0, 5) }}–{{
+              session.endTime.slice(0, 5)
+            }}
+          </li>
+        }
+      </ul>
+      @if (enrollment.expiresAt) {
+        <p class="deadline">
+          Expires {{ enrollment.expiresAt | date: "d MMM y 'at' HH:mm" : 'UTC' }} UTC.
+        </p>
+      }
+      <div class="notice notice-warning">
+        <app-icon name="clock" />
+        <p>
+          Your application is awaiting confirmation. Enrollment is confirmed after payment is
+          received and an administrator approves your application. A seat is not guaranteed.
+        </p>
+      </div>
+      <p class="meta">The academy must provide manual payment instructions.</p>
+      @if (applicationError()) {
+        <p class="notice notice-error" role="alert">{{ applicationError() }}</p>
+      }
+      @if (confirmCancellation()) {
+        <p>Cancel your application for {{ enrollment.groupName }}?</p>
+        <div class="actions">
+          <button
+            class="btn-secondary"
+            [disabled]="cancellingId() !== null"
+            (click)="confirmCancellation.set(false)"
+          >
+            Keep application</button
+          ><button
+            class="btn-danger"
+            [disabled]="cancellingId() !== null"
+            (click)="cancel(enrollment)"
+          >
+            {{ cancellingId() ? 'Cancelling…' : 'Cancel application' }}
+          </button>
+        </div>
+      } @else {
+        <div class="form-actions">
+          <button class="btn-danger" (click)="confirmCancellation.set(true)">
+            Cancel application</button
+          ><button class="btn-secondary" (click)="selectedApplication.set(null)">Close</button>
+        </div>
+      }
+    </div>
+  </app-dialog>
+}

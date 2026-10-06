@@ -40,6 +40,9 @@ public class User {
 
     private String phone;
 
+    @Column(name = "auth_version", nullable = false)
+    private int authVersion;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

@@ -18,13 +18,22 @@ public class GroupController {
     private final GroupService groupService;
 
     @GetMapping
-    public List<GroupResponse> findAll(@RequestParam(required = false) Long teacherId) {
-        return teacherId == null ? groupService.findAll() : groupService.findByTeacher(teacherId);
+    public List<GroupResponse> findAll(@RequestParam(required = false) Long teacherId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.nooracademy.security.UserPrincipal principal) {
+        if (principal != null && principal.getUser().getRole() == com.nooracademy.user.Role.ADMIN) {
+            return teacherId == null ? groupService.findAll() : groupService.findByTeacher(teacherId);
+        }
+        if (principal != null && principal.getUser().getRole() == com.nooracademy.user.Role.TEACHER) {
+            if (teacherId != null && !teacherId.equals(principal.getUser().getId())) throw new org.springframework.security.access.AccessDeniedException("Group is not assigned to you");
+            return groupService.findByTeacher(principal.getUser().getId());
+        }
+        return groupService.findPublic();
     }
 
     @GetMapping("/{id}")
-    public GroupResponse findById(@PathVariable Long id) {
-        return groupService.findById(id);
+    public GroupResponse findById(@PathVariable Long id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.nooracademy.security.UserPrincipal principal) {
+        return groupService.findVisible(id, principal == null ? null : principal.getUser());
     }
 
     @PostMapping

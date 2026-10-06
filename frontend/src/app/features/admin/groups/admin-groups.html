@@ -1,180 +1,358 @@
-<h1 class="text-2xl font-bold text-ink">Groups</h1>
-
-<form
-  [formGroup]="form"
-  (ngSubmit)="submit()"
-  class="mt-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4"
->
-  <h2 class="font-semibold text-ink">{{ editingId() ? 'Edit Group' : 'New Group' }}</h2>
-
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+<div class="page-heading">
+  <div>
+    <h1>Groups</h1>
+    <p>Manage class schedules, teachers, rooms and availability.</p>
+  </div>
+  <button class="btn-primary" [disabled]="loading()" (click)="startCreate()">
+    <app-icon name="plus" />Create group
+  </button>
+</div>
+@if (success()) {
+  <p class="notice notice-success record-feedback" role="status">
+    <app-icon name="check" />{{ success() }}
+  </p>
+}
+@if (statusError()) {
+  <p class="notice notice-error record-feedback" role="alert">{{ statusError() }}</p>
+}
+@if (loadError()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load groups.</h2>
+    <p>{{ loadError() }}</p>
+    <button class="btn-secondary" (click)="loadAll()">Try again</button>
+  </div>
+} @else if (loading() && !groups().length) {
+  <div class="panel record-loading" role="status" aria-label="Loading groups">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+} @else {
+  <div class="filter-bar">
     <div>
-      <label class="block text-sm font-medium text-ink">Course</label>
-      <select
-        formControlName="courseId"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      <label for="group-course-filter">Course</label
+      ><select
+        id="group-course-filter"
+        [value]="courseFilter()"
+        (change)="filterCourse($any($event.target).value)"
       >
-        <option [value]="0" disabled>Select course</option>
+        <option value="0">All courses</option>
         @for (course of courses(); track course.id) {
           <option [value]="course.id">{{ course.title }}</option>
         }
       </select>
     </div>
     <div>
-      <label class="block text-sm font-medium text-ink">Teacher</label>
-      <select
-        formControlName="teacherId"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+      <label for="group-status-filter">Status</label
+      ><select
+        id="group-status-filter"
+        [value]="statusFilter()"
+        (change)="statusFilter.set($any($event.target).value)"
       >
-        <option [value]="0" disabled>Select teacher</option>
-        @for (teacher of teachers(); track teacher.id) {
-          <option [value]="teacher.id">{{ teacher.firstName }} {{ teacher.lastName }}</option>
+        <option value="">All statuses</option>
+        @for (status of statuses; track status) {
+          <option [value]="status">{{ status | titlecase }}</option>
         }
       </select>
     </div>
-    <div>
-      <label class="block text-sm font-medium text-ink">Room</label>
-      <select
-        formControlName="roomId"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-      >
-        <option [value]="0" disabled>Select room</option>
-        @for (room of rooms(); track room.id) {
-          <option [value]="room.id">{{ room.name }} ({{ room.maxCapacity }} seats)</option>
-        }
-      </select>
-    </div>
+    <p class="meta">{{ filteredGroups().length }} groups</p>
   </div>
-
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-    <div>
-      <label class="block text-sm font-medium text-ink">Group name</label>
-      <input
-        formControlName="groupName"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-      />
+  @if (filteredGroups().length) {
+    <p class="meta scroll-hint" id="groups-scroll-hint">
+      Scroll the table horizontally to see the full schedule and actions.
+    </p>
+    <div
+      class="table-wrap"
+      tabindex="0"
+      role="region"
+      aria-label="Group records"
+      aria-describedby="groups-scroll-hint"
+      [attr.aria-busy]="loading()"
+    >
+      <table class="groups-table">
+        <thead>
+          <tr>
+            <th scope="col">Course / group</th>
+            <th scope="col">Teacher / room</th>
+            <th scope="col">Dates / weekly sessions</th>
+            <th scope="col">Seats</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (group of filteredGroups(); track group.id) {
+            <tr [class.row-selected]="editorOpen() && editingId() === group.id">
+              <td>
+                <span class="record-title">{{ group.courseTitle }}</span
+                ><span class="record-summary">{{ group.groupName }}</span>
+              </td>
+              <td>
+                {{ group.teacherName }}<span class="record-summary">{{ group.roomName }}</span>
+              </td>
+              <td>
+                <span class="record-title"
+                  >{{ group.startDate | date: 'd MMM y' }} –
+                  {{ group.endDate | date: 'd MMM y' }}</span
+                >
+                @for (session of group.sessions; track $index) {
+                  <span class="record-summary"
+                    >{{ session.dayOfWeek | titlecase }} · {{ session.startTime.slice(0, 5) }}–{{
+                      session.endTime.slice(0, 5)
+                    }}</span
+                  >
+                }
+              </td>
+              <td>
+                {{ group.remainingSeats }} of {{ group.roomCapacity
+                }}<span class="record-summary">remaining</span>
+              </td>
+              <td>
+                <app-status-badge [status]="group.status" /><select
+                  class="group-status-select"
+                  [value]="group.status"
+                  [disabled]="updatingStatus() !== null"
+                  [attr.aria-label]="'Change status for ' + group.groupName"
+                  (change)="changeStatus(group, $any($event.target).value, $any($event.target))"
+                >
+                  @for (status of statuses; track status) {
+                    <option [value]="status" [selected]="status === group.status">
+                      {{ status | titlecase }}
+                    </option>
+                  }
+                </select>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button
+                    class="btn-secondary"
+                    [attr.aria-label]="'Edit ' + group.groupName"
+                    (click)="startEdit(group)"
+                  >
+                    Edit</button
+                  ><button
+                    class="delete-link"
+                    [attr.aria-label]="'Delete ' + group.groupName"
+                    (click)="requestDelete(group)"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <a class="text-link" [routerLink]="['/classroom', group.id]">Open workspace</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-    <div>
-      <label class="block text-sm font-medium text-ink">Start date</label>
-      <input
-        type="date"
-        formControlName="startDate"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-      />
-    </div>
-    <div>
-      <label class="block text-sm font-medium text-ink">End date</label>
-      <input
-        type="date"
-        formControlName="endDate"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-      />
-    </div>
-  </div>
-
-  <div>
-    <div class="flex items-center justify-between">
-      <label class="block text-sm font-medium text-ink">Weekly sessions</label>
+  } @else {
+    <app-empty-state
+      [title]="groups().length ? 'No matching groups.' : 'No groups yet.'"
+      [message]="
+        groups().length
+          ? 'Adjust the course or status filter.'
+          : 'Create a group to bring a course, teacher and schedule together.'
+      "
+      icon="users"
+    />
+  }
+}
+@if (editorOpen()) {
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="panel record-form"
+    aria-labelledby="record-editor-title"
+  >
+    <div class="dialog-heading">
+      <h2 id="record-editor-title" tabindex="-1">
+        {{ editingId() ? 'Edit group' : 'Create group' }}
+      </h2>
       <button
         type="button"
-        (click)="addSession()"
-        class="text-sm font-semibold text-primary-500 hover:underline"
+        class="icon-button"
+        aria-label="Close group editor"
+        [disabled]="saving()"
+        (click)="closeEditor()"
       >
-        + Add session
+        <app-icon name="close" />
       </button>
     </div>
-
-    <div formArrayName="sessions" class="mt-2 space-y-2">
-      @for (sessionGroup of sessions.controls; track $index) {
-        <div [formGroupName]="$index" class="flex items-center gap-2">
-          <select formControlName="dayOfWeek" class="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-            @for (day of days; track day) {
-              <option [value]="day">{{ day }}</option>
+    @if (formError()) {
+      <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
+        {{ formError() }}
+      </p>
+    }
+    <fieldset [disabled]="saving()" class="stack">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="group-course">Course</label
+          ><select
+            id="group-course"
+            formControlName="courseId"
+            [attr.aria-invalid]="invalid('courseId')"
+            aria-describedby="group-course-error"
+          >
+            <option [value]="0" disabled>Select course</option>
+            @for (course of courses(); track course.id) {
+              <option [value]="course.id">{{ course.title }}</option>
             }
           </select>
-          <input type="time" formControlName="startTime" class="rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
-          <span class="text-gray-400">to</span>
-          <input type="time" formControlName="endTime" class="rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
-          @if (sessions.length > 1) {
-            <button type="button" (click)="removeSession($index)" class="text-sm text-danger hover:underline">
-              Remove
-            </button>
+          @if (invalid('courseId')) {
+            <p class="field-error" id="group-course-error">Select a course.</p>
           }
         </div>
-      }
-    </div>
-  </div>
-
-  @if (errorMessage(); as error) {
-    <p class="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{{ error }}</p>
-  }
-
-  <div class="flex gap-2">
-    <button
-      type="submit"
-      [disabled]="saving()"
-      class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
-    >
-      {{ editingId() ? 'Save Changes' : 'Create Group' }}
-    </button>
-    @if (editingId()) {
-      <button
-        type="button"
-        (click)="cancelEdit()"
-        class="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-ink hover:bg-gray-50"
-      >
-        Cancel
-      </button>
-    }
-  </div>
-</form>
-
-<div class="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
-  <table class="min-w-full divide-y divide-gray-200 text-sm">
-    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
-      <tr>
-        <th class="px-4 py-3">Group</th>
-        <th class="px-4 py-3">Course</th>
-        <th class="px-4 py-3">Teacher</th>
-        <th class="px-4 py-3">Room</th>
-        <th class="px-4 py-3">Seats</th>
-        <th class="px-4 py-3">Status</th>
-        <th class="px-4 py-3 text-right">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      @if (loading()) {
-        <tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">Loading&hellip;</td></tr>
-      } @else {
-        @for (group of groups(); track group.id) {
-          <tr>
-            <td class="px-4 py-3 font-medium text-ink">{{ group.groupName }}</td>
-            <td class="px-4 py-3 text-gray-500">{{ group.courseTitle }}</td>
-            <td class="px-4 py-3 text-gray-500">{{ group.teacherName }}</td>
-            <td class="px-4 py-3 text-gray-500">{{ group.roomName }}</td>
-            <td class="px-4 py-3 text-gray-500">{{ group.confirmedSeats }}/{{ group.roomCapacity }}</td>
-            <td class="px-4 py-3">
-              <select
-                [value]="group.status"
-                (change)="changeStatus(group, $any($event.target).value)"
-                class="rounded-md border border-gray-300 px-2 py-1 text-xs"
+        <div class="form-field">
+          <label for="group-name">Group name</label
+          ><input
+            id="group-name"
+            formControlName="groupName"
+            [attr.aria-invalid]="invalid('groupName')"
+            aria-describedby="group-name-error"
+          />
+          @if (invalid('groupName')) {
+            <p class="field-error" id="group-name-error">Enter a group name.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="group-teacher">Teacher</label
+          ><select
+            id="group-teacher"
+            formControlName="teacherId"
+            [attr.aria-invalid]="invalid('teacherId')"
+            aria-describedby="group-teacher-error"
+          >
+            <option [value]="0" disabled>Select teacher</option>
+            @for (teacher of teachers(); track teacher.id) {
+              <option [value]="teacher.id">{{ teacher.firstName }} {{ teacher.lastName }}</option>
+            }
+          </select>
+          @if (invalid('teacherId')) {
+            <p class="field-error" id="group-teacher-error">Select a teacher.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="group-room">Room</label
+          ><select
+            id="group-room"
+            formControlName="roomId"
+            [attr.aria-invalid]="invalid('roomId')"
+            aria-describedby="group-room-help"
+          >
+            <option [value]="0" disabled>Select room</option>
+            @for (room of rooms(); track room.id) {
+              <option [value]="room.id">{{ room.name }} ({{ room.maxCapacity }} seats)</option>
+            }
+          </select>
+          <p class="field-help" id="group-room-help">
+            {{
+              selectedRoomCapacity() === null
+                ? 'Group capacity is set by its room.'
+                : 'Group capacity: ' + selectedRoomCapacity() + ' seats.'
+            }}
+          </p>
+          @if (invalid('roomId')) {
+            <p class="field-error">Select a room.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="group-start">Start date</label
+          ><input
+            id="group-start"
+            type="date"
+            formControlName="startDate"
+            [attr.aria-invalid]="invalid('startDate')"
+            aria-describedby="group-start-error"
+          />
+          @if (invalid('startDate')) {
+            <p class="field-error" id="group-start-error">Enter a start date.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="group-end">End date</label
+          ><input
+            id="group-end"
+            type="date"
+            formControlName="endDate"
+            [min]="form.controls.startDate.value"
+            [attr.aria-invalid]="invalid('endDate')"
+            aria-describedby="group-end-error"
+          />
+          @if (invalid('endDate')) {
+            <p class="field-error" id="group-end-error">
+              Enter an end date on or after the start date.
+            </p>
+          }
+        </div>
+      </div>
+      <section class="session-editor" aria-labelledby="weekly-sessions-title">
+        <div class="session-heading">
+          <h3 id="weekly-sessions-title">Weekly sessions</h3>
+          <button type="button" class="text-link" (click)="addSession()">
+            <app-icon name="plus" />Add session
+          </button>
+        </div>
+        <div formArrayName="sessions">
+          @for (sessionGroup of sessions.controls; track sessionGroup; let i = $index) {
+            <div [formGroupName]="i" class="session-row">
+              <div>
+                <label [for]="'session-day-' + i">Weekday</label
+                ><select [id]="'session-day-' + i" formControlName="dayOfWeek">
+                  @for (day of days; track day) {
+                    <option [value]="day">{{ day | titlecase }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label [for]="'session-start-' + i">Start time</label
+                ><input [id]="'session-start-' + i" type="time" formControlName="startTime" />
+              </div>
+              <div>
+                <label [for]="'session-end-' + i">End time</label
+                ><input [id]="'session-end-' + i" type="time" formControlName="endTime" />
+              </div>
+              <button
+                type="button"
+                class="icon-button"
+                [disabled]="sessions.length === 1"
+                [attr.aria-label]="'Remove session ' + (i + 1)"
+                (click)="removeSession(i)"
               >
-                @for (status of statuses; track status) {
-                  <option [value]="status">{{ status }}</option>
-                }
-              </select>
-            </td>
-            <td class="px-4 py-3 text-right">
-              <button (click)="startEdit(group)" class="mr-2 font-semibold text-primary-500 hover:underline">
-                Edit
+                <app-icon name="close" />
               </button>
-              <button (click)="delete(group)" class="font-semibold text-danger hover:underline">Delete</button>
-            </td>
-          </tr>
-        } @empty {
-          <tr><td colspan="7" class="px-4 py-6 text-center text-gray-400">No groups yet.</td></tr>
-        }
-      }
-    </tbody>
-  </table>
-</div>
+            </div>
+          }
+        </div>
+      </section>
+    </fieldset>
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
+        Cancel</button
+      ><button type="submit" class="btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create group' }}
+      </button>
+    </div>
+  </form>
+}
+@if (deleteTarget(); as group) {
+  <app-admin-confirm
+    title="Delete group?"
+    [message]="'Delete ' + group.groupName + '? This cannot be undone.'"
+    acceptLabel="Delete group"
+    cancelLabel="Keep group"
+    [busy]="deleting()"
+    [error]="deleteError()"
+    (accepted)="deleteRecord()"
+    (cancelled)="deleteTarget.set(null)"
+  />
+}
+@if (discardAction()) {
+  <app-admin-confirm
+    title="Discard changes?"
+    message="Your unsaved group and session changes will be lost."
+    acceptLabel="Discard changes"
+    cancelLabel="Keep editing"
+    (accepted)="discardChanges()"
+    (cancelled)="keepEditing()"
+  />
+}

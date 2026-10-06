@@ -1,31 +1,110 @@
-<section class="bg-primary-500 text-white">
-  <div class="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
-    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Learn with Noor Academy</h1>
-    <p class="mx-auto mt-4 max-w-2xl text-lg text-primary-100">
-      Small-group classes, expert teachers, and flexible schedules. Find a course and reserve
-      your seat today.
+<section class="hero public-container" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <span class="eyebrow">Learn with clarity</span>
+    <h1 id="hero-title">A brighter path<br />to learning.</h1>
+    <p class="lead">
+      Explore Noor Academy's courses, choose a class that fits your schedule, and keep your learning
+      materials in one place.
     </p>
-    <a
-      routerLink="/courses"
-      class="mt-8 inline-block rounded-md bg-accent-500 px-6 py-3 font-semibold text-primary-900 hover:bg-accent-600"
-    >
-      Browse Courses
-    </a>
+    <div class="actions">
+      <a routerLink="/courses" class="btn-primary">Explore courses <app-icon name="arrow" /></a
+      ><a routerLink="/" fragment="enrollment" class="text-link">How enrollment works</a>
+    </div>
+  </div>
+  <app-learning-art />
+</section>
+<section class="benefit-strip" aria-label="Learning at Noor Academy">
+  <div class="public-container benefits">
+    <div><app-icon name="users" /><span>Scheduled group classes</span></div>
+    <div><app-icon name="user" /><span>Teacher-led learning</span></div>
+    <div><app-icon name="book" /><span>Resources in one place</span></div>
   </div>
 </section>
-
-<section id="courses" class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-  <h2 class="text-2xl font-bold text-ink">Popular Courses</h2>
-
+<section class="public-container home-section" aria-labelledby="courses-heading">
+  <div class="section-heading">
+    <h2 id="courses-heading" class="section-title">Find your next chapter.</h2>
+    <a routerLink="/courses" class="text-link">View all courses <app-icon name="arrow" /></a>
+  </div>
   @if (loading()) {
-    <p class="mt-6 text-gray-500">Loading courses&hellip;</p>
-  } @else if (courses().length === 0) {
-    <p class="mt-6 text-gray-500">No courses available yet. Check back soon.</p>
+    <div role="status">
+      <span class="sr-only">Loading courses…</span>
+      <div class="course-grid" aria-hidden="true">
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="panel skeleton-card">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (failed()) {
+    <div class="notice notice-error" role="alert">
+      <app-icon name="info" />
+      <div>
+        <p>We couldn't load the courses.</p>
+        <button class="text-link" type="button" (click)="load()">Try again</button>
+      </div>
+    </div>
+  } @else if (!courses().length) {
+    <div class="empty-state">
+      <app-icon name="book" />
+      <h3>No courses are available yet.</h3>
+      <p>Please check again later.</p>
+    </div>
   } @else {
-    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="course-grid">
       @for (course of courses(); track course.id) {
-        <app-course-card [course]="course" />
+        <app-course-card [course]="course" [editorial]="true" />
       }
     </div>
   }
+</section>
+<section id="enrollment" class="enrollment-section" aria-labelledby="enrollment-heading">
+  <div class="public-container enrollment-layout">
+    <h2 id="enrollment-heading" class="section-title">A clear path<br />into your class.</h2>
+    <div>
+      <ol class="enrollment-steps">
+        <li>
+          <span class="step-number">01</span>
+          <div>
+            <h3>Choose your group</h3>
+            <p>Compare schedules, teachers and availability.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number">02</span>
+          <div>
+            <h3>Apply and arrange payment</h3>
+            <p>Your request stays pending for up to 72 hours.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-number">03</span>
+          <div>
+            <h3>Receive confirmation</h3>
+            <p>An administrator confirms enrollment after receiving payment.</p>
+          </div>
+        </li>
+      </ol>
+      <p class="notice notice-warning">
+        <app-icon name="info" />An application does not guarantee a seat.
+      </p>
+    </div>
+  </div>
+</section>
+<section class="public-container home-section experience" aria-labelledby="experience-heading">
+  <div>
+    <span class="eyebrow">Your learning experience</span>
+    <h2 id="experience-heading" class="section-title">Less searching.<br />More learning.</h2>
+    <p class="lead">Your weekly schedule and class resources, together.</p>
+  </div>
+  <app-workspace-preview />
+</section>
+<section class="closing-section" aria-labelledby="closing-heading">
+  <div class="public-container closing-inner">
+    <h2 id="closing-heading" class="section-title">Your next chapter<br />starts here.</h2>
+    <a routerLink="/courses" class="btn-secondary">Explore courses <app-icon name="arrow" /></a
+    ><span class="closing-arch" aria-hidden="true"></span>
+  </div>
 </section>

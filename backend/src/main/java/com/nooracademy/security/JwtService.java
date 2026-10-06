@@ -25,6 +25,7 @@ public class JwtService {
         Instant expiry = now.plusMillis(jwtProperties.expirationMs());
         return Jwts.builder()
                 .subject(principal.getUsername())
+                .claim("authVersion", principal.getUser().getAuthVersion())
                 .claim("role", principal.getUser().getRole().name())
                 .claim("userId", principal.getUser().getId())
                 .issuedAt(Date.from(now))
@@ -39,7 +40,9 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserPrincipal principal) {
         String email = extractEmail(token);
-        return email.equals(principal.getUsername()) && !isExpired(token);
+        Integer version = parseClaims(token).getPayload().get("authVersion", Integer.class);
+        return email.equals(principal.getUsername()) && !isExpired(token)
+                && (version == null ? 0 : version) == principal.getUser().getAuthVersion();
     }
 
     private boolean isExpired(String token) {

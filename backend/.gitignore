@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Private deployment credentials
+.env*
+!.env.example
+__pycache__/

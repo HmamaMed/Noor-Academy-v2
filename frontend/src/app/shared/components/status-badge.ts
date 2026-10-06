@@ -1,24 +1,9 @@
 import { Component, computed, input } from '@angular/core';
-
-const COLORS: Record<string, string> = {
-  ACTIVE: 'bg-success/10 text-success',
-  CONFIRMED: 'bg-success/10 text-success',
-  DRAFT: 'bg-primary-100 text-primary-700',
-  PENDING: 'bg-warning/10 text-warning',
-  FULL: 'bg-warning/10 text-warning',
-  COMPLETED: 'bg-primary-100 text-primary-700',
-  CANCELLED: 'bg-danger/10 text-danger',
+import { Icon } from '../design/icon';
+const STATES: Record<string, [string, string, string]> = {
+ ACTIVE: ['Active', 'success', 'check'], OPEN: ['Open', 'success', 'check'], CONFIRMED: ['Confirmed', 'success', 'check'],
+ PENDING: ['Pending', 'warning', 'clock'], FULL: ['Full', 'neutral', 'users'], DRAFT: ['Draft', 'neutral', 'file'],
+ INACTIVE: ['Inactive', 'neutral', 'clock'], COMPLETED: ['Completed', 'neutral', 'check'], CANCELLED: ['Cancelled', 'neutral', 'close'], EXPIRED: ['Expired', 'neutral', 'clock'],
 };
-
-@Component({
-  selector: 'app-status-badge',
-  template: `
-    <span class="rounded-full px-2.5 py-1 text-xs font-semibold" [class]="colorClass()">
-      {{ status() }}
-    </span>
-  `,
-})
-export class StatusBadge {
-  status = input.required<string>();
-  protected colorClass = computed(() => COLORS[this.status()] ?? 'bg-gray-100 text-gray-700');
-}
+@Component({ selector: 'app-status-badge', imports: [Icon], template: `<span class="status-badge" [attr.data-tone]="state()[1]"><app-icon [name]="state()[2]"/>{{ state()[0] }}</span>` })
+export class StatusBadge { status = input.required<string>(); protected state = computed(() => STATES[this.status()] ?? [this.status(), 'neutral', 'info']); }

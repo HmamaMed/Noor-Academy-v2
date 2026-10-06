@@ -27,6 +27,19 @@ export class UserService {
     return this.http.post<User>(this.baseUrl, request);
   }
 
+  update(
+    id: number,
+    request: { firstName: string; lastName: string; phone: string },
+  ): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/${id}`, request);
+  }
+  me(): Observable<User> {
+    return this.http.get<User>(`${this.baseUrl}/me`);
+  }
+  updateMe(request: { firstName: string; lastName: string; phone: string }): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/me`, request);
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

@@ -1,0 +1,37 @@
+<section class="auth-page">
+  <div class="auth-panel">
+    <a routerLink="/" aria-label="Noor Academy home"><app-brand /></a>
+    <h1>{{ resetting ? 'Set a new password' : 'Forgot your password?' }}</h1>
+    @if (invalidLink()) {
+      <div class="notice notice-error mt-6" role="alert"><app-icon name="info" /><p>This reset link is no longer valid.</p></div>
+      <a routerLink="/forgot-password" class="btn-primary w-full mt-6">Request a new link</a>
+    } @else if (message()) {
+      <div class="notice notice-success mt-6" role="status"><app-icon name="check" /><div><h2 class="text-lg">{{ resetting ? 'Password updated.' : 'Check your email.' }}</h2><p class="mt-2">{{ message() }}</p></div></div>
+      <a routerLink="/login" class="btn-primary w-full mt-6">Sign in <app-icon name="arrow" /></a>
+    } @else {
+      <p class="muted mt-3">{{ resetting ? 'Choose a new password for your account.' : 'Enter your email and we will send you a reset link.' }}</p>
+      @if (error()) { <div id="recovery-error" class="notice notice-error mt-6" tabindex="-1" role="alert">{{ error() }}</div> }
+      <form [formGroup]="form" (ngSubmit)="submit()" class="stack" novalidate>
+        @if (!resetting) {
+          <div><label for="recovery-email">Email</label><input id="recovery-email" type="email" formControlName="email" autocomplete="email" placeholder="you@example.com" [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid" aria-describedby="recovery-email-error" />
+            @if (form.controls.email.touched && form.controls.email.invalid) { <p id="recovery-email-error" class="field-error">Enter a valid email address.</p> }
+          </div>
+        } @else {
+          <div>
+            <label for="new-password">New password</label>
+            <div class="password-control"><input id="new-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid" aria-describedby="reset-policy reset-password-error" /><button type="button" (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()" [attr.aria-label]="showPassword() ? 'Hide new password' : 'Show new password'">{{ showPassword() ? 'Hide' : 'Show' }}</button></div>
+            <p id="reset-policy" class="field-help">Use between 8 and 72 characters.</p>
+            @if (form.controls.password.touched && form.controls.password.invalid) { <p id="reset-password-error" class="field-error">Enter a password between 8 and 72 characters.</p> }
+          </div>
+          <div>
+            <label for="confirm-password">Confirm password</label>
+            <div class="password-control"><input id="confirm-password" [type]="showConfirmation() ? 'text' : 'password'" formControlName="confirmPassword" autocomplete="new-password" [attr.aria-invalid]="form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.hasError('mismatch'))" aria-describedby="reset-confirm-error" /><button type="button" (click)="showConfirmation.set(!showConfirmation())" [attr.aria-pressed]="showConfirmation()" [attr.aria-label]="showConfirmation() ? 'Hide confirmed password' : 'Show confirmed password'">{{ showConfirmation() ? 'Hide' : 'Show' }}</button></div>
+            @if (form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.hasError('mismatch'))) { <p id="reset-confirm-error" class="field-error">Enter the same password again.</p> }
+          </div>
+        }
+        <button type="submit" class="btn-primary w-full" [disabled]="busy()">{{ busy() ? (resetting ? 'Updating password…' : 'Sending reset link…') : (resetting ? 'Update password' : 'Send reset link') }} @if (!busy()) { <app-icon name="arrow" /> }</button>
+      </form>
+    }
+    <a routerLink="/login" class="text-link mt-6"><app-icon name="back" />Back to sign in</a>
+  </div>
+</section>

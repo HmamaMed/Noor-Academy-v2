@@ -1,76 +1,259 @@
-<h1 class="text-2xl font-bold text-ink">Users</h1>
-
-<form
-  [formGroup]="form"
-  (ngSubmit)="submit()"
-  class="mt-6 space-y-3 rounded-lg border border-gray-200 bg-white p-4"
->
-  <h2 class="font-semibold text-ink">Create Teacher / Admin Account</h2>
-  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-    <input formControlName="firstName" placeholder="First name" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
-    <input formControlName="lastName" placeholder="Last name" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
-    <input formControlName="email" type="email" placeholder="Email" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
-    <input formControlName="phone" placeholder="Phone (optional)" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
-    <input formControlName="password" type="password" placeholder="Password" class="rounded-md border border-gray-300 px-3 py-2 text-sm" />
-    <select formControlName="role" class="rounded-md border border-gray-300 px-3 py-2 text-sm">
-      <option value="TEACHER">Teacher</option>
-      <option value="ADMIN">Admin</option>
-    </select>
+<div class="page-heading">
+  <div>
+    <h1>Users</h1>
+    <p>Manage your academy’s people and account details.</p>
   </div>
-
-  @if (errorMessage(); as error) {
-    <p class="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{{ error }}</p>
-  }
-
-  <button
-    type="submit"
-    [disabled]="saving()"
-    class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
-  >
-    Create Account
+  <button class="btn-primary" (click)="startCreate()">
+    <app-icon name="plus" />Create account
   </button>
-</form>
-
-<div class="mt-6 flex items-center gap-2">
-  <label class="text-sm font-medium text-ink">Filter by role:</label>
-  <select
-    (change)="filterByRole($any($event.target).value)"
-    class="rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+</div>
+<div class="tabs" aria-label="Filter users by role">
+  <button
+    [class.active]="!roleFilter()"
+    [attr.aria-pressed]="!roleFilter()"
+    (click)="filterByRole('')"
   >
-    <option value="">All</option>
-    @for (role of roles; track role) {
-      <option [value]="role">{{ role }}</option>
-    }
-  </select>
+    All</button
+  ><button
+    [class.active]="roleFilter() === 'STUDENT'"
+    [attr.aria-pressed]="roleFilter() === 'STUDENT'"
+    (click)="filterByRole('STUDENT')"
+  >
+    Students</button
+  ><button
+    [class.active]="roleFilter() === 'TEACHER'"
+    [attr.aria-pressed]="roleFilter() === 'TEACHER'"
+    (click)="filterByRole('TEACHER')"
+  >
+    Teachers</button
+  ><button
+    [class.active]="roleFilter() === 'ADMIN'"
+    [attr.aria-pressed]="roleFilter() === 'ADMIN'"
+    (click)="filterByRole('ADMIN')"
+  >
+    Administrators
+  </button>
 </div>
-
-<div class="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white">
-  <table class="min-w-full divide-y divide-gray-200 text-sm">
-    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
-      <tr>
-        <th class="px-4 py-3">Name</th>
-        <th class="px-4 py-3">Email</th>
-        <th class="px-4 py-3">Role</th>
-        <th class="px-4 py-3 text-right">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      @if (loading()) {
-        <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">Loading&hellip;</td></tr>
-      } @else {
-        @for (user of users(); track user.id) {
+@if (success()) {
+  <p class="notice notice-success record-feedback" role="status">
+    <app-icon name="check" />{{ success() }}
+  </p>
+}
+@if (loadError()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load users.</h2>
+    <p>{{ loadError() }}</p>
+    <button class="btn-secondary" (click)="load()">Try again</button>
+  </div>
+} @else if (loading() && !users().length) {
+  <div class="panel record-loading" role="status" aria-label="Loading users">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+} @else {
+  @if (users().length) {
+    <div class="table-wrap" [attr.aria-busy]="loading()">
+      <table class="record-table">
+        <thead>
           <tr>
-            <td class="px-4 py-3 font-medium text-ink">{{ user.firstName }} {{ user.lastName }}</td>
-            <td class="px-4 py-3 text-gray-500">{{ user.email }}</td>
-            <td class="px-4 py-3 text-gray-500">{{ user.role }}</td>
-            <td class="px-4 py-3 text-right">
-              <button (click)="delete(user)" class="font-semibold text-danger hover:underline">Delete</button>
-            </td>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Actions</th>
           </tr>
-        } @empty {
-          <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400">No users found.</td></tr>
-        }
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr [class.row-selected]="editorOpen() && editingId() === user.id">
+              <td data-label="Name" class="record-title">
+                {{ user.firstName }} {{ user.lastName }}
+              </td>
+              <td data-label="Email">{{ user.email }}</td>
+              <td data-label="Role">
+                <span class="status-badge">{{
+                  user.role === 'ADMIN'
+                    ? 'Administrator'
+                    : user.role === 'TEACHER'
+                      ? 'Teacher'
+                      : 'Student'
+                }}</span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button
+                    class="btn-secondary"
+                    [attr.aria-label]="'Edit ' + user.firstName + ' ' + user.lastName"
+                    (click)="startEdit(user)"
+                  >
+                    Edit</button
+                  ><button
+                    class="delete-link"
+                    [attr.aria-label]="'Delete ' + user.firstName + ' ' + user.lastName"
+                    (click)="requestDelete(user)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <app-empty-state
+      title="No matching users."
+      message="Choose another role to see more accounts."
+      icon="users"
+    />
+  }
+}
+@if (editorOpen()) {
+  <app-dialog
+    [label]="editingId() ? 'Edit user' : 'Create account'"
+    [drawer]="true"
+    [busy]="saving()"
+    (closed)="closeEditor()"
+  >
+    <div class="dialog-heading">
+      <h2 id="record-editor-title" tabindex="-1">
+        {{ editingId() ? 'Edit user' : 'Create account' }}
+      </h2>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Close user editor"
+        [disabled]="saving()"
+        (click)="closeEditor()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      @if (formError()) {
+        <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
+          {{ formError() }}
+        </p>
       }
-    </tbody>
-  </table>
-</div>
+      <fieldset [disabled]="saving()" class="stack">
+        <div class="form-field">
+          <label for="record-firstName">First name</label
+          ><input
+            id="record-firstName"
+            type="text"
+            formControlName="firstName"
+            [attr.aria-invalid]="invalid('firstName')"
+            aria-describedby="record-firstName-error"
+          />
+
+          @if (invalid('firstName')) {
+            <p id="record-firstName-error" class="field-error">Enter a first name.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="record-lastName">Last name</label
+          ><input
+            id="record-lastName"
+            type="text"
+            formControlName="lastName"
+            [attr.aria-invalid]="invalid('lastName')"
+            aria-describedby="record-lastName-error"
+          />
+
+          @if (invalid('lastName')) {
+            <p id="record-lastName-error" class="field-error">Enter a last name.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="user-email">Email</label
+          ><input
+            id="user-email"
+            formControlName="email"
+            type="email"
+            [readonly]="editingId() !== null"
+            [attr.aria-invalid]="invalid('email')"
+            aria-describedby="user-email-help"
+          />
+          <p id="user-email-help" class="field-help">
+            {{ editingId() ? 'The account email is read-only.' : 'Enter a valid email address.' }}
+          </p>
+          @if (invalid('email')) {
+            <p class="field-error">Enter a valid email address.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="record-phone">Phone (optional)</label
+          ><input
+            id="record-phone"
+            type="tel"
+            formControlName="phone"
+            [attr.aria-invalid]="invalid('phone')"
+            aria-describedby="record-phone-error"
+          />
+
+          @if (invalid('phone')) {
+            <p id="record-phone-error" class="field-error">Enter a value.</p>
+          }
+        </div>
+        @if (!editingId()) {
+          <div class="form-field">
+            <label for="user-password">Password</label
+            ><input
+              id="user-password"
+              formControlName="password"
+              type="password"
+              autocomplete="new-password"
+              [attr.aria-invalid]="invalid('password')"
+              aria-describedby="user-password-help"
+            />
+            <p id="user-password-help" class="field-help">Use at least 8 characters.</p>
+            @if (invalid('password')) {
+              <p class="field-error">Enter a password with at least 8 characters.</p>
+            }
+          </div>
+        }
+        <div class="form-field">
+          <label for="user-role">Role</label
+          ><select id="user-role" formControlName="role">
+            <option value="TEACHER">Teacher</option>
+            <option value="ADMIN">Administrator</option>
+            <option value="STUDENT">Student</option>
+          </select>
+          @if (editingId()) {
+            <p class="field-help">The account role is read-only.</p>
+          }
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
+          Cancel</button
+        ><button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create account' }}
+        </button>
+      </div>
+    </form>
+  </app-dialog>
+}
+@if (deleteTarget(); as record) {
+  <app-admin-confirm
+    title="Delete user?"
+    [message]="'Delete ' + record.firstName + ' ' + record.lastName + '? This cannot be undone.'"
+    acceptLabel="Delete user"
+    cancelLabel="Keep user"
+    [busy]="deleting()"
+    [error]="deleteError()"
+    (accepted)="deleteRecord()"
+    (cancelled)="deleteTarget.set(null)"
+  />
+}
+@if (discardAction()) {
+  <app-admin-confirm
+    title="Discard changes?"
+    message="Your unsaved changes will be lost."
+    acceptLabel="Discard changes"
+    cancelLabel="Keep editing"
+    (accepted)="discardChanges()"
+    (cancelled)="keepEditing()"
+  />
+}

@@ -15,6 +15,8 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
+    private final com.nooracademy.group.GroupRepository groupRepository;
+    private final com.nooracademy.enrollment.EnrollmentRepository enrollmentRepository;
 
     public List<RoomResponse> findAll() {
         return roomRepository.findAll().stream().map(roomMapper::toResponse).toList();
@@ -32,7 +34,13 @@ public class RoomService {
 
     @Transactional
     public RoomResponse update(Long id, RoomRequest request) {
-        Room room = getRoomOrThrow(id);
+        Room room = roomRepository.findLockedById(id).orElseThrow(() -> new NotFoundException("Room not found"));
+        for (com.nooracademy.group.Group group : groupRepository.findByRoomIdOrderById(id)) {
+            groupRepository.findLockedById(group.getId()).orElseThrow();
+            if (enrollmentRepository.countByGroupIdAndStatus(group.getId(), com.nooracademy.enrollment.EnrollmentStatus.CONFIRMED) > request.maxCapacity()) {
+                throw new com.nooracademy.common.exception.ConflictException("Capacity cannot be lower than a group's confirmed enrollment count");
+            }
+        }
         room.setName(request.name());
         room.setMaxCapacity(request.maxCapacity());
         return roomMapper.toResponse(room);

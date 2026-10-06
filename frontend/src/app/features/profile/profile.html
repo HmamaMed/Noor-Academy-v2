@@ -1,0 +1,121 @@
+<header class="profile-header">
+  <span class="eyebrow">Account</span>
+  <h1>Your profile</h1>
+  <p class="muted">Manage your account details.</p>
+</header>
+@if (loading()) {
+  <section class="panel stack" aria-busy="true">
+    <p role="status">Loading your profile…</p>
+    <div class="skeleton h-12"></div>
+    <div class="skeleton h-12"></div>
+    <div class="skeleton h-12"></div>
+  </section>
+} @else if (loadError()) {
+  <section class="empty-state">
+    <app-icon name="info" />
+    <h2>We couldn’t load your profile.</h2>
+    <p>Your account details are unavailable right now.</p>
+    <button class="btn-primary" (click)="load()">Try again</button>
+  </section>
+} @else {
+  @if (saved()) {
+    <div class="notice notice-success mb-6" role="status">
+      <app-icon name="check" />Profile updated.
+    </div>
+  }
+  @if (error()) {
+    <div id="profile-error" class="notice notice-error mb-6" role="alert" tabindex="-1">
+      {{ error() }}
+    </div>
+  }
+  <section class="panel">
+    <h2>Account details</h2>
+    <p class="muted mt-2">Keep your name and contact number up to date.</p>
+    <form [formGroup]="form" (ngSubmit)="save()" class="profile-form" novalidate>
+      <fieldset class="form-grid" [disabled]="saving()">
+        <div>
+          <label for="profile-first">First name</label
+          ><input
+            id="profile-first"
+            formControlName="firstName"
+            autocomplete="given-name"
+            [attr.aria-invalid]="form.controls.firstName.touched && form.controls.firstName.invalid"
+            aria-describedby="profile-first-error"
+          />
+          @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+            <p id="profile-first-error" class="field-error">Enter your first name.</p>
+          }
+        </div>
+        <div>
+          <label for="profile-last">Last name</label
+          ><input
+            id="profile-last"
+            formControlName="lastName"
+            autocomplete="family-name"
+            [attr.aria-invalid]="form.controls.lastName.touched && form.controls.lastName.invalid"
+            aria-describedby="profile-last-error"
+          />
+          @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+            <p id="profile-last-error" class="field-error">Enter your last name.</p>
+          }
+        </div>
+        <div class="form-field-full">
+          <label for="profile-email">Email</label
+          ><input
+            id="profile-email"
+            type="email"
+            [value]="user()?.email"
+            readonly
+            aria-describedby="profile-email-help"
+          />
+          <p id="profile-email-help" class="field-help">
+            Your account email cannot be changed here.
+          </p>
+        </div>
+        <div class="form-field-full">
+          <label for="profile-phone">Phone <span class="muted">(optional)</span></label
+          ><input id="profile-phone" type="tel" formControlName="phone" autocomplete="tel" />
+        </div>
+        <div class="form-field-full">
+          <label for="profile-role">Role</label
+          ><input
+            id="profile-role"
+            [value]="
+              user()?.role === 'ADMIN'
+                ? 'Administrator'
+                : user()?.role === 'TEACHER'
+                  ? 'Teacher'
+                  : 'Student'
+            "
+            readonly
+          />
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="restore()"
+          [disabled]="saving() || !form.dirty"
+        >
+          Cancel</button
+        ><button type="submit" class="btn-primary" [disabled]="saving() || !form.dirty">
+          {{ saving() ? 'Saving…' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+@if (discardOpen()) {
+  <app-dialog label="Discard profile changes?" (closed)="resolveDiscard(false)"
+    ><div class="dialog-heading"><h2>Discard your changes?</h2></div>
+    <p class="muted">Your profile has changes that have not been saved.</p>
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="resolveDiscard(false)">
+        Keep editing</button
+      ><button type="button" class="btn-danger" (click)="resolveDiscard(true)">
+        Discard changes
+      </button>
+    </div></app-dialog
+  >
+}

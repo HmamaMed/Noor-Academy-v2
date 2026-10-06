@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.workspace-back {
+  margin-bottom: var(--noor-space-24);
+}
+.workspace-heading {
+  align-items: flex-start;
+}
+.workspace-heading > div {
+  min-width: 0;
+}
+.workspace-heading h1 {
+  overflow-wrap: anywhere;
+}
+.workspace-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--noor-space-24);
+  margin-top: var(--noor-space-16);
+}
+.workspace-facts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.weekly-sessions {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin-top: var(--noor-space-16);
+}
+.weekly-sessions li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.875rem;
+}
+.workspace-feedback {
+  margin-bottom: var(--noor-space-24);
+}
+.materials-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--noor-space-24);
+}
+.materials-heading p {
+  margin-top: 0.5rem;
+}
+.resource-list {
+  display: grid;
+  gap: var(--noor-space-16);
+}
+.material-reader {
+  margin-top: var(--noor-space-32);
+  scroll-margin-top: 2rem;
+}
+.material-reader .dialog-heading {
+  margin-bottom: var(--noor-space-16);
+}
+.material-body {
+  max-width: 47.5rem;
+  font-size: 1rem;
+  line-height: 1.75rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding-top: var(--noor-space-24);
+  border-top: 1px solid var(--noor-border);
+}
+.reader-actions {
+  margin-top: var(--noor-space-24);
+}
+.workspace-note {
+  margin-top: var(--noor-space-32);
+}
+.publish-form {
+  display: grid;
+  gap: var(--noor-space-24);
+}
+.upload-field {
+  padding: var(--noor-space-16);
+  border: 1px dashed var(--noor-border-control);
+  border-radius: var(--noor-radius-control);
+  background: var(--noor-background);
+}
+.upload-field input {
+  width: 100%;
+  min-height: var(--noor-touch-min);
+  font-size: 0.875rem;
+}
+.upload-field input::file-selector-button {
+  min-height: var(--noor-touch-min);
+  margin-right: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--noor-border-control);
+  border-radius: var(--noor-radius-control);
+  background: var(--noor-surface);
+  color: var(--noor-primary);
+  cursor: pointer;
+}
+.upload-field input:disabled::file-selector-button {
+  background: var(--noor-neutral-soft);
+  color: var(--noor-text-muted);
+  cursor: not-allowed;
+}
+@media (max-width: 767px) {
+  .workspace-facts {
+    gap: 0.75rem;
+  }
+  .workspace-facts > span {
+    flex-basis: 100%;
+  }
+  .workspace-heading > button {
+    width: 100%;
+  }
+  .reader-actions > * {
+    width: 100%;
+  }
+}

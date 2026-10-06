@@ -1,0 +1,232 @@
+:host {
+  display: block;
+}
+.learning-dashboard {
+  overflow-wrap: anywhere;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.15fr);
+  grid-template-areas: 'next applications' 'agenda groups' 'past past';
+  gap: var(--noor-space-24);
+  align-items: start;
+}
+.next-class {
+  grid-area: next;
+  position: relative;
+  overflow: hidden;
+  min-height: 22rem;
+}
+.next-class > :not(.next-decoration) {
+  position: relative;
+  z-index: 1;
+}
+.next-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.next-class h2 {
+  margin-block: 1rem 0.5rem;
+  max-width: 26ch;
+  font-size: var(--noor-type-app-h1-size);
+  line-height: var(--noor-type-app-h1-line);
+  padding-right: 3rem;
+}
+.class-facts {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+  margin-block: 1.5rem;
+}
+.class-facts li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.next-decoration {
+  position: absolute;
+  width: 8rem;
+  height: 15rem;
+  bottom: -2rem;
+  right: -3rem;
+  opacity: 0.65;
+  pointer-events: none;
+}
+.applications {
+  grid-area: applications;
+}
+.agenda {
+  grid-area: agenda;
+}
+.current-groups {
+  grid-area: groups;
+}
+.past-groups {
+  grid-area: past;
+}
+.applications h2,
+.agenda h2,
+.current-groups h2,
+.past-groups h2 {
+  font-size: var(--noor-type-h3-size);
+  line-height: var(--noor-type-h3-line);
+}
+.application-card {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+.application-card + .application-card {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--noor-border);
+}
+.group-intro {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+}
+.group-intro > app-course-motif {
+  width: 4rem;
+  height: 5rem;
+  flex: 0 0 4rem;
+  border-radius: 0.5rem;
+}
+.group-intro > div {
+  min-width: 0;
+}
+.group-intro h3 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.group-intro app-status-badge {
+  display: block;
+  margin-top: 0.5rem;
+}
+.deadline {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--noor-warning);
+  font-variant-numeric: tabular-nums;
+}
+.agenda-list,
+.group-list,
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+.agenda-list > li + li,
+.group-list > li + li,
+.history-list > li + li {
+  border-top: 1px solid var(--noor-border);
+}
+.agenda-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding-block: 1rem;
+}
+.agenda-row:hover {
+  color: var(--noor-primary);
+}
+.agenda-row > app-icon {
+  width: 1.25rem;
+  margin-left: auto;
+}
+.agenda-date {
+  display: grid;
+  min-width: 3.25rem;
+  padding-right: 1rem;
+  border-right: 1px solid var(--noor-border);
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-transform: uppercase;
+  color: var(--noor-text-muted);
+}
+.agenda-date strong {
+  color: var(--noor-text);
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 500;
+}
+.agenda-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.agenda-copy > strong {
+  font-weight: 500;
+  line-height: 1.5rem;
+}
+.agenda-time {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.group-list > li {
+  padding-block: 1rem;
+}
+.history-list > li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-block: 1rem;
+}
+.history-list h3 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.history-list > li > div {
+  margin-right: auto;
+}
+.section-empty {
+  padding-block: 1rem;
+}
+.dashboard-skeleton {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1.5rem;
+  min-height: 20rem;
+}
+.dashboard-skeleton .skeleton:first-child {
+  height: 8rem;
+}
+@media (max-width: 767px) {
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'next' 'applications' 'agenda' 'groups' 'past';
+    gap: var(--noor-space-24);
+  }
+  .next-class h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    padding-right: 0;
+  }
+  .next-class .btn-primary {
+    width: 100%;
+  }
+  .next-decoration {
+    width: 5rem;
+    right: -2rem;
+    opacity: 0.3;
+  }
+  .next-label {
+    flex-wrap: wrap;
+  }
+  .dashboard-sections {
+    gap: 0;
+  }
+  .dashboard-sections a {
+    padding-inline: 0.5rem;
+    font-size: 0.875rem;
+  }
+  .agenda-row {
+    gap: 0.75rem;
+  }
+  .history-list > li > div {
+    flex-basis: 100%;
+  }
+}

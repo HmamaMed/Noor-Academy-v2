@@ -20,37 +20,53 @@ import java.util.List;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final GroupRepository groupRepository;
     private final EnrollmentProperties enrollmentProperties;
+    private final jakarta.persistence.EntityManager entityManager;
+    private final org.springframework.context.ApplicationEventPublisher events;
+
+    private void notifyStudent(Enrollment enrollment, String message) {
+        events.publishEvent(new com.nooracademy.notification.MailNotification(enrollment.getStudent().getEmail(),
+                "Noor Academy enrollment update", message + ": " + enrollment.getGroup().getGroupName()));
+    }
+
+    private void validateOpen(Group group) {
+        if (group.getStatus() != com.nooracademy.group.GroupStatus.ACTIVE || group.getEndDate().isBefore(java.time.LocalDate.now())) {
+            throw new BadRequestException("This group is not open for enrollment");
+        }
+    }
 
     @Transactional
     public EnrollmentResponse apply(User student, Long groupId) {
-        Group group = groupRepository.findById(groupId)
+        Group group = groupRepository.findLockedById(groupId)
                 .orElseThrow(() -> new NotFoundException("Group not found: " + groupId));
 
-        enrollmentRepository.findByStudentIdAndGroupId(student.getId(), groupId).ifPresent(existing -> {
-            if (existing.getStatus() != EnrollmentStatus.CANCELLED) {
-                throw new BadRequestException("You already have an application for this group");
-            }
-        });
+        validateOpen(group);
+        Enrollment existing = enrollmentRepository.findByStudentIdAndGroupId(student.getId(), groupId).orElse(null);
+        if (existing != null && existing.getStatus() != EnrollmentStatus.CANCELLED) {
+            throw new BadRequestException("You already have an application for this group");
+        }
 
         int confirmedSeats = enrollmentRepository.countByGroupIdAndStatus(groupId, EnrollmentStatus.CONFIRMED);
         if (confirmedSeats >= group.getRoom().getMaxCapacity()) {
             throw new ConflictException("This group is full");
         }
 
-        Enrollment enrollment = Enrollment.builder()
-                .student(student)
-                .group(group)
-                .status(EnrollmentStatus.PENDING)
-                .appliedAt(Instant.now())
-                .build();
+        Enrollment enrollment = existing == null ? new Enrollment() : existing;
+        enrollment.setStudent(student);
+        enrollment.setGroup(group);
+        enrollment.setStatus(EnrollmentStatus.PENDING);
+        enrollment.setAppliedAt(Instant.now());
+        enrollment.setConfirmedAt(null);
 
-        return toResponse(enrollmentRepository.save(enrollment));
+        enrollmentRepository.save(enrollment);
+        notifyStudent(enrollment, "Application received. Please arrange payment with the academy within 72 hours");
+        return toResponse(enrollment);
     }
 
     @Transactional
@@ -59,6 +75,10 @@ public class EnrollmentService {
         if (enrollment.getStatus() != EnrollmentStatus.PENDING) {
             throw new BadRequestException("Only pending applications can be confirmed");
         }
+        validateOpen(enrollment.getGroup());
+        if (!enrollment.getAppliedAt().plus(enrollmentProperties.pendingExpiryHours(), ChronoUnit.HOURS).isAfter(Instant.now())) {
+            throw new BadRequestException("This application has expired; cancel it and apply again");
+        }
         int confirmedSeats = enrollmentRepository.countByGroupIdAndStatus(
                 enrollment.getGroup().getId(), EnrollmentStatus.CONFIRMED);
         if (confirmedSeats >= enrollment.getGroup().getRoom().getMaxCapacity()) {
@@ -66,6 +86,7 @@ public class EnrollmentService {
         }
         enrollment.setStatus(EnrollmentStatus.CONFIRMED);
         enrollment.setConfirmedAt(Instant.now());
+        notifyStudent(enrollment, "Your enrollment is confirmed. Your class workspace is now available");
         return toResponse(enrollment);
     }
 
@@ -74,9 +95,10 @@ public class EnrollmentService {
         Enrollment enrollment = getOrThrow(enrollmentId);
         boolean isOwner = enrollment.getStudent().getId().equals(actor.getId());
         if (actor.getRole() == Role.STUDENT && !isOwner) {
-            throw new BadRequestException("You can only cancel your own applications");
+            throw new org.springframework.security.access.AccessDeniedException("You can only cancel your own applications");
         }
         enrollment.setStatus(EnrollmentStatus.CANCELLED);
+        notifyStudent(enrollment, "Your enrollment has been cancelled");
         return toResponse(enrollment);
     }
 
@@ -84,7 +106,12 @@ public class EnrollmentService {
         return enrollmentRepository.findByStudentId(studentId).stream().map(this::toResponse).toList();
     }
 
-    public List<EnrollmentResponse> findByGroup(Long groupId, EnrollmentStatus status) {
+    public List<EnrollmentResponse> findByGroup(Long groupId, EnrollmentStatus status, User actor) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found"));
+        if (actor.getRole() == Role.TEACHER && !group.getTeacher().getId().equals(actor.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("This group is not assigned to you");
+        }
+        if (actor.getRole() == Role.TEACHER) status = EnrollmentStatus.CONFIRMED;
         List<Enrollment> enrollments = status == null
                 ? enrollmentRepository.findByGroupId(groupId)
                 : enrollmentRepository.findByGroupIdAndStatus(groupId, status);
@@ -103,14 +130,24 @@ public class EnrollmentService {
         if (expired.isEmpty()) {
             return;
         }
-        expired.forEach(e -> e.setStatus(EnrollmentStatus.CANCELLED));
-        enrollmentRepository.saveAll(expired);
+        // Serialize with confirmations, then reload so we never overwrite a just-confirmed enrollment.
+        for (Long id : expired.stream().sorted(java.util.Comparator.comparing(e -> e.getGroup().getId())).map(Enrollment::getId).toList()) {
+            Enrollment enrollment = getOrThrow(id);
+            if (enrollment.getStatus() == EnrollmentStatus.PENDING && enrollment.getAppliedAt().isBefore(cutoff)) {
+                enrollment.setStatus(EnrollmentStatus.CANCELLED);
+                notifyStudent(enrollment, "Your application expired after 72 hours without confirmation");
+            }
+        }
         log.info("Auto-cancelled {} expired pending enrollment(s)", expired.size());
     }
 
     private Enrollment getOrThrow(Long id) {
-        return enrollmentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Enrollment not found: " + id));
+        Long groupId = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Enrollment not found: " + id)).getGroup().getId();
+        groupRepository.findLockedById(groupId).orElseThrow(() -> new NotFoundException("Group not found"));
+        Enrollment enrollment = enrollmentRepository.findById(id).orElseThrow();
+        entityManager.refresh(enrollment);
+        return enrollment;
     }
 
     private EnrollmentResponse toResponse(Enrollment e) {
@@ -127,7 +164,13 @@ public class EnrollmentService {
                 e.getStatus(),
                 e.getAppliedAt(),
                 e.getConfirmedAt(),
-                expiresAt
+                expiresAt,
+                e.getGroup().getStatus(),
+                e.getGroup().getTeacher().getFirstName() + " " + e.getGroup().getTeacher().getLastName(),
+                e.getGroup().getRoom().getName(),
+                e.getGroup().getStartDate(), e.getGroup().getEndDate(),
+                e.getGroup().getSessions().stream().map(s -> new com.nooracademy.session.dto.SessionResponse(
+                        s.getId(), s.getDayOfWeek(), s.getStartTime(), s.getEndTime())).toList()
         );
     }
 }

@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "name": "Noor Academy / Light, with purpose",
+    "version": "1.0",
+    "status": "design proposal",
+    "date": "2026-10-05",
+    "units": "CSS px unless otherwise stated"
+  },
+  "color": {
+    "background": "#F7F5EF",
+    "surface": "#FFFFFF",
+    "primary": "#163D35",
+    "primary-hover": "#0F2D27",
+    "primary-soft": "#E8F0EB",
+    "accent": "#B58A43",
+    "accent-text": "#78551D",
+    "text": "#182924",
+    "text-muted": "#52635B",
+    "border": "#DCE3DC",
+    "border-control": "#78867E",
+    "success": "#216047",
+    "success-soft": "#E7F2EB",
+    "warning": "#805A1F",
+    "warning-soft": "#FFF4D8",
+    "error": "#9E2F32",
+    "error-soft": "#FBECEE",
+    "info": "#28576B",
+    "info-soft": "#EAF2F7",
+    "neutral-soft": "#EEF0ED"
+  },
+  "font": {
+    "display": "Lora, Georgia, serif",
+    "body": "Inter, system-ui, -apple-system, Segoe UI, sans-serif",
+    "displayWeights": [
+      400,
+      500
+    ],
+    "bodyWeights": [
+      400,
+      500,
+      600
+    ]
+  },
+  "type": {
+    "display": [
+      64,
+      72,
+      500
+    ],
+    "publicH1": [
+      48,
+      56,
+      500
+    ],
+    "section": [
+      40,
+      48,
+      500
+    ],
+    "appH1": [
+      32,
+      40,
+      600
+    ],
+    "h2": [
+      24,
+      32,
+      600
+    ],
+    "h3": [
+      20,
+      28,
+      600
+    ],
+    "lead": [
+      18,
+      28,
+      400
+    ],
+    "body": [
+      16,
+      26,
+      400
+    ],
+    "meta": [
+      14,
+      20,
+      400
+    ],
+    "button": [
+      16,
+      24,
+      600
+    ],
+    "eyebrow": [
+      12,
+      16,
+      600
+    ],
+    "mobileDisplay": [
+      40,
+      46,
+      500
+    ],
+    "mobileAppH1": [
+      28,
+      36,
+      600
+    ]
+  },
+  "space": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64,
+    96
+  ],
+  "radius": {
+    "control": 8,
+    "card": 12,
+    "feature": 20,
+    "pill": 999
+  },
+  "layout": {
+    "publicMax": 1200,
+    "appContentMax": 1280,
+    "sidebar": 240,
+    "desktopGutter": 24,
+    "mobileGutter": 20,
+    "tabletGutter": 32,
+    "headerDesktop": 80,
+    "headerMobile": 64,
+    "sectionDesktop": 96,
+    "sectionMobile": 56,
+    "dialogMax": 560,
+    "drawer": 480
+  },
+  "breakpoint": {
+    "tablet": 768,
+    "desktop": 1024,
+    "wide": 1440
+  },
+  "control": {
+    "height": 48,
+    "touchMin": 44,
+    "paddingInline": 20,
+    "inputFontSize": 16,
+    "textareaMin": 144
+  },
+  "focus": {
+    "width": 3,
+    "offset": 3,
+    "color": "#163D35",
+    "separator": "#FFFFFF"
+  },
+  "shadow": {
+    "raised": "0 8px 24px rgba(24,41,36,.08)",
+    "dialog": "0 20px 60px rgba(24,41,36,.16)"
+  },
+  "motion": {
+    "feedbackMs": 140,
+    "drawerMs": 180,
+    "easing": "cubic-bezier(.2,0,0,1)",
+    "reducedMotion": "remove movement, animation and smooth scrolling"
+  },
+  "layers": {
+    "base": 0,
+    "sticky": 10,
+    "menu": 30,
+    "overlay": 40,
+    "dialog": 50,
+    "toast": 60
+  }
+}

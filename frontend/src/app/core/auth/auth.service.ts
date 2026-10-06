@@ -24,7 +24,15 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    return !!this.token;
+    const token = this.token;
+    if (!token) return false;
+    try {
+      const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(encoded));
+      return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
   }
 
   hasRole(...roles: Role[]): boolean {
@@ -50,6 +58,11 @@ export class AuthService {
     this.currentUserSubject.next(null);
   }
 
+  updateStoredUser(user: User): void {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
   private setSession(response: AuthResponse): void {
     localStorage.setItem(TOKEN_KEY, response.token);
     localStorage.setItem(USER_KEY, JSON.stringify(response.user));
@@ -58,6 +71,11 @@ export class AuthService {
 
   private readStoredUser(): User | null {
     const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
+    if (!this.isAuthenticated) return null;
+    try {
+      return raw ? (JSON.parse(raw) as User) : null;
+    } catch {
+      return null;
+    }
   }
 }

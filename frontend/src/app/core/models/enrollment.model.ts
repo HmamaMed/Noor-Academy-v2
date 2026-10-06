@@ -1,3 +1,5 @@
+import { SessionSlot } from './session.model';
+import { GroupStatus } from './group.model';
 export type EnrollmentStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
 export interface Enrollment {
@@ -11,4 +13,10 @@ export interface Enrollment {
   appliedAt: string;
   confirmedAt: string | null;
   expiresAt: string | null;
+  groupStatus: GroupStatus;
+  teacherName: string;
+  roomName: string;
+  startDate: string;
+  endDate: string;
+  sessions: SessionSlot[];
 }

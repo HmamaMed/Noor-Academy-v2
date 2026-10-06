@@ -1,16 +1,14 @@
-<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-  <h1 class="text-3xl font-bold text-ink">All Courses</h1>
-  <p class="mt-2 text-gray-500">Browse our courses and find an available group to join.</p>
-
+<div class="public-container public-page">
+  <nav aria-label="Breadcrumb" class="meta"><a routerLink="/" class="text-link">Home</a><span aria-hidden="true"> / </span><span>Courses</span></nav>
+  <header class="catalog-heading"><div><h1 class="public-title">Find your next chapter.</h1><p class="lead">Explore a course, then choose a group that fits your week.</p></div><app-learning-art /></header>
   @if (loading()) {
-    <p class="mt-6 text-gray-500">Loading courses&hellip;</p>
-  } @else if (courses().length === 0) {
-    <p class="mt-6 text-gray-500">No courses available yet. Check back soon.</p>
+    <div role="status"><span class="sr-only">Loading courses…</span><div class="course-grid" aria-hidden="true">@for (item of [1,2,3,4]; track item) { <div class="panel skeleton-card"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div> }</div></div>
+  } @else if (failed()) {
+    <div class="notice notice-error" role="alert"><app-icon name="info" /><div><p>We couldn't load the courses.</p><button class="text-link" type="button" (click)="load()">Try again</button></div></div>
+  } @else if (!courses().length) {
+    <div class="empty-state"><app-icon name="book" /><h2>No courses are available yet.</h2><p>Please check again later.</p></div>
   } @else {
-    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      @for (course of courses(); track course.id) {
-        <app-course-card [course]="course" />
-      }
-    </div>
+    <div class="course-grid">@for (course of courses(); track course.id) { <app-course-card [course]="course" /> }</div>
+    <p class="notice catalog-notice"><app-icon name="book" />Availability is shown for each group.</p>
   }
 </div>

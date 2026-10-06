@@ -2,6 +2,7 @@ package com.nooracademy.user;
 
 import com.nooracademy.security.CurrentUser;
 import com.nooracademy.user.dto.UpdateUserRequest;
+import com.nooracademy.user.dto.CreateUserRequest;
 import com.nooracademy.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
+        return userService.createUser(request);
+    }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")

@@ -14,6 +14,12 @@ public record EnrollmentResponse(
         EnrollmentStatus status,
         Instant appliedAt,
         Instant confirmedAt,
-        Instant expiresAt
+        Instant expiresAt,
+        com.nooracademy.group.GroupStatus groupStatus,
+        String teacherName,
+        String roomName,
+        java.time.LocalDate startDate,
+        java.time.LocalDate endDate,
+        java.util.List<com.nooracademy.session.dto.SessionResponse> sessions
 ) {
 }

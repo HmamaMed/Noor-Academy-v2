@@ -1,72 +1,49 @@
-<div class="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-10">
-  <h1 class="text-2xl font-bold text-ink">Create your account</h1>
-  <p class="mt-1 text-sm text-gray-500">Register as a student to apply for classes.</p>
-
-  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
-    <div class="grid grid-cols-2 gap-4">
+<section class="auth-page">
+  <div class="auth-panel">
+    <a routerLink="/" aria-label="Noor Academy home"><app-brand /></a>
+    <h1>Your next chapter starts here.</h1>
+    <p class="muted mt-3">Create an account to explore our courses.</p>
+    @if (error()) { <div id="register-error" class="notice notice-error mt-6" tabindex="-1" role="alert">{{ error() }}</div> }
+    <form [formGroup]="form" (ngSubmit)="submit()" class="stack" novalidate>
       <div>
-        <label for="firstName" class="block text-sm font-medium text-ink">First name</label>
-        <input
-          id="firstName"
-          formControlName="firstName"
-          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-        />
+        <label for="firstName">First name</label>
+        <input id="firstName" formControlName="firstName" autocomplete="given-name" [attr.aria-invalid]="form.controls.firstName.touched && form.controls.firstName.invalid" aria-describedby="firstName-error" />
+        @if (form.controls.firstName.touched && form.controls.firstName.invalid) { <p id="firstName-error" class="field-error">Enter your first name.</p> }
       </div>
       <div>
-        <label for="lastName" class="block text-sm font-medium text-ink">Last name</label>
-        <input
-          id="lastName"
-          formControlName="lastName"
-          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-        />
+        <label for="lastName">Last name</label>
+        <input id="lastName" formControlName="lastName" autocomplete="family-name" [attr.aria-invalid]="form.controls.lastName.touched && form.controls.lastName.invalid" aria-describedby="lastName-error" />
+        @if (form.controls.lastName.touched && form.controls.lastName.invalid) { <p id="lastName-error" class="field-error">Enter your last name.</p> }
       </div>
-    </div>
-
-    <div>
-      <label for="email" class="block text-sm font-medium text-ink">Email</label>
-      <input
-        id="email"
-        type="email"
-        formControlName="email"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-      />
-    </div>
-
-    <div>
-      <label for="phone" class="block text-sm font-medium text-ink">Phone (optional)</label>
-      <input
-        id="phone"
-        formControlName="phone"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-      />
-    </div>
-
-    <div>
-      <label for="password" class="block text-sm font-medium text-ink">Password</label>
-      <input
-        id="password"
-        type="password"
-        formControlName="password"
-        class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-      />
-      <p class="mt-1 text-xs text-gray-400">At least 8 characters.</p>
-    </div>
-
-    @if (errorMessage(); as error) {
-      <p class="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{{ error }}</p>
-    }
-
-    <button
-      type="submit"
-      [disabled]="loading()"
-      class="w-full rounded-md bg-primary-500 px-4 py-2 font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
-    >
-      {{ loading() ? 'Creating account…' : 'Create Account' }}
-    </button>
-  </form>
-
-  <p class="mt-6 text-center text-sm text-gray-500">
-    Already have an account?
-    <a routerLink="/login" class="font-semibold text-primary-500 hover:underline">Log in</a>
-  </p>
-</div>
+      <div>
+        <label for="register-email">Email</label>
+        <input id="register-email" type="email" formControlName="email" autocomplete="email" placeholder="you@example.com" [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid" aria-describedby="register-email-error" />
+        @if (form.controls.email.touched && form.controls.email.invalid) { <p id="register-email-error" class="field-error">Enter a valid email address.</p> }
+      </div>
+      <div>
+        <label for="register-password">Password</label>
+        <div class="password-control">
+          <input id="register-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid" aria-describedby="password-policy password-error" />
+          <button type="button" (click)="showPassword.set(!showPassword())" [attr.aria-pressed]="showPassword()" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">{{ showPassword() ? 'Hide' : 'Show' }}</button>
+        </div>
+        <p id="password-policy" class="field-help">Use at least 8 characters.</p>
+        @if (form.controls.password.touched && form.controls.password.invalid) { <p id="password-error" class="field-error">Enter a password with at least 8 characters.</p> }
+      </div>
+      <div>
+        <label for="register-confirm">Confirm password</label>
+        <div class="password-control">
+          <input id="register-confirm" [type]="showConfirmation() ? 'text' : 'password'" formControlName="confirmPassword" autocomplete="new-password" [attr.aria-invalid]="form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.hasError('mismatch'))" aria-describedby="confirm-error" />
+          <button type="button" (click)="showConfirmation.set(!showConfirmation())" [attr.aria-pressed]="showConfirmation()" [attr.aria-label]="showConfirmation() ? 'Hide confirmed password' : 'Show confirmed password'">{{ showConfirmation() ? 'Hide' : 'Show' }}</button>
+        </div>
+        @if (form.controls.confirmPassword.touched && (form.controls.confirmPassword.invalid || form.hasError('mismatch'))) { <p id="confirm-error" class="field-error">Enter the same password again.</p> }
+      </div>
+      <div>
+        <label for="register-phone">Phone <span class="muted">(optional)</span></label>
+        <input id="register-phone" type="tel" formControlName="phone" autocomplete="tel" />
+      </div>
+      <button class="btn-primary w-full" type="submit" [disabled]="loading()">{{ loading() ? 'Creating account…' : 'Create account' }} @if (!loading()) { <app-icon name="arrow" /> }</button>
+    </form>
+    <div class="auth-divider">Already have an account?</div>
+    <a routerLink="/login" [queryParams]="{redirectTo: redirectTo}" class="btn-secondary w-full">Sign in</a>
+  </div>
+</section>

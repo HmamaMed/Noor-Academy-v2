@@ -1,38 +1,42 @@
 @import "tailwindcss";
-
+@import "./styles/noor-tokens.css";
+@import "./styles/noor-system.css";
 @theme {
-  --color-primary-50: #eceef8;
-  --color-primary-100: #ced4ee;
-  --color-primary-200: #a7b1e1;
-  --color-primary-300: #8090d4;
-  --color-primary-400: #5f71c9;
-  --color-primary-500: #3f51b5;
-  --color-primary-600: #3947a0;
-  --color-primary-700: #303c88;
-  --color-primary-800: #28316f;
-  --color-primary-900: #1e2554;
-
-  --color-accent-50: #fff8e1;
-  --color-accent-100: #ffecb3;
-  --color-accent-200: #ffe082;
-  --color-accent-300: #ffd54f;
-  --color-accent-400: #ffca28;
-  --color-accent-500: #ffc107;
-  --color-accent-600: #ffb300;
-  --color-accent-700: #ffa000;
-
-  --color-success: #28a745;
-  --color-warning: #fd7e14;
-  --color-danger: #dc3545;
-
-  --color-surface: #f8f9fa;
-  --color-ink: #212529;
-
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primary-50: #E8F0EB;
+  --color-primary-100: #E8F0EB;
+  --color-primary-200: #DCE3DC;
+  --color-primary-300: #78867E;
+  --color-primary-400: #216047;
+  --color-primary-500: #163D35;
+  --color-primary-600: #0F2D27;
+  --color-primary-700: #0F2D27;
+  --color-primary-800: #163D35;
+  --color-primary-900: #182924;
+  --color-accent-50: #FFF4D8;
+  --color-accent-100: #FFF4D8;
+  --color-accent-300: #B58A43;
+  --color-accent-500: #B58A43;
+  --color-accent-600: #78551D;
+  --color-success: #216047;
+  --color-warning: #805A1F;
+  --color-danger: #9E2F32;
+  --color-surface: #F7F5EF;
+  --color-ink: #182924;
+  --color-gray-50: #F7F5EF;
+  --color-gray-100: #EEF0ED;
+  --color-gray-200: #DCE3DC;
+  --color-gray-300: #78867E;
+  --color-gray-400: #52635B;
+  --color-gray-500: #52635B;
+  --color-gray-600: #52635B;
+  --color-gray-700: #182924;
+  --color-red-50: #FBECEE;
+  --color-red-200: #9E2F32;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-body {
-  background-color: var(--color-surface);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-}
+@font-face { font-family: Inter; src: url('/fonts/inter-400.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: Inter; src: url('/fonts/inter-500.ttf') format('truetype'); font-style: normal; font-weight: 500; font-display: swap; }
+@font-face { font-family: Inter; src: url('/fonts/inter-600.ttf') format('truetype'); font-style: normal; font-weight: 600; font-display: swap; }
+@font-face { font-family: Lora; src: url('/fonts/lora-400.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+@font-face { font-family: Lora; src: url('/fonts/lora-500.ttf') format('truetype'); font-style: normal; font-weight: 500; font-display: swap; }

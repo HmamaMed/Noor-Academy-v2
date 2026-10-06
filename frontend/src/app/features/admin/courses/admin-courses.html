@@ -1,72 +1,150 @@
-<h1 class="text-2xl font-bold text-ink">Courses</h1>
-
-<form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-3 rounded-lg border border-gray-200 bg-white p-4">
-  <h2 class="font-semibold text-ink">{{ editingId() ? 'Edit Course' : 'New Course' }}</h2>
-  <input
-    formControlName="title"
-    placeholder="Title"
-    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-  />
-  <textarea
-    formControlName="description"
-    placeholder="Description"
-    rows="2"
-    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-  ></textarea>
-  <textarea
-    formControlName="syllabus"
-    placeholder="Syllabus"
-    rows="2"
-    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-  ></textarea>
-  <div class="flex gap-2">
-    <button
-      type="submit"
-      [disabled]="saving()"
-      class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
+<div class="page-heading">
+  <div>
+    <h1>Courses</h1>
+    <p>Shape the learning at Noor Academy.</p>
+  </div>
+  <button class="btn-primary" (click)="startCreate()"><app-icon name="plus" />Create course</button>
+</div>
+@if (success()) {
+  <p class="notice notice-success record-feedback" role="status">
+    <app-icon name="check" />{{ success() }}
+  </p>
+}
+@if (loadError()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load courses.</h2>
+    <p>{{ loadError() }}</p>
+    <button class="btn-secondary" (click)="load()">Try again</button>
+  </div>
+} @else if (loading() && !courses().length) {
+  <div class="panel record-loading" role="status" aria-label="Loading courses">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+} @else {
+  @if (courses().length) {
+    <div class="table-wrap" [attr.aria-busy]="loading()">
+      <table class="record-table">
+        <thead>
+          <tr>
+            <th scope="col">Course title</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (course of courses(); track course.id) {
+            <tr [class.row-selected]="editorOpen() && editingId() === course.id">
+              <td data-label="Course" class="record-title">{{ course.title }}</td>
+              <td>
+                <div class="row-actions">
+                  <button
+                    class="btn-secondary"
+                    [attr.aria-label]="'Edit ' + course.title"
+                    (click)="startEdit(course)"
+                  >
+                    Edit</button
+                  ><button
+                    class="delete-link"
+                    [attr.aria-label]="'Delete ' + course.title"
+                    (click)="requestDelete(course)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <app-empty-state
+      title="No courses yet."
+      message="Create a course to start organizing your class groups."
+      icon="book"
+      ><button class="btn-primary" (click)="startCreate()">Create course</button></app-empty-state
     >
-      {{ editingId() ? 'Save Changes' : 'Create Course' }}
-    </button>
-    @if (editingId()) {
+  }
+}
+@if (editorOpen()) {
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="panel record-form"
+    aria-labelledby="record-editor-title"
+  >
+    <div class="dialog-heading">
+      <h2 id="record-editor-title" tabindex="-1">
+        {{ editingId() ? 'Edit course' : 'Create course' }}
+      </h2>
       <button
         type="button"
-        (click)="cancelEdit()"
-        class="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-ink hover:bg-gray-50"
+        class="icon-button"
+        aria-label="Close course editor"
+        [disabled]="saving()"
+        (click)="closeEditor()"
       >
-        Cancel
+        <app-icon name="close" />
       </button>
+    </div>
+    @if (formError()) {
+      <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
+        {{ formError() }}
+      </p>
     }
-  </div>
-</form>
+    <fieldset [disabled]="saving()" class="stack">
+      <div class="form-field">
+        <label for="record-title">Course title</label
+        ><input
+          id="record-title"
+          type="text"
+          formControlName="title"
+          [attr.aria-invalid]="invalid('title')"
+          aria-describedby="record-title-error"
+        />
 
-<div class="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
-  <table class="min-w-full divide-y divide-gray-200 text-sm">
-    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
-      <tr>
-        <th class="px-4 py-3">Title</th>
-        <th class="px-4 py-3">Description</th>
-        <th class="px-4 py-3 text-right">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      @if (loading()) {
-        <tr><td colspan="3" class="px-4 py-6 text-center text-gray-400">Loading&hellip;</td></tr>
-      } @else {
-        @for (course of courses(); track course.id) {
-          <tr>
-            <td class="px-4 py-3 font-medium text-ink">{{ course.title }}</td>
-            <td class="max-w-sm truncate px-4 py-3 text-gray-500">{{ course.description }}</td>
-            <td class="px-4 py-3 text-right">
-              <button (click)="startEdit(course)" class="mr-2 font-semibold text-primary-500 hover:underline">
-                Edit
-              </button>
-              <button (click)="delete(course)" class="font-semibold text-danger hover:underline">Delete</button>
-            </td>
-          </tr>
-        } @empty {
-          <tr><td colspan="3" class="px-4 py-6 text-center text-gray-400">No courses yet.</td></tr>
+        @if (invalid('title')) {
+          <p id="record-title-error" class="field-error">Enter a course title.</p>
         }
-      }
-    </tbody>
-  </table>
-</div>
+      </div>
+      <div class="form-field">
+        <label for="course-description">Description</label
+        ><textarea id="course-description" formControlName="description"></textarea>
+      </div>
+      <div class="form-field">
+        <label for="course-syllabus">Syllabus</label
+        ><textarea id="course-syllabus" formControlName="syllabus" rows="8"></textarea>
+      </div>
+    </fieldset>
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
+        Cancel</button
+      ><button type="submit" class="btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create course' }}
+      </button>
+    </div>
+  </form>
+}
+@if (deleteTarget(); as record) {
+  <app-admin-confirm
+    title="Delete course?"
+    [message]="'Delete ' + record.title + '? This cannot be undone.'"
+    acceptLabel="Delete course"
+    cancelLabel="Keep course"
+    [busy]="deleting()"
+    [error]="deleteError()"
+    (accepted)="deleteRecord()"
+    (cancelled)="deleteTarget.set(null)"
+  />
+}
+@if (discardAction()) {
+  <app-admin-confirm
+    title="Discard changes?"
+    message="Your unsaved changes will be lost."
+    acceptLabel="Discard changes"
+    cancelLabel="Keep editing"
+    (accepted)="discardChanges()"
+    (cancelled)="keepEditing()"
+  />
+}

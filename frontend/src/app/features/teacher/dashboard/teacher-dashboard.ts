@@ -1,56 +1,58 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe, TitleCasePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { GroupService } from '../../../core/services/group.service';
 import { EnrollmentService } from '../../../core/services/enrollment.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Group } from '../../../core/models/group.model';
 import { Enrollment } from '../../../core/models/enrollment.model';
 import { StatusBadge } from '../../../shared/components/status-badge';
-import { GroupRosterTable } from '../../../shared/components/group-roster-table';
+import { Icon } from '../../../shared/design/icon';
+import { CourseMotif } from '../../../shared/design/course-motif';
+import { NoorDialog } from '../../../shared/design/dialog';
+import { nextSession } from '../../../shared/utils/schedule';
 
 @Component({
   selector: 'app-teacher-dashboard',
-  imports: [StatusBadge, GroupRosterTable],
+  imports: [StatusBadge, RouterLink, DatePipe, TitleCasePipe, Icon, CourseMotif, NoorDialog],
   templateUrl: './teacher-dashboard.html',
+  styleUrl: './teacher-dashboard.css',
 })
 export class TeacherDashboard implements OnInit {
-  private groupService = inject(GroupService);
-  private enrollmentService = inject(EnrollmentService);
-  private authService = inject(AuthService);
-
+  private readonly groupService = inject(GroupService);
+  private readonly enrollmentService = inject(EnrollmentService);
+  private readonly authService = inject(AuthService);
+  protected readonly localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   protected groups = signal<Group[]>([]);
   protected loading = signal(true);
-  protected expandedGroupId = signal<number | null>(null);
+  protected error = signal('');
+  protected selectedGroup = signal<Group | null>(null);
   protected roster = signal<Enrollment[]>([]);
   protected rosterLoading = signal(false);
+  protected rosterError = signal('');
+  protected next = computed(() => nextSession(this.groups().filter((group) => group.status === 'ACTIVE' || group.status === 'FULL')));
 
-  ngOnInit(): void {
+  ngOnInit() { this.load(); }
+  protected load() {
     const teacherId = this.authService.currentUser?.id;
-    if (!teacherId) {
-      this.loading.set(false);
-      return;
-    }
+    if (!teacherId) { this.loading.set(false); this.error.set('Sign in again to view your assigned groups.'); return; }
+    this.loading.set(true); this.error.set('');
     this.groupService.findAll(teacherId).subscribe({
-      next: (groups) => {
-        this.groups.set(groups);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
+      next: (groups) => { this.groups.set(groups); this.loading.set(false); },
+      error: (err) => { this.loading.set(false); this.error.set(err.error?.message ?? 'We couldn’t load your assigned groups. Try again.'); },
     });
   }
-
-  toggleRoster(group: Group): void {
-    if (this.expandedGroupId() === group.id) {
-      this.expandedGroupId.set(null);
-      return;
-    }
-    this.expandedGroupId.set(group.id);
-    this.rosterLoading.set(true);
+  protected openRoster(group: Group) {
+    this.selectedGroup.set(group); this.roster.set([]); this.rosterError.set(''); this.rosterLoading.set(true);
     this.enrollmentService.findByGroup(group.id, 'CONFIRMED').subscribe({
       next: (roster) => {
-        this.roster.set(roster);
-        this.rosterLoading.set(false);
+        if (this.selectedGroup()?.id !== group.id) return;
+        this.roster.set(roster.filter((enrollment) => enrollment.status === 'CONFIRMED')); this.rosterLoading.set(false);
       },
-      error: () => this.rosterLoading.set(false),
+      error: (err) => {
+        if (this.selectedGroup()?.id !== group.id) return;
+        this.rosterLoading.set(false); this.rosterError.set(err.error?.message ?? 'We couldn’t load the confirmed students. Try again.');
+      },
     });
   }
 }

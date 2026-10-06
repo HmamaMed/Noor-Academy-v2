@@ -32,9 +32,9 @@ public class EnrollmentController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public List<EnrollmentResponse> byGroup(@RequestParam Long groupId,
+    public List<EnrollmentResponse> byGroup(@CurrentUser User actor, @RequestParam Long groupId,
                                              @RequestParam(required = false) EnrollmentStatus status) {
-        return enrollmentService.findByGroup(groupId, status);
+        return enrollmentService.findByGroup(groupId, status, actor);
     }
 
     @PatchMapping("/{id}/confirm")

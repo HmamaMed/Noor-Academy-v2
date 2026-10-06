@@ -1,0 +1,106 @@
+/* Noor Academy - design tokens, v1.0. CSS px represented in rem at a 16px root. */
+:root {
+  --noor-background: #F7F5EF;
+  --noor-surface: #FFFFFF;
+  --noor-primary: #163D35;
+  --noor-primary-hover: #0F2D27;
+  --noor-primary-soft: #E8F0EB;
+  --noor-accent: #B58A43;
+  --noor-accent-text: #78551D;
+  --noor-text: #182924;
+  --noor-text-muted: #52635B;
+  --noor-border: #DCE3DC;
+  --noor-border-control: #78867E;
+  --noor-success: #216047;
+  --noor-success-soft: #E7F2EB;
+  --noor-warning: #805A1F;
+  --noor-warning-soft: #FFF4D8;
+  --noor-error: #9E2F32;
+  --noor-error-soft: #FBECEE;
+  --noor-info: #28576B;
+  --noor-info-soft: #EAF2F7;
+  --noor-neutral-soft: #EEF0ED;
+  --noor-font-display: "Lora", Georgia, serif;
+  --noor-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --noor-space-4: 0.25rem;
+  --noor-space-8: 0.5rem;
+  --noor-space-12: 0.75rem;
+  --noor-space-16: 1rem;
+  --noor-space-24: 1.5rem;
+  --noor-space-32: 2rem;
+  --noor-space-48: 3rem;
+  --noor-space-64: 4rem;
+  --noor-space-96: 6rem;
+  --noor-radius-control: 0.5rem;
+  --noor-radius-card: 0.75rem;
+  --noor-radius-feature: 1.25rem;
+  --noor-radius-pill: 62.4375rem;
+  --noor-public-max: 75rem;
+  --noor-app-content-max: 80rem;
+  --noor-sidebar: 15rem;
+  --noor-desktop-gutter: 1.5rem;
+  --noor-mobile-gutter: 1.25rem;
+  --noor-tablet-gutter: 2rem;
+  --noor-header-desktop: 5rem;
+  --noor-header-mobile: 4rem;
+  --noor-section-desktop: 6rem;
+  --noor-section-mobile: 3.5rem;
+  --noor-dialog-max: 35rem;
+  --noor-drawer: 30rem;
+  --noor-type-display-size: 4rem;
+  --noor-type-display-line: 4.5rem;
+  --noor-type-display-weight: 500;
+  --noor-type-public-h1-size: 3rem;
+  --noor-type-public-h1-line: 3.5rem;
+  --noor-type-public-h1-weight: 500;
+  --noor-type-section-size: 2.5rem;
+  --noor-type-section-line: 3rem;
+  --noor-type-section-weight: 500;
+  --noor-type-app-h1-size: 2rem;
+  --noor-type-app-h1-line: 2.5rem;
+  --noor-type-app-h1-weight: 600;
+  --noor-type-h2-size: 1.5rem;
+  --noor-type-h2-line: 2rem;
+  --noor-type-h2-weight: 600;
+  --noor-type-h3-size: 1.25rem;
+  --noor-type-h3-line: 1.75rem;
+  --noor-type-h3-weight: 600;
+  --noor-type-lead-size: 1.125rem;
+  --noor-type-lead-line: 1.75rem;
+  --noor-type-lead-weight: 400;
+  --noor-type-body-size: 1rem;
+  --noor-type-body-line: 1.625rem;
+  --noor-type-body-weight: 400;
+  --noor-type-meta-size: 0.875rem;
+  --noor-type-meta-line: 1.25rem;
+  --noor-type-meta-weight: 400;
+  --noor-type-button-size: 1rem;
+  --noor-type-button-line: 1.5rem;
+  --noor-type-button-weight: 600;
+  --noor-type-eyebrow-size: 0.75rem;
+  --noor-type-eyebrow-line: 1rem;
+  --noor-type-eyebrow-weight: 600;
+  --noor-type-mobile-display-size: 2.5rem;
+  --noor-type-mobile-display-line: 2.875rem;
+  --noor-type-mobile-display-weight: 500;
+  --noor-type-mobile-app-h1-size: 1.75rem;
+  --noor-type-mobile-app-h1-line: 2.25rem;
+  --noor-type-mobile-app-h1-weight: 600;
+  --noor-control-height: 3rem;
+  --noor-touch-min: 2.75rem;
+  --noor-focus-width: 3px;
+  --noor-focus-offset: 3px;
+  --noor-focus-separator: #FFFFFF;
+  --noor-shadow-raised: 0 8px 24px rgba(24,41,36,.08);
+  --noor-shadow-dialog: 0 20px 60px rgba(24,41,36,.16);
+  --noor-motion-feedback: 140ms;
+  --noor-motion-drawer: 180ms;
+  --noor-motion-ease: cubic-bezier(.2,0,0,1);
+}
+
+/* Implementation notes: these tokens alone do not style an application.
+   Tablet breakpoint: 48rem; desktop: 64rem; wide reference: 90rem.
+   Focus: use a 3px forest ring with a 3px white separation on light/primary surfaces.
+   Essential control borders use --noor-border-control, never decorative brass.
+   Respect prefers-reduced-motion by removing transforms, animation, and smooth scrolling.
+   Do not set the document font-size in px; retain user font scaling. */

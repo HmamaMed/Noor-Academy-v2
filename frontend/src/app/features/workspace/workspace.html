@@ -1,0 +1,370 @@
+<div class="app-content">
+  <a class="text-link workspace-back" [routerLink]="dashboard()"
+    ><app-icon name="back" />Back to dashboard</a
+  >
+  @if (loading()) {
+    <section class="panel stack" role="status" aria-busy="true">
+      <p>Loading class materials…</p>
+      <div class="skeleton h-12" aria-hidden="true"></div>
+      <div class="skeleton h-12" aria-hidden="true"></div>
+      <div class="skeleton h-12" aria-hidden="true"></div>
+    </section>
+  } @else if (denied()) {
+    <section class="empty-state">
+      <app-icon name="lock" />
+      <h1>
+        {{
+          pending()
+            ? 'Your enrollment is awaiting confirmation.'
+            : 'You do not have access to this class.'
+        }}
+      </h1>
+      <p>
+        {{
+          pending()
+            ? 'Class materials become available after an administrator confirms your enrollment.'
+            : 'Class materials are available to confirmed students and authorized teachers.'
+        }}
+      </p>
+      <a class="btn-primary" [routerLink]="pending() ? '/student/dashboard' : '/courses'">{{
+        pending() ? 'View application' : 'Back to courses'
+      }}</a>
+    </section>
+  } @else if (loadError()) {
+    <section class="empty-state" role="alert">
+      <app-icon name="info" />
+      <h1>{{ loadError() }}</h1>
+      <p>Your class materials are unavailable right now.</p>
+      <button class="btn-primary" (click)="load()">Try again</button>
+    </section>
+  } @else if (workspace(); as space) {
+    <header class="page-heading workspace-heading">
+      <div>
+        <h1>{{ space.group.courseTitle }}</h1>
+        <p>
+          {{ space.group.groupName }} · {{ space.group.teacherName }} · {{ space.group.roomName }}
+        </p>
+        <div class="workspace-facts">
+          <app-status-badge [status]="space.group.status" />
+          @if (!space.canManage) {
+            <app-status-badge status="CONFIRMED" />
+          }
+          <span class="meta"
+            ><app-icon name="calendar" />{{ space.group.startDate | date: 'd MMM y' }}–{{
+              space.group.endDate | date: 'd MMM y'
+            }}</span
+          >
+        </div>
+        <ul class="weekly-sessions">
+          @for (session of space.group.sessions; track $index) {
+            <li>
+              <app-icon name="clock" />{{ session.dayOfWeek | titlecase }} ·
+              {{ session.startTime.slice(0, 5) }}–{{ session.endTime.slice(0, 5) }}
+            </li>
+          }
+        </ul>
+      </div>
+      @if (space.canManage) {
+        <button class="btn-primary" (click)="openEditor()">
+          <app-icon name="plus" />Publish material
+        </button>
+      }
+    </header>
+    @if (success()) {
+      <p class="notice notice-success workspace-feedback" role="status">
+        <app-icon name="check" />{{ success() }}
+      </p>
+    }
+    <nav class="tabs" aria-label="Filter materials">
+      <button
+        type="button"
+        [class.active]="filter() === 'ALL'"
+        [attr.aria-pressed]="filter() === 'ALL'"
+        (click)="filter.set('ALL')"
+      >
+        All materials
+      </button>
+      @for (type of types; track type) {
+        @if (type !== 'OTHER' || space.materials.some(isOther)) {
+          <button
+            type="button"
+            [class.active]="filter() === type"
+            [attr.aria-pressed]="filter() === type"
+            (click)="filter.set(type)"
+          >
+            {{ labels[type] }}
+          </button>
+        }
+      }
+    </nav>
+    <section aria-labelledby="materials-heading">
+      <div class="materials-heading">
+        <div>
+          <h2 id="materials-heading">Class materials</h2>
+          <p class="meta">
+            {{ visible().length }} {{ visible().length === 1 ? 'resource' : 'resources' }}
+          </p>
+        </div>
+        <span class="status-badge">{{
+          space.canManage ? 'Publishing access' : 'Student view'
+        }}</span>
+      </div>
+      @if (downloadError(); as material) {
+        <div class="notice notice-error workspace-feedback" role="alert">
+          <app-icon name="download" />
+          <div>
+            <p>
+              Could not download {{ material.fileName ?? material.title }}. Try again; if it still
+              fails, contact your teacher.
+            </p>
+            <button
+              class="text-link"
+              [disabled]="downloading() !== null"
+              (click)="download(material)"
+            >
+              Try download again
+            </button>
+          </div>
+        </div>
+      }
+      <div class="resource-list">
+        @for (material of visible(); track material.id) {
+          <app-resource-card
+            [material]="material"
+            [canManage]="space.canManage"
+            [busy]="busyMaterial() !== null || downloading() !== null"
+            [downloading]="downloading() === material.id"
+            (read)="read(material)"
+            (download)="download(material)"
+            (remove)="requestRemove(material)"
+          />
+        } @empty {
+          <div class="empty-state">
+            <app-icon name="book" />
+            <h3>{{ emptyTitle() }}</h3>
+            <p>
+              {{
+                space.canManage
+                  ? 'Publish a resource to share it with your confirmed students.'
+                  : 'Your teacher will publish resources here.'
+              }}
+            </p>
+            @if (space.canManage) {
+              <button class="btn-primary" (click)="openEditor()">Publish material</button>
+            }
+          </div>
+        }
+      </div>
+    </section>
+    @if (selectedMaterial(); as material) {
+      <section
+        id="material-reader"
+        class="panel material-reader"
+        tabindex="-1"
+        aria-label="Reading resource"
+      >
+        <div class="dialog-heading">
+          <div>
+            <h2>{{ material.title }}</h2>
+            <p class="meta mt-2">
+              {{ material.type | titlecase }} · {{ material.createdAt | date: 'd MMM y' }} ·
+              {{ material.authorName }}
+            </p>
+          </div>
+          <button
+            class="icon-button"
+            aria-label="Close reading view"
+            (click)="selectedMaterial.set(null)"
+          >
+            <app-icon name="close" />
+          </button>
+        </div>
+        <p class="material-body">{{ material.description }}</p>
+        <div class="actions reader-actions">
+          @if (material.hasFile) {
+            <button
+              class="btn-secondary"
+              [disabled]="downloading() !== null"
+              (click)="download(material)"
+            >
+              <app-icon name="download" />{{
+                downloading() === material.id ? 'Downloading…' : 'Download ' + material.fileName
+              }}
+            </button>
+          }
+          @if (material.externalUrl) {
+            <a
+              class="btn-secondary"
+              [href]="material.externalUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Open link <app-icon name="link"
+            /></a>
+          }
+        </div>
+      </section>
+    }
+    @if (space.group.status === 'COMPLETED') {
+      <p class="notice workspace-note">
+        <app-icon name="book" />Materials from this completed group remain available.
+      </p>
+    }
+  }
+</div>
+@if (editorOpen() && workspace()?.canManage) {
+  <app-dialog label="Publish material" [drawer]="true" [busy]="busy()" (closed)="closeEditor()"
+    ><div class="dialog-heading">
+      <div>
+        <h2>New class material</h2>
+        <p class="meta mt-2">{{ workspace()?.group?.courseTitle }}</p>
+      </div>
+      <button
+        class="icon-button"
+        [disabled]="busy()"
+        aria-label="Close publishing form"
+        (click)="closeEditor()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    <p class="muted mb-6">Publish a lesson, exercise, or correction for your confirmed students.</p>
+    @if (formError()) {
+      <p id="material-form-error" class="notice notice-error mb-6" tabindex="-1" role="alert">
+        {{ formError() }}
+      </p>
+    }
+    <form [formGroup]="form" (ngSubmit)="publish()" class="publish-form" novalidate>
+      <fieldset class="stack" [disabled]="busy()">
+        <div>
+          <label for="material-type">Material type</label
+          ><select id="material-type" formControlName="type">
+            @for (type of types; track type) {
+              <option [value]="type">{{ type | titlecase }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="material-title">Title</label
+          ><input
+            id="material-title"
+            formControlName="title"
+            maxlength="200"
+            [attr.aria-invalid]="form.controls.title.touched && form.controls.title.invalid"
+            aria-describedby="material-title-error"
+          />
+          @if (form.controls.title.touched && form.controls.title.invalid) {
+            <p id="material-title-error" class="field-error">
+              Enter a title of up to 200 characters.
+            </p>
+          }
+        </div>
+        <div>
+          <label for="material-body">Body or instructions</label
+          ><textarea
+            id="material-body"
+            formControlName="description"
+            maxlength="20000"
+            rows="7"
+            [attr.aria-invalid]="
+              form.controls.description.touched && form.controls.description.invalid
+            "
+            aria-describedby="material-body-help"
+          ></textarea>
+          <p id="material-body-help" class="field-help">Up to 20,000 characters.</p>
+        </div>
+        <div>
+          <label for="material-link">Google Drive / Docs link (optional)</label
+          ><input
+            id="material-link"
+            type="url"
+            formControlName="externalUrl"
+            placeholder="https://docs.google.com/…"
+            [attr.aria-invalid]="
+              form.controls.externalUrl.touched && form.controls.externalUrl.invalid
+            "
+            aria-describedby="material-link-help material-link-error"
+          />
+          <p id="material-link-help" class="field-help">
+            Share existing linked resources with your students in Google Drive. Link permissions are
+            managed separately.
+          </p>
+          @if (form.controls.externalUrl.touched && form.controls.externalUrl.invalid) {
+            <p id="material-link-error" class="field-error">
+              Use an HTTPS Google Drive or Google Docs link, up to 2,000 characters.
+            </p>
+          }
+        </div>
+        <div class="upload-field">
+          <label for="material-file">Attachment (optional)</label
+          ><input
+            id="material-file"
+            type="file"
+            [disabled]="!workspace()?.uploadsEnabled || busy()"
+            (change)="chooseFile($event)"
+            aria-describedby="material-upload-help"
+          />
+          <p id="material-upload-help" class="field-help">
+            {{
+              workspace()?.uploadsEnabled
+                ? 'Choose one file up to 25 MB.'
+                : 'File uploads are unavailable. You can still publish text and resource links.'
+            }}
+          </p>
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <button class="btn-secondary" type="button" [disabled]="busy()" (click)="closeEditor()">
+          Cancel</button
+        ><button class="btn-primary" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Publishing…' : 'Publish material' }}
+        </button>
+      </div>
+    </form>
+  </app-dialog>
+}
+@if (discardOpen()) {
+  <app-dialog label="Discard unpublished changes?" (closed)="resolveDiscard(false)"
+    ><h2>Discard unpublished changes?</h2>
+    <p class="muted mt-4">Your changes have not been published.</p>
+    <div class="form-actions">
+      <button class="btn-secondary" (click)="resolveDiscard(false)">Keep editing</button
+      ><button class="btn-danger" (click)="resolveDiscard(true)">Discard changes</button>
+    </div></app-dialog
+  >
+}
+@if (removeTarget(); as material) {
+  <app-dialog
+    label="Remove this material?"
+    [busy]="busyMaterial() !== null"
+    (closed)="removeTarget.set(null)"
+    ><div class="dialog-heading">
+      <h2>Remove this material?</h2>
+      <button
+        class="icon-button"
+        [disabled]="busyMaterial() !== null"
+        aria-label="Close removal confirmation"
+        (click)="removeTarget.set(null)"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    <p>
+      Remove “{{ material.title }}”? Students will no longer see this resource. Any uploaded
+      attachment will also be deleted.
+    </p>
+    @if (removeError()) {
+      <p class="notice notice-error mt-4" role="alert">{{ removeError() }}</p>
+    }
+    <div class="form-actions">
+      <button
+        class="btn-secondary"
+        [disabled]="busyMaterial() !== null"
+        (click)="removeTarget.set(null)"
+      >
+        Keep material</button
+      ><button class="btn-danger" [disabled]="busyMaterial() !== null" (click)="remove()">
+        {{ busyMaterial() !== null ? 'Removing…' : 'Remove material' }}
+      </button>
+    </div></app-dialog
+  >
+}

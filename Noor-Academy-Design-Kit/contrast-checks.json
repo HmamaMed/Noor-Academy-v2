@@ -1,0 +1,89 @@
+{
+  "method": "W3C relative sRGB luminance; exact unrounded ratios used for threshold decisions",
+  "pairs": [
+    {
+      "foreground": "surface",
+      "background": "primary",
+      "ratio": 11.979,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "text",
+      "background": "background",
+      "ratio": 13.943,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "text-muted",
+      "background": "background",
+      "ratio": 5.847,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "text-muted",
+      "background": "surface",
+      "ratio": 6.374,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "accent-text",
+      "background": "background",
+      "ratio": 6.182,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "accent",
+      "background": "background",
+      "ratio": 2.883,
+      "normal_text_pass": false,
+      "non_text_pass": false
+    },
+    {
+      "foreground": "success",
+      "background": "success-soft",
+      "ratio": 6.469,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "warning",
+      "background": "warning-soft",
+      "ratio": 5.642,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "error",
+      "background": "error-soft",
+      "ratio": 6.308,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "info",
+      "background": "info-soft",
+      "ratio": 6.956,
+      "normal_text_pass": true,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "border-control",
+      "background": "surface",
+      "ratio": 3.811,
+      "normal_text_pass": false,
+      "non_text_pass": true
+    },
+    {
+      "foreground": "border-control",
+      "background": "background",
+      "ratio": 3.496,
+      "normal_text_pass": false,
+      "non_text_pass": true
+    }
+  ]
+}

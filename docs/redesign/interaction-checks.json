@@ -1,0 +1,190 @@
+[
+  {
+    "check": "/ fits at 320px",
+    "passed": true
+  },
+  {
+    "check": "/courses fits at 320px",
+    "passed": true
+  },
+  {
+    "check": "/courses/1 fits at 320px",
+    "passed": true
+  },
+  {
+    "check": "/login fits at 320px",
+    "passed": true
+  },
+  {
+    "check": "Mobile navigation is a full-width modal",
+    "passed": true
+  },
+  {
+    "check": "Escape closes navigation and restores focus",
+    "passed": true
+  },
+  {
+    "check": "Signed-out application preserves course/group intent",
+    "passed": true
+  },
+  {
+    "check": "Sign-in returns to the selected course without submitting",
+    "passed": true
+  },
+  {
+    "check": "Dashboard section links stay on the dashboard",
+    "passed": true
+  },
+  {
+    "check": "Student workspace hides publishing/removal controls",
+    "passed": true
+  },
+  {
+    "check": "Read action exposes the full resource body",
+    "passed": true
+  },
+  {
+    "check": "Pending application is denied private materials",
+    "passed": true
+  },
+  {
+    "check": "Publishing drawer fills mobile width",
+    "passed": true
+  },
+  {
+    "check": "Unconfigured uploads are disabled with a visible explanation",
+    "passed": true
+  },
+  {
+    "check": "Unsaved publishing changes require explicit discard",
+    "passed": true
+  },
+  {
+    "check": "Keeping changes retains entered text",
+    "passed": true
+  },
+  {
+    "check": "Existing API publication closes the form and refreshes the list",
+    "passed": true
+  },
+  {
+    "check": "Removal confirmation names the resource",
+    "passed": true
+  },
+  {
+    "check": "Cancelling removal retains the resource",
+    "passed": true
+  },
+  {
+    "check": "Temporary resource is removed through the existing API",
+    "passed": true
+  },
+  {
+    "check": "Roster is restricted to confirmed students",
+    "passed": true
+  },
+  {
+    "check": "Admin route changes preserve dirty forms until decided",
+    "passed": true
+  },
+  {
+    "check": "Admin keep-editing restores entered data",
+    "passed": true
+  },
+  {
+    "check": "Admin explicit discard completes navigation",
+    "passed": true
+  },
+  {
+    "check": "Admin review requires payment verification before confirmation",
+    "passed": true
+  },
+  {
+    "check": "Profile route changes prompt before discarding",
+    "passed": true
+  },
+  {
+    "check": "Profile keeps edits after cancelled navigation",
+    "passed": true
+  },
+  {
+    "check": "Profile cancel restores loaded values",
+    "passed": true
+  },
+  {
+    "check": "Every group status selector matches its server-backed badge",
+    "passed": true
+  },
+  {
+    "check": "Sign-out asks before discarding unsaved edits",
+    "passed": true
+  },
+  {
+    "check": "Cancelled sign-out preserves the session and profile edits",
+    "passed": true
+  },
+  {
+    "check": "Completed sign-out clears the session and reaches home",
+    "passed": true
+  },
+  {
+    "check": "Application review shows group details and a seat disclaimer",
+    "passed": true
+  },
+  {
+    "check": "Explicit submission shows a pending server acknowledgment",
+    "passed": true
+  },
+  {
+    "check": "Application deadline comes from the server and lasts 72 hours",
+    "passed": true
+  },
+  {
+    "check": "Submission creates one application for the selected group",
+    "passed": true
+  },
+  {
+    "check": "Student can explicitly cancel the temporary application",
+    "passed": true
+  },
+  {
+    "check": "Cancellation is reflected by the server",
+    "passed": true
+  },
+  {
+    "check": "A server-marked full group stays closed without claiming zero seats",
+    "passed": true
+  },
+  {
+    "check": "A server-marked full group stays closed without claiming zero seats",
+    "passed": true
+  },
+  {
+    "check": "Inactive group explains that applications are closed",
+    "passed": true
+  },
+  {
+    "check": "Completed group explains retained confirmed-student access",
+    "passed": true
+  },
+  {
+    "check": "Missing course does not substitute another record",
+    "passed": true
+  },
+  {
+    "check": "Read-only profile fields have the neutral token surface",
+    "passed": true
+  },
+  {
+    "check": "Catalog network error is distinct from an empty catalog",
+    "passed": true
+  },
+  {
+    "check": "Catalog retry recovers after connectivity returns",
+    "passed": true
+  },
+  {
+    "check": "Course enrollment help reaches the real homepage section",
+    "passed": true
+  }
+]

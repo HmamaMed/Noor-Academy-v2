@@ -1,0 +1,246 @@
+:host {
+  display: block;
+}
+.hero {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--noor-space-24);
+  align-items: center;
+  padding-block: var(--noor-space-48);
+}
+.hero-copy {
+  padding-block: var(--noor-space-32);
+}
+.hero h1 {
+  font: 500 var(--noor-type-display-size)/var(--noor-type-display-line) var(--noor-font-display);
+  letter-spacing: -0.025em;
+  color: var(--noor-primary);
+  margin-block: 1.5rem;
+}
+.hero .lead {
+  max-width: 52ch;
+}
+.hero .actions {
+  margin-top: 2rem;
+  gap: 1.5rem;
+}
+.hero app-learning-art {
+  width: 100%;
+}
+.benefit-strip {
+  border-block: 1px solid var(--noor-border);
+}
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-block: 1.5rem;
+}
+.benefits > div {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--noor-text-muted);
+}
+.benefits > div + div {
+  border-left: 1px solid var(--noor-border);
+}
+.benefits app-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--noor-primary);
+}
+.home-section {
+  padding-block: var(--noor-section-desktop);
+}
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.section-heading h2 {
+  max-width: 15ch;
+}
+.enrollment-section {
+  background: var(--noor-primary-soft);
+  padding-block: var(--noor-space-48);
+}
+.enrollment-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: center;
+}
+.enrollment-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+.enrollment-steps li {
+  display: flex;
+  gap: 0.75rem;
+}
+.enrollment-steps h3 {
+  font: 600 0.875rem/1.25rem var(--noor-font-body);
+  margin: 0.5rem 0;
+}
+.enrollment-steps p {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--noor-text-muted);
+}
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--noor-accent);
+  border-radius: 50%;
+  color: var(--noor-accent-text);
+  font-family: var(--noor-font-display);
+}
+.experience {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 3rem;
+  align-items: center;
+}
+.experience .section-title {
+  margin-block: 1.5rem;
+}
+.closing-section {
+  background: var(--noor-primary);
+  overflow: hidden;
+}
+.closing-inner {
+  display: flex;
+  align-items: center;
+  gap: 6rem;
+  position: relative;
+  padding-block: 3rem;
+}
+.closing-inner > h2,
+.closing-inner > a {
+  position: relative;
+  z-index: 1;
+}
+.closing-inner .section-title {
+  color: var(--noor-background);
+}
+.closing-arch {
+  position: absolute;
+  right: -2rem;
+  bottom: -9rem;
+  width: 20rem;
+  height: 24rem;
+  border: 1px solid var(--noor-accent);
+  border-radius: 50% 50% 0 0;
+  box-shadow:
+    0 0 0 2rem #ffffff08,
+    0 0 0 4rem #ffffff05;
+}
+.closing-arch::after {
+  content: '';
+  position: absolute;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  background: var(--noor-accent);
+  right: 1.5rem;
+  top: 2.5rem;
+}
+@media (max-width: 1023px) {
+  .hero h1 {
+    font-size: 3rem;
+    line-height: 3.5rem;
+  }
+  .hero .actions {
+    gap: 1rem;
+  }
+  .enrollment-layout {
+    grid-template-columns: 1fr;
+  }
+  .experience {
+    gap: 2rem;
+  }
+}
+@media (max-width: 767px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 2rem;
+    gap: 2rem;
+  }
+  .hero-copy {
+    padding: 0;
+  }
+  .hero h1 {
+    font-size: var(--noor-type-mobile-display-size);
+    line-height: var(--noor-type-mobile-display-line);
+  }
+  .hero .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero .text-link {
+    justify-content: center;
+  }
+  .hero app-learning-art {
+    max-width: 24rem;
+    margin: auto;
+  }
+  .benefits {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .benefits > div {
+    justify-content: flex-start;
+  }
+  .benefits > div + div {
+    border: 0;
+  }
+  .home-section {
+    padding-block: var(--noor-section-mobile);
+  }
+  .section-heading {
+    display: block;
+  }
+  .section-heading .text-link {
+    margin-top: 1rem;
+  }
+  .enrollment-section {
+    padding-block: 2rem;
+  }
+  .enrollment-steps {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .enrollment-steps h3 {
+    margin-top: 0;
+  }
+  .step-number {
+    flex-basis: 2.75rem;
+    height: 2.75rem;
+  }
+  .experience {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .closing-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    padding-block: 2rem;
+  }
+  .closing-arch {
+    right: -9rem;
+    opacity: 0.3;
+  }
+  .closing-inner .btn-secondary {
+    width: 100%;
+  }
+}

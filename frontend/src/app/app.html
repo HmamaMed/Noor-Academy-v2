@@ -1,4 +1,7 @@
-<app-navbar />
-<main class="min-h-screen bg-surface">
-  <router-outlet />
-</main>
+<a class="skip-link" [href]="skipTarget()">Skip to content</a>
+<app-navbar [appShell]="appShell()" />
+<main id="main-content" tabindex="-1" [class.app-main]="appShell()"><router-outlet /></main>
+@if (!appShell()) {
+  <app-footer />
+}
+<app-toast-outlet />

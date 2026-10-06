@@ -1,29 +1,320 @@
-<h1 class="text-2xl font-bold text-ink">Enrollments</h1>
-
-<div class="mt-6 max-w-md">
-  <label class="block text-sm font-medium text-ink">Select a group</label>
-  <select
-    (change)="onGroupChange($any($event.target).value)"
-    class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-  >
-    <option value="" disabled selected>Choose a group&hellip;</option>
-    @for (group of groups(); track group.id) {
-      <option [value]="group.id">{{ group.groupName }} · {{ group.courseTitle }}</option>
-    }
-  </select>
+<div class="page-heading">
+  <div>
+    <h1>Enrollment requests</h1>
+    <p>Review applications and confirm enrollment after payment.</p>
+  </div>
+  <button class="btn-secondary" [disabled]="loading() || submitting()" (click)="load()">
+    {{ loading() ? 'Refreshing…' : 'Refresh' }}
+  </button>
 </div>
-
-@if (selectedGroupId()) {
-  <div class="mt-6">
-    @if (loading()) {
-      <p class="text-gray-500">Loading roster&hellip;</p>
-    } @else {
-      <app-group-roster-table
-        [enrollments]="enrollments()"
-        [showActions]="true"
-        (confirm)="confirm($event)"
-        (cancel)="cancel($event)"
-      />
+@if (success()) {
+  <p class="notice notice-success record-feedback" role="status">
+    <app-icon name="check" />{{ success() }}
+  </p>
+}
+@if (loadError()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load applications.</h2>
+    <p>{{ loadError() }}</p>
+    <button class="btn-secondary" (click)="load()">Try again</button>
+  </div>
+} @else if (loading() && !enrollments().length) {
+  <div class="panel record-loading" role="status" aria-label="Loading applications">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+} @else {
+  <div class="filter-bar">
+    <div>
+      <label for="enrollment-group">Group</label
+      ><select
+        id="enrollment-group"
+        [value]="groupFilter()"
+        (change)="filterGroup($any($event.target).value)"
+      >
+        <option value="0">All groups</option>
+        @for (group of groups(); track group.id) {
+          <option [value]="group.id">{{ group.courseTitle }} · {{ group.groupName }}</option>
+        }
+      </select>
+    </div>
+    <p class="meta">Application timestamps shown in UTC.</p>
+  </div>
+  <div class="tabs enrollment-tabs" aria-label="Filter applications by status">
+    @for (status of statuses; track status) {
+      <button
+        type="button"
+        [class.active]="statusFilter() === status"
+        [attr.aria-pressed]="statusFilter() === status"
+        (click)="statusFilter.set(status)"
+      >
+        {{ status | titlecase }} <span>({{ count(status) }})</span>
+      </button>
     }
   </div>
+  @if (filteredEnrollments().length) {
+    <div class="table-wrap" [attr.aria-busy]="loading()">
+      <table class="record-table enrollment-table">
+        <thead>
+          <tr>
+            <th scope="col">Student</th>
+            <th scope="col">Course / group</th>
+            <th scope="col">Applied</th>
+            <th scope="col">Expires</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredEnrollments(); track item.id) {
+            <tr [class.row-selected]="selected()?.id === item.id">
+              <td data-label="Student">
+                <span class="record-title">{{ item.studentName }}</span>
+              </td>
+              <td data-label="Course / group">
+                {{ item.courseTitle }}<span class="record-summary">{{ item.groupName }}</span>
+              </td>
+              <td data-label="Applied" class="deadline">
+                {{ item.appliedAt | date: 'd MMM y, HH:mm' : 'UTC' }}
+              </td>
+              <td data-label="Expires" class="deadline">
+                @if (deadline(item); as expires) {
+                  {{ expires | date: 'd MMM y, HH:mm' : 'UTC' }}
+                  @if (deadlinePassed(item)) {
+                    <span class="record-summary">Deadline passed</span>
+                  }
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td data-label="Status"><app-status-badge [status]="item.status" /></td>
+              <td>
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    [attr.aria-label]="
+                      'Review application from ' + item.studentName + ' for ' + item.groupName
+                    "
+                    (click)="openReview(item)"
+                  >
+                    Review
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <app-empty-state
+      [title]="
+        statusFilter() === 'PENDING'
+          ? 'No pending applications.'
+          : statusFilter() === 'CONFIRMED'
+            ? 'No confirmed enrollments.'
+            : 'No cancelled applications.'
+      "
+      [message]="
+        groupFilter()
+          ? 'There are no applications with this status for the selected group.'
+          : statusFilter() === 'PENDING'
+            ? 'There are no applications awaiting review.'
+            : 'Applications with this status will appear here.'
+      "
+      icon="file"
+    />
+  }
+  @if (statusFilter() === 'CANCELLED') {
+    <p class="meta admin-section">
+      Expired applications are recorded as cancelled. The current records do not distinguish expiry
+      from manual cancellation.
+    </p>
+  }
+}
+@if (selected(); as item) {
+  <app-dialog
+    label="Review application"
+    [drawer]="true"
+    [busy]="submitting()"
+    (closed)="closeReview()"
+  >
+    <div class="dialog-heading">
+      <h2>Review application</h2>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Close application review"
+        [disabled]="submitting()"
+        (click)="closeReview()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    <div class="review-identity">
+      <span class="review-avatar"><app-icon name="user" /></span>
+      <div>
+        <h3>{{ item.studentName }}</h3>
+        <app-status-badge [status]="item.status" />
+      </div>
+    </div>
+    @if (reviewLoading()) {
+      <p class="meta admin-section" role="status">Refreshing application and availability…</p>
+    }
+    @if (reviewError()) {
+      <div class="notice notice-error admin-section" role="alert">
+        <div>
+          <p>{{ reviewError() }}</p>
+          <button
+            class="text-link"
+            type="button"
+            [disabled]="reviewLoading() || submitting()"
+            (click)="refreshReview()"
+          >
+            Refresh details
+          </button>
+        </div>
+      </div>
+    }
+    <dl class="review-details">
+      <div>
+        <dt>Course</dt>
+        <dd>{{ item.courseTitle }}</dd>
+      </div>
+      <div>
+        <dt>Group</dt>
+        <dd>{{ item.groupName }}</dd>
+      </div>
+      <div class="detail-icon">
+        <app-icon name="user" />
+        <div>
+          <dt>Teacher</dt>
+          <dd>{{ item.teacherName }}</dd>
+        </div>
+      </div>
+      <div class="detail-icon">
+        <app-icon name="room" />
+        <div>
+          <dt>Room</dt>
+          <dd>{{ item.roomName }}</dd>
+        </div>
+      </div>
+      <div class="detail-icon">
+        <app-icon name="calendar" />
+        <div>
+          <dt>Dates and weekly sessions</dt>
+          <dd>
+            {{ item.startDate | date: 'd MMM y' }} – {{ item.endDate | date: 'd MMM y' }}
+            @for (session of item.sessions; track $index) {
+              <span class="record-summary"
+                >{{ session.dayOfWeek | titlecase }} · {{ session.startTime.slice(0, 5) }}–{{
+                  session.endTime.slice(0, 5)
+                }}</span
+              >
+            }
+          </dd>
+        </div>
+      </div>
+      @if (selectedGroup(); as group) {
+        <div class="detail-icon">
+          <app-icon name="users" />
+          <div>
+            <dt>Current availability</dt>
+            <dd>
+              {{ group.remainingSeats }} of {{ group.roomCapacity }} seats remaining<span
+                class="record-summary"
+                >Group status: {{ group.status | titlecase }}</span
+              >
+            </dd>
+          </div>
+        </div>
+      }
+      <div>
+        <dt>Applied · UTC</dt>
+        <dd class="deadline">{{ item.appliedAt | date: 'd MMM y, HH:mm' : 'UTC' }}</dd>
+      </div>
+      @if (deadline(item); as expires) {
+        <div>
+          <dt>Application deadline · UTC</dt>
+          <dd class="deadline">{{ expires | date: 'd MMM y, HH:mm' : 'UTC' }}</dd>
+        </div>
+      }
+      @if (item.confirmedAt) {
+        <div>
+          <dt>Confirmed · UTC</dt>
+          <dd class="deadline">{{ item.confirmedAt | date: 'd MMM y, HH:mm' : 'UTC' }}</dd>
+        </div>
+      }
+    </dl>
+    @if (item.status === 'PENDING') {
+      <div class="notice notice-warning">
+        <app-icon name="info" />
+        <p>
+          A pending application does not reserve a seat. Confirm only after receiving manual
+          payment.
+        </p>
+      </div>
+      @if (reviewReady() && confirmationReason()) {
+        <p class="notice notice-warning admin-section">{{ confirmationReason() }}</p>
+      }
+      <div class="review-actions">
+        <label class="payment-verification"
+          ><input
+            type="checkbox"
+            [checked]="paymentVerified()"
+            [disabled]="submitting() || reviewLoading() || !!confirmationReason()"
+            (change)="paymentVerified.set($any($event.target).checked)"
+          /><span>I verified that manual payment was received.</span></label
+        ><button
+          type="button"
+          class="btn-primary"
+          [disabled]="
+            submitting() || reviewLoading() || !paymentVerified() || !!confirmationReason()
+          "
+          (click)="confirm()"
+        >
+          {{ submitting() && !cancelTarget() ? 'Confirming…' : 'Confirm enrollment' }}
+        </button>
+      </div>
+      <p class="meta admin-section">
+        Availability, status and the deadline are checked again by the server before confirmation.
+      </p>
+    }
+    @if (item.status !== 'CANCELLED') {
+      <div class="review-actions">
+        <button
+          type="button"
+          class="btn-danger"
+          [disabled]="submitting() || reviewLoading() || !reviewReady()"
+          (click)="requestCancel()"
+        >
+          {{ item.status === 'CONFIRMED' ? 'Cancel enrollment' : 'Cancel application' }}
+        </button>
+      </div>
+    }
+  </app-dialog>
+}
+@if (cancelTarget(); as target) {
+  <app-admin-confirm
+    [title]="target.status === 'CONFIRMED' ? 'Cancel enrollment?' : 'Cancel application?'"
+    [message]="
+      'Cancel ' +
+      target.studentName +
+      '’s ' +
+      (target.status === 'CONFIRMED' ? 'enrollment' : 'application') +
+      ' for ' +
+      target.courseTitle +
+      ' · ' +
+      target.groupName +
+      '?'
+    "
+    [acceptLabel]="target.status === 'CONFIRMED' ? 'Cancel enrollment' : 'Cancel application'"
+    [cancelLabel]="target.status === 'CONFIRMED' ? 'Keep enrollment' : 'Keep application'"
+    [busy]="submitting()"
+    [error]="cancelError()"
+    (accepted)="cancel()"
+    (cancelled)="cancelTarget.set(null)"
+  />
 }

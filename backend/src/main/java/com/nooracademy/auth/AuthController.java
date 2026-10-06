@@ -16,6 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
+
+    @PostMapping("/forgot-password")
+    public java.util.Map<String, String> forgotPassword(@Valid @RequestBody com.nooracademy.auth.dto.ForgotPasswordRequest request) {
+        passwordResetService.request(request.email());
+        return java.util.Map.of("message", "If this email is registered, a password reset link will be sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public java.util.Map<String, String> resetPassword(@Valid @RequestBody com.nooracademy.auth.dto.ResetPasswordRequest request) {
+        passwordResetService.reset(request.token(), request.password());
+        return java.util.Map.of("message", "Password updated. Please log in again.");
+    }
 
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
