@@ -441,17 +441,11 @@
     margin-top: 1rem;
   }
   .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    font: 500 1.75rem/1.2 var(--noor-font-display);
-    color: var(--noor-primary);
-    white-space: nowrap;
-  }
-  .brand-symbol {
-    width: 3rem;
-    height: 2.25rem;
     display: inline-block;
+    max-width: 100%;
+    flex-shrink: 0;
+    vertical-align: middle;
+    line-height: 0;
   }
   .site-header {
     height: var(--noor-header-desktop);
@@ -494,10 +488,10 @@
     flex-direction: column;
     z-index: 10;
   }
-  .app-sidebar .brand {
-    flex-direction: column;
-    font-size: 1.5rem;
-    gap: 0.5rem;
+  .sidebar-brand-link {
+    display: flex;
+    justify-content: center;
+    align-self: center;
   }
   .app-navigation {
     display: grid;
@@ -806,8 +800,11 @@
     margin-top: 2rem;
   }
   .auth-panel .brand {
-    font-size: 1.5rem;
     margin-bottom: 2rem;
+  }
+  .auth-brand-link {
+    display: table;
+    margin-inline: auto;
   }
   .auth-divider {
     display: flex;
@@ -876,13 +873,6 @@
   }
   .public-page {
     padding-block: 2rem 3.5rem;
-  }
-  .brand {
-    font-size: 1.375rem;
-    gap: 0.75rem;
-  }
-  .brand-symbol {
-    width: 2.5rem;
   }
   .header-inner {
     gap: var(--noor-space-8);
@@ -967,15 +957,6 @@
   }
   .table-wrap {
     overflow-wrap: normal;
-  }
-}
-@media (max-width: 379px) {
-  .brand {
-    font-size: 1.25rem;
-    gap: 0.5rem;
-  }
-  .brand-symbol {
-    width: 2rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {

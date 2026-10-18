@@ -1,6 +1,6 @@
 <section class="auth-page">
   <div class="auth-panel">
-    <a routerLink="/" aria-label="Noor Academy home"><app-brand /></a>
+    <a routerLink="/" class="auth-brand-link" aria-label="Noor Academy home"><app-brand variant="stacked" /></a>
     <h1>Your next chapter starts here.</h1>
     <p class="muted mt-3">Create an account to explore our courses.</p>
     @if (error()) { <div id="register-error" class="notice notice-error mt-6" tabindex="-1" role="alert">{{ error() }}</div> }

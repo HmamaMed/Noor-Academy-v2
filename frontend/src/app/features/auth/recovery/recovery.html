@@ -1,6 +1,6 @@
 <section class="auth-page">
   <div class="auth-panel">
-    <a routerLink="/" aria-label="Noor Academy home"><app-brand /></a>
+    <a routerLink="/" class="auth-brand-link" aria-label="Noor Academy home"><app-brand variant="stacked" /></a>
     <h1>{{ resetting ? 'Set a new password' : 'Forgot your password?' }}</h1>
     @if (invalidLink()) {
       <div class="notice notice-error mt-6" role="alert"><app-icon name="info" /><p>This reset link is no longer valid.</p></div>

@@ -1,6 +1,6 @@
 @if (appShell()) {
   <aside class="app-sidebar" aria-label="Academy navigation">
-    <a routerLink="/" aria-label="Noor Academy home"><app-brand /></a>
+    <a routerLink="/" class="sidebar-brand-link" aria-label="Noor Academy home"><app-brand variant="stacked" /></a>
     <nav class="app-navigation" aria-label="Main">
       @for (link of links(); track link.path) { <a [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page"><app-icon [name]="link.icon" />{{ link.label }}</a> }
     </nav>
