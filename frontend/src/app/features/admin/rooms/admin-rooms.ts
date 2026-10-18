@@ -1,3 +1,4 @@
+import { NoorDialog } from '../../../shared/design/dialog';
 import { AdminEditor } from '../admin-editor';
 import { AdminConfirm } from '../admin-confirm';
 import { Icon } from '../../../shared/design/icon';
@@ -9,7 +10,7 @@ import { Room } from '../../../core/models/room.model';
 
 @Component({
   selector: 'app-admin-rooms',
-  imports: [ReactiveFormsModule, AdminConfirm, Icon, EmptyState],
+  imports: [NoorDialog, ReactiveFormsModule, AdminConfirm, Icon, EmptyState],
   templateUrl: './admin-rooms.html',
   styleUrl: '../admin.css',
 })
@@ -29,9 +30,11 @@ export class AdminRooms extends AdminEditor implements OnInit {
   });
 
   protected deleteTarget = signal<Room | null>(null);
-  protected deleteError = signal('');
+  protected override deleteError = signal('');
 
-  startCreate(): void { this.openEditor(() => this.cancelEdit()); }
+  startCreate(): void {
+    this.openEditor(() => this.cancelEdit());
+  }
 
   ngOnInit(): void {
     this.load();

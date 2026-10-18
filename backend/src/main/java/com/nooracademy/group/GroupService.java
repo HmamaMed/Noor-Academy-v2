@@ -52,7 +52,7 @@ public class GroupService {
 
     public GroupResponse findVisible(Long id, User actor) {
         Group group = getGroupOrThrow(id);
-        if (isPublic(group) || (actor != null && (actor.getRole() == Role.ADMIN
+        if (isPublic(group) || (actor != null && (actor.getRole().isAdmin()
             || (actor.getRole() == Role.TEACHER && group.getTeacher().getId().equals(actor.getId()))
             || enrollmentRepository.existsByStudentIdAndGroupIdAndStatus(actor.getId(), id, EnrollmentStatus.CONFIRMED)))) return toResponse(group);
         throw new NotFoundException("Group not found");

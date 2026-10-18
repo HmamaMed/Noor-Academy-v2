@@ -32,7 +32,7 @@ public class MaterialService {
     }
 
     private boolean canManage(Group group, User actor) {
-        return actor.getRole() == Role.ADMIN || (actor.getRole() == Role.TEACHER && group.getTeacher().getId().equals(actor.getId()));
+        return actor.getRole().isAdmin() || (actor.getRole() == Role.TEACHER && group.getTeacher().getId().equals(actor.getId()));
     }
 
     private Group accessibleGroup(Long id, User actor, boolean manage) {

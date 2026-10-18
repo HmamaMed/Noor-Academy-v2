@@ -71,13 +71,7 @@
               </td>
               <td data-label="Email">{{ user.email }}</td>
               <td data-label="Role">
-                <span class="status-badge">{{
-                  user.role === 'ADMIN'
-                    ? 'Administrator'
-                    : user.role === 'TEACHER'
-                      ? 'Teacher'
-                      : 'Student'
-                }}</span>
+                <span class="status-badge">{{ roleLabel(user.role) }}</span>
               </td>
               <td>
                 <div class="row-actions">
@@ -89,6 +83,12 @@
                     Edit</button
                   ><button
                     class="delete-link"
+                    [disabled]="user.role === 'SUPER_ADMIN'"
+                    [attr.title]="
+                      user.role === 'SUPER_ADMIN'
+                        ? 'This administrator is protected from deletion.'
+                        : null
+                    "
                     [attr.aria-label]="'Delete ' + user.firstName + ' ' + user.lastName"
                     (click)="requestDelete(user)"
                   >
@@ -112,7 +112,7 @@
 @if (editorOpen()) {
   <app-dialog
     [label]="editingId() ? 'Edit user' : 'Create account'"
-    [drawer]="true"
+    [wide]="true"
     [busy]="saving()"
     (closed)="closeEditor()"
   >

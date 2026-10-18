@@ -110,6 +110,22 @@ class NoorAcademyBackendApplicationTests {
     }
     long id(HttpResponse<String> response) { return ((Number) json.readValue(response.body(), Map.class).get("id")).longValue(); }
 
+    @Test void protectedAdministratorCannotBeDeletedOrDemotedEvenByDirectSql() throws Exception {
+        User owner = create("owner", Role.ADMIN);
+        jdbc.update("UPDATE users SET role = 'SUPER_ADMIN' WHERE id = ?", owner.getId());
+        assertEquals(409, api("DELETE", "/users/" + owner.getId(), adminToken, null).statusCode());
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class, () -> jdbc.update("DELETE FROM users WHERE id = ?", owner.getId()));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class, () -> jdbc.update("UPDATE users SET role = 'ADMIN' WHERE id = ?", owner.getId()));
+        User protectedUser = userRepository.findById(owner.getId()).orElseThrow();
+        assertEquals(Role.SUPER_ADMIN, protectedUser.getRole());
+        String ownerToken = token(protectedUser);
+        assertEquals(200, api("GET", "/groups", ownerToken, null).statusCode());
+        assertEquals(200, api("GET", "/users?role=ADMIN", ownerToken, null).statusCode());
+        assertEquals(409, api("DELETE", "/users/" + owner.getId(), ownerToken, null).statusCode());
+        var forged = Map.of("firstName", "Fake", "lastName", "Owner", "email", "fake@example.test", "password", password, "role", "SUPER_ADMIN");
+        assertEquals(400, api("POST", "/users", adminToken, forged).statusCode());
+    }
+
     @Test void adminCanCreateTeacherButStudentCannot() throws Exception {
         var body = Map.of("firstName","New","lastName","Teacher","email","new@example.test","password",password,"role","TEACHER");
         assertEquals(200, api("POST","/users",adminToken,body).statusCode());

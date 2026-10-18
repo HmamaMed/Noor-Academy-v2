@@ -1,3 +1,4 @@
+import { NoorDialog } from '../../../shared/design/dialog';
 import { AdminEditor } from '../admin-editor';
 import { AdminConfirm } from '../admin-confirm';
 import { Icon } from '../../../shared/design/icon';
@@ -10,7 +11,7 @@ import { CourseImage } from '../../../shared/design/course-image';
 
 @Component({
   selector: 'app-admin-courses',
-  imports: [ReactiveFormsModule, AdminConfirm, Icon, EmptyState, CourseImage],
+  imports: [NoorDialog, ReactiveFormsModule, AdminConfirm, Icon, EmptyState, CourseImage],
   templateUrl: './admin-courses.html',
   styleUrls: ['../admin.css', './admin-courses.css'],
 })
@@ -38,7 +39,7 @@ export class AdminCourses extends AdminEditor implements OnInit {
   });
 
   protected deleteTarget = signal<Course | null>(null);
-  protected deleteError = signal('');
+  protected override deleteError = signal('');
 
   constructor() {
     super();

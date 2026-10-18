@@ -1,3 +1,4 @@
+import { NoorDialog } from '../../../shared/design/dialog';
 import { AdminEditor } from '../admin-editor';
 import { AdminConfirm } from '../admin-confirm';
 import { Icon } from '../../../shared/design/icon';
@@ -32,7 +33,17 @@ const STATUSES: GroupStatus[] = ['DRAFT', 'ACTIVE', 'FULL', 'COMPLETED', 'CANCEL
 
 @Component({
   selector: 'app-admin-groups',
-  imports: [ReactiveFormsModule, RouterLink, AdminConfirm, Icon, EmptyState, StatusBadge, DatePipe, TitleCasePipe],
+  imports: [
+    NoorDialog,
+    ReactiveFormsModule,
+    RouterLink,
+    AdminConfirm,
+    Icon,
+    EmptyState,
+    StatusBadge,
+    DatePipe,
+    TitleCasePipe,
+  ],
   templateUrl: './admin-groups.html',
   styleUrl: '../admin.css',
 })
@@ -70,15 +81,30 @@ export class AdminGroups extends AdminEditor implements OnInit {
 
   protected courseFilter = signal(0);
   protected statusFilter = signal('');
-  protected filteredGroups = computed(() => this.groups().filter(group => (!this.courseFilter() || group.courseId === this.courseFilter()) && (!this.statusFilter() || group.status === this.statusFilter())));
+  protected filteredGroups = computed(() =>
+    this.groups().filter(
+      (group) =>
+        (!this.courseFilter() || group.courseId === this.courseFilter()) &&
+        (!this.statusFilter() || group.status === this.statusFilter()),
+    ),
+  );
   protected deleteTarget = signal<Group | null>(null);
-  protected deleteError = signal('');
+  protected override deleteError = signal('');
   protected updatingStatus = signal<number | null>(null);
   protected statusError = signal('');
 
-  startCreate(): void { this.openEditor(() => this.cancelEdit()); }
-  filterCourse(value: string): void { this.courseFilter.set(Number(value)); }
-  selectedRoomCapacity(): number | null { return this.rooms().find(room => room.id === Number(this.form.controls.roomId.value))?.maxCapacity ?? null; }
+  startCreate(): void {
+    this.openEditor(() => this.cancelEdit());
+  }
+  filterCourse(value: string): void {
+    this.courseFilter.set(Number(value));
+  }
+  selectedRoomCapacity(): number | null {
+    return (
+      this.rooms().find((room) => room.id === Number(this.form.controls.roomId.value))
+        ?.maxCapacity ?? null
+    );
+  }
 
   ngOnInit(): void {
     this.loadAll();
@@ -125,7 +151,9 @@ export class AdminGroups extends AdminEditor implements OnInit {
     this.form.markAsDirty();
   }
 
-  startEdit(group: Group): void { this.openEditor(() => this.editRecord(group)); }
+  startEdit(group: Group): void {
+    this.openEditor(() => this.editRecord(group));
+  }
 
   private editRecord(group: Group): void {
     this.editingId.set(group.id);
@@ -169,7 +197,9 @@ export class AdminGroups extends AdminEditor implements OnInit {
     if (this.saving()) return;
     this.formError.set('');
     if (this.form.invalid || this.sessions.length === 0) {
-      this.formError.set('Check the highlighted fields. Select a course, teacher, room, dates, and at least one session.');
+      this.formError.set(
+        'Check the highlighted fields. Select a course, teacher, room, dates, and at least one session.',
+      );
       this.focusError();
       this.form.markAllAsTouched();
       return;
@@ -183,7 +213,7 @@ export class AdminGroups extends AdminEditor implements OnInit {
       this.focusError();
       return;
     }
-    if (raw.sessions.some(session => session.endTime <= session.startTime)) {
+    if (raw.sessions.some((session) => session.endTime <= session.startTime)) {
       this.formError.set('Each weekly session must end after its start time.');
       this.focusError();
       return;
@@ -225,12 +255,17 @@ export class AdminGroups extends AdminEditor implements OnInit {
   }
 
   changeStatus(group: Group, status: GroupStatus, select: HTMLSelectElement): void {
-    if (this.updatingStatus()) { select.value = group.status; return; }
+    if (this.updatingStatus()) {
+      select.value = group.status;
+      return;
+    }
     this.updatingStatus.set(group.id);
     this.statusError.set('');
     this.groupService.updateStatus(group.id, status).subscribe({
       next: (updated) => {
-        this.groups.update(groups => groups.map(item => item.id === updated.id ? updated : item));
+        this.groups.update((groups) =>
+          groups.map((item) => (item.id === updated.id ? updated : item)),
+        );
         this.updatingStatus.set(null);
         this.success.set('Group status updated.');
       },
@@ -238,11 +273,15 @@ export class AdminGroups extends AdminEditor implements OnInit {
         select.value = group.status;
         this.updatingStatus.set(null);
         this.statusError.set(err.error?.message ?? 'Could not update group status.');
+        this.toast.error(this.statusError());
       },
     });
   }
 
-  requestDelete(group: Group): void { this.deleteError.set(''); this.deleteTarget.set(group); }
+  requestDelete(group: Group): void {
+    this.deleteError.set('');
+    this.deleteTarget.set(group);
+  }
 
   deleteRecord(): void {
     const group = this.deleteTarget();

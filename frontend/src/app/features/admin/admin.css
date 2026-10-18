@@ -6,8 +6,8 @@
   margin-top: var(--noor-space-32);
 }
 .record-form {
-  margin-top: var(--noor-space-32);
-  max-width: 56rem;
+  margin: 0;
+  max-width: none;
 }
 .record-form > h2,
 .record-form > .dialog-heading {
@@ -238,3 +238,5 @@
     flex-wrap: wrap;
   }
 }
+
+.delete-link:disabled { color: var(--noor-text-muted); cursor: not-allowed; }

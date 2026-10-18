@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { Brand } from '../../shared/design/brand';
 import { Icon } from '../../shared/design/icon';
+import { isAdminRole } from '../models/user.model';
 import { NoorDialog } from '../../shared/design/dialog';
 
 @Component({
@@ -18,15 +19,16 @@ export class Navbar {
   appShell = input(false);
   protected user = toSignal(this.auth.currentUser$, { initialValue: this.auth.currentUser });
   protected menuOpen = signal(false);
+  protected isAdmin = computed(() => isAdminRole(this.user()?.role));
   protected dashboard = computed(() =>
-    this.user()?.role === 'ADMIN'
+    this.isAdmin()
       ? '/admin/enrollments'
       : this.user()?.role === 'TEACHER'
         ? '/teacher/dashboard'
         : '/student/dashboard',
   );
   protected links = computed(() =>
-    this.user()?.role === 'ADMIN'
+    this.isAdmin()
       ? [
           { path: '/admin/enrollments', label: 'Enrollments', icon: 'check' },
           { path: '/admin/groups', label: 'Groups', icon: 'users' },

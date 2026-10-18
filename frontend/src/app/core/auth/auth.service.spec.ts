@@ -24,6 +24,20 @@ describe('AuthService session validation', () => {
     auth.logout();
     expect(auth.isAuthenticated).toBe(false);
   });
+  it('recognizes a protected administrator as an admin without granting student/teacher permissions', () => {
+    const auth = TestBed.inject(AuthService);
+    auth.updateStoredUser({
+      id: 1,
+      firstName: 'Owner',
+      lastName: 'Account',
+      email: 'owner@example.test',
+      phone: null,
+      role: 'SUPER_ADMIN',
+    });
+    expect(auth.hasRole('ADMIN')).toBe(true);
+    expect(auth.hasRole('SUPER_ADMIN')).toBe(true);
+    expect(auth.hasRole('TEACHER', 'STUDENT')).toBe(false);
+  });
   it('does not restore a user with an expired token', () => {
     localStorage.setItem('noor_academy_token', token(Date.now() / 1000 - 60));
     localStorage.setItem('noor_academy_user', JSON.stringify({ id: 1, role: 'ADMIN' }));

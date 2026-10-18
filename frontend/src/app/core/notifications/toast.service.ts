@@ -23,6 +23,30 @@ export class ToastService {
   readonly messages = this.state.asReadonly();
   private readonly timers = new Map<number, ToastTimer>();
   private nextId = 0;
+  private readonly contexts: object[] = [];
+  readonly activeContext = signal<object | null>(null);
+
+  attachModal(context: object): void {
+    this.contexts.push(context);
+    this.changeContext();
+  }
+
+  detachModal(context: object): void {
+    const index = this.contexts.indexOf(context);
+    if (index !== -1) this.contexts.splice(index, 1);
+    this.changeContext();
+  }
+
+  private changeContext(): void {
+    this.activeContext.set(this.contexts.at(-1) ?? null);
+    // An outlet can disappear while hovered/focused when a modal opens or closes.
+    for (const [id, timer] of this.timers) {
+      if (timer.paused.size) {
+        timer.paused.clear();
+        this.start(id, timer);
+      }
+    }
+  }
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
@@ -31,16 +55,22 @@ export class ToastService {
     });
   }
 
-  error(value: unknown): void { this.show(value, 'error'); }
+  error(value: unknown): void {
+    this.show(value, 'error');
+  }
 
-  success(message: string): void { this.show(message, 'success'); }
+  success(message: string): void {
+    this.show(message, 'success');
+  }
 
   private show(value: unknown, kind: Toast['kind']): void {
     const message =
       typeof value === 'string' && value.trim()
         ? value.trim()
         : 'An unexpected error occurred. Please try again.';
-    const existing = this.messages().find((toast) => toast.message === message && toast.kind === kind);
+    const existing = this.messages().find(
+      (toast) => toast.message === message && toast.kind === kind,
+    );
     if (existing) {
       const timer = this.timers.get(existing.id)!;
       clearTimeout(timer.handle);

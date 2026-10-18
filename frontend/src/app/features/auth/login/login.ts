@@ -53,9 +53,11 @@ export class Login {
       },
       error: (err) => {
         this.loading.set(false);
-        this.reportError(err.status === 401 || err.status === 403
-          ? 'We could not sign you in. Check your email and password and try again.'
-          : 'We could not sign you in. Please try again.');
+        this.toast.error(
+          err.status === 401 || err.status === 403
+            ? 'We could not sign you in. Check your email and password and try again.'
+            : 'We could not sign you in. Please try again.',
+        );
       },
     });
   }

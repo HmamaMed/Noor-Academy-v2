@@ -20,7 +20,7 @@ public class GroupController {
     @GetMapping
     public List<GroupResponse> findAll(@RequestParam(required = false) Long teacherId,
             @org.springframework.security.core.annotation.AuthenticationPrincipal com.nooracademy.security.UserPrincipal principal) {
-        if (principal != null && principal.getUser().getRole() == com.nooracademy.user.Role.ADMIN) {
+        if (principal != null && principal.getUser().getRole().isAdmin()) {
             return teacherId == null ? groupService.findAll() : groupService.findByTeacher(teacherId);
         }
         if (principal != null && principal.getUser().getRole() == com.nooracademy.user.Role.TEACHER) {

@@ -56,4 +56,20 @@ describe('Error toast lifecycle', () => {
     vi.advanceTimersByTime(8000);
     expect(toast.messages()).toHaveLength(0);
   });
+  it('routes feedback to the topmost modal and returns to the prior outlet on close', () => {
+    const editor = {},
+      confirmation = {};
+    toast.attachModal(editor);
+    toast.error('Could not save.');
+    const id = toast.messages()[0].id;
+    toast.pause(id, 'pointer');
+    toast.attachModal(confirmation);
+    expect(toast.activeContext()).toBe(confirmation);
+    toast.detachModal(confirmation);
+    expect(toast.activeContext()).toBe(editor);
+    toast.detachModal(editor);
+    expect(toast.activeContext()).toBeNull();
+    vi.advanceTimersByTime(8000);
+    expect(toast.messages()).toHaveLength(0);
+  });
 });

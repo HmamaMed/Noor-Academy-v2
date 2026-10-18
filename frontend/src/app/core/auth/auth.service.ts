@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
-import { Role, User } from '../models/user.model';
+import { Role, User, isAdminRole } from '../models/user.model';
 
 const TOKEN_KEY = 'noor_academy_token';
 const USER_KEY = 'noor_academy_user';
@@ -37,7 +37,10 @@ export class AuthService {
 
   hasRole(...roles: Role[]): boolean {
     const user = this.currentUser;
-    return !!user && roles.includes(user.role);
+    return (
+      !!user &&
+      roles.some((role) => (role === 'ADMIN' ? isAdminRole(user.role) : role === user.role))
+    );
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {

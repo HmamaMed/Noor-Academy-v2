@@ -1,11 +1,14 @@
-import { Directive, HostListener, Signal, signal } from '@angular/core';
+import { Directive, HostListener, Signal, effect, inject, signal, untracked } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
+import { ToastService } from '../../core/notifications/toast.service';
 
 /** Shared state for the existing administrative record forms. */
 @Directive()
 export abstract class AdminEditor {
+  protected readonly toast = inject(ToastService);
   protected abstract form: AbstractControl;
   protected abstract saving: Signal<boolean>;
+  protected abstract deleteError: Signal<string>;
   protected editorOpen = signal(false);
   protected discardAction = signal<(() => void) | null>(null);
   protected formError = signal('');
@@ -15,7 +18,25 @@ export abstract class AdminEditor {
   private editorTrigger: HTMLElement | null = null;
   private resolveLeave?: (leave: boolean) => void;
 
+  constructor() {
+    for (const source of [
+      () => this.formError(),
+      () => this.loadError(),
+      () => this.deleteError(),
+    ]) {
+      effect(() => {
+        const message = source();
+        if (message) untracked(() => this.toast.error(message));
+      });
+    }
+    effect(() => {
+      const message = this.success();
+      if (message) untracked(() => this.toast.success(message));
+    });
+  }
+
   protected openEditor(action: () => void): void {
+    if (this.saving() || this.deleting()) return;
     const open = () => {
       this.editorTrigger = document.activeElement as HTMLElement | null;
       action();
@@ -30,6 +51,7 @@ export abstract class AdminEditor {
   }
 
   protected closeEditor(): void {
+    if (this.saving() || this.deleting()) return;
     if (this.form.dirty) this.discardAction.set(() => this.finishEditor());
     else this.finishEditor();
   }

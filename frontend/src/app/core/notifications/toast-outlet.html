@@ -1,15 +1,40 @@
-<div class="toast-stack">
-@for (kind of kinds; track kind) {
-  <section [attr.aria-label]="kind === 'error' ? 'Errors' : 'Updates'" [attr.aria-live]="kind === 'error' ? 'assertive' : 'polite'" aria-atomic="false" aria-relevant="additions" class="grid gap-3">
-    @for (message of toast.messages(); track message.id) {
-      @if (message.kind === kind) {
-        <div class="toast" [class.success]="kind === 'success'" (mouseenter)="toast.pause(message.id, 'pointer')" (mouseleave)="toast.resume(message.id, 'pointer')" (focusin)="toast.pause(message.id, 'focus')" (focusout)="onFocusOut(message.id, $event)">
-          <app-icon [name]="kind === 'error' ? 'info' : 'check'" />
-          <div class="toast-copy"><p class="font-semibold">{{ kind === 'error' ? 'Error' : 'Success' }}</p><p>{{ message.message }}</p></div>
-          <button type="button" class="icon-button" [attr.aria-label]="'Dismiss ' + kind" (click)="toast.dismiss(message.id)"><app-icon name="close" /></button>
-        </div>
-      }
+@if (toast.activeContext() === context()) {
+  <div class="toast-stack">
+    @for (kind of kinds; track kind) {
+      <section
+        [attr.aria-label]="kind === 'error' ? 'Errors' : 'Updates'"
+        [attr.aria-live]="kind === 'error' ? 'assertive' : 'polite'"
+        aria-atomic="false"
+        aria-relevant="additions"
+        class="grid gap-3"
+      >
+        @for (message of toast.messages(); track message.id) {
+          @if (message.kind === kind) {
+            <div
+              class="toast"
+              [class.success]="kind === 'success'"
+              (mouseenter)="toast.pause(message.id, 'pointer')"
+              (mouseleave)="toast.resume(message.id, 'pointer')"
+              (focusin)="toast.pause(message.id, 'focus')"
+              (focusout)="onFocusOut(message.id, $event)"
+            >
+              <app-icon [name]="kind === 'error' ? 'info' : 'check'" />
+              <div class="toast-copy">
+                <p class="font-semibold">{{ kind === 'error' ? 'Error' : 'Success' }}</p>
+                <p>{{ message.message }}</p>
+              </div>
+              <button
+                type="button"
+                class="icon-button"
+                [attr.aria-label]="'Dismiss ' + kind"
+                (click)="toast.dismiss(message.id)"
+              >
+                <app-icon name="close" />
+              </button>
+            </div>
+          }
+        }
+      </section>
     }
-  </section>
+  </div>
 }
-</div>

@@ -1,6 +1,7 @@
 package com.nooracademy.user;
 
 import com.nooracademy.common.exception.BadRequestException;
+import com.nooracademy.common.exception.ConflictException;
 import com.nooracademy.common.exception.NotFoundException;
 import com.nooracademy.user.dto.CreateUserRequest;
 import com.nooracademy.user.dto.UpdateUserRequest;
@@ -22,6 +23,8 @@ public class UserService {
 
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
+        if (request.role() == Role.SUPER_ADMIN)
+            throw new BadRequestException("Protected administrator accounts must be provisioned through the database.");
         if (userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("A user with this email already exists");
         }
@@ -38,7 +41,7 @@ public class UserService {
 
     public List<UserResponse> findAll(Role role) {
         List<User> users = role == null ? userRepository.findAll() : userRepository.findAll().stream()
-                .filter(u -> u.getRole() == role)
+                .filter(u -> role == Role.ADMIN ? u.getRole().isAdmin() : u.getRole() == role)
                 .toList();
         return users.stream().map(userMapper::toResponse).toList();
     }
@@ -58,10 +61,12 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new NotFoundException("User not found: " + id);
-        }
-        userRepository.deleteById(id);
+        User user = userRepository.findLockedById(id)
+                .orElseThrow(() -> new NotFoundException("User not found: " + id));
+        if (user.getRole() == Role.SUPER_ADMIN)
+            throw new ConflictException("This administrator account is protected and cannot be deleted.");
+        userRepository.delete(user);
+        userRepository.flush();
     }
 
     User getUserOrThrow(Long id) {

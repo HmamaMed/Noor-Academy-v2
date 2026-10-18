@@ -6,7 +6,7 @@ import { EmptyState } from '../../../shared/design/empty-state';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../../core/services/user.service';
-import { Role, User } from '../../../core/models/user.model';
+import { Role, User, isAdminRole, roleLabel } from '../../../core/models/user.model';
 
 const ROLES: Role[] = ['ADMIN', 'TEACHER', 'STUDENT'];
 
@@ -21,6 +21,7 @@ export class AdminUsers extends AdminEditor implements OnInit {
   private userService = inject(UserService);
 
   protected roles = ROLES;
+  protected roleLabel = roleLabel;
   protected users = signal<User[]>([]);
   protected loading = signal(true);
   protected editingId = signal<number | null>(null);
@@ -38,9 +39,11 @@ export class AdminUsers extends AdminEditor implements OnInit {
   });
 
   protected deleteTarget = signal<User | null>(null);
-  protected deleteError = signal('');
+  protected override deleteError = signal('');
 
-  startCreate(): void { this.openEditor(() => this.cancelEdit()); }
+  startCreate(): void {
+    this.openEditor(() => this.cancelEdit());
+  }
 
   ngOnInit(): void {
     this.load();
@@ -82,7 +85,7 @@ export class AdminUsers extends AdminEditor implements OnInit {
       email: user.email,
       phone: user.phone ?? '',
       password: '',
-      role: user.role,
+      role: isAdminRole(user.role) ? 'ADMIN' : user.role,
     });
   }
 
@@ -139,13 +142,17 @@ export class AdminUsers extends AdminEditor implements OnInit {
   }
 
   requestDelete(record: User): void {
+    if (record.role === 'SUPER_ADMIN') {
+      this.toast.error('This administrator account is protected and cannot be deleted.');
+      return;
+    }
     this.deleteError.set('');
     this.deleteTarget.set(record);
   }
 
   deleteRecord(): void {
     const record = this.deleteTarget();
-    if (!record || this.deleting()) return;
+    if (!record || this.deleting() || record.role === 'SUPER_ADMIN') return;
     this.deleting.set(true);
     this.userService.delete(record.id).subscribe({
       next: () => {

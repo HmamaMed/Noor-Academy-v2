@@ -212,7 +212,7 @@
   }
 </div>
 @if (editorOpen() && workspace()?.canManage) {
-  <app-dialog label="Publish material" [drawer]="true" [busy]="busy()" (closed)="closeEditor()"
+  <app-dialog label="Publish material" [wide]="true" [busy]="busy()" (closed)="closeEditor()"
     ><div class="dialog-heading">
       <div>
         <h2>New class material</h2>

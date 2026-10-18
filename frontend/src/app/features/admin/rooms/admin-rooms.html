@@ -70,69 +70,75 @@
   }
 }
 @if (editorOpen()) {
-  <form
-    [formGroup]="form"
-    (ngSubmit)="submit()"
-    class="panel record-form"
-    aria-labelledby="record-editor-title"
+  <app-dialog
+    [label]="editingId() ? 'Edit room' : 'Create room'"
+    [busy]="saving()"
+    (closed)="closeEditor()"
   >
-    <div class="dialog-heading">
-      <h2 id="record-editor-title" tabindex="-1">
-        {{ editingId() ? 'Edit room' : 'Create room' }}
-      </h2>
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Close room editor"
-        [disabled]="saving()"
-        (click)="closeEditor()"
-      >
-        <app-icon name="close" />
-      </button>
-    </div>
-    @if (formError()) {
-      <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
-        {{ formError() }}
-      </p>
-    }
-    <fieldset [disabled]="saving()" class="form-grid">
-      <div class="form-field">
-        <label for="record-name">Room name</label
-        ><input
-          id="record-name"
-          type="text"
-          formControlName="name"
-          [attr.aria-invalid]="invalid('name')"
-          aria-describedby="record-name-error"
-        />
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="record-form"
+      aria-labelledby="record-editor-title"
+    >
+      <div class="dialog-heading">
+        <h2 id="record-editor-title" tabindex="-1">
+          {{ editingId() ? 'Edit room' : 'Create room' }}
+        </h2>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Close room editor"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          <app-icon name="close" />
+        </button>
+      </div>
+      @if (formError()) {
+        <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
+          {{ formError() }}
+        </p>
+      }
+      <fieldset [disabled]="saving()" class="form-grid">
+        <div class="form-field">
+          <label for="record-name">Room name</label
+          ><input
+            id="record-name"
+            type="text"
+            formControlName="name"
+            [attr.aria-invalid]="invalid('name')"
+            aria-describedby="record-name-error"
+          />
 
-        @if (invalid('name')) {
-          <p id="record-name-error" class="field-error">Enter a room name.</p>
-        }
+          @if (invalid('name')) {
+            <p id="record-name-error" class="field-error">Enter a room name.</p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="record-maxCapacity">Capacity</label
+          ><input
+            id="record-maxCapacity"
+            type="number"
+            formControlName="maxCapacity"
+            [attr.aria-invalid]="invalid('maxCapacity')"
+            aria-describedby="record-maxCapacity-error"
+          />
+          <p class="field-help">Group capacity is set by its assigned room.</p>
+          @if (invalid('maxCapacity')) {
+            <p id="record-maxCapacity-error" class="field-error">Enter a capacity of at least 1.</p>
+          }
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
+          Cancel</button
+        ><button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create room' }}
+        </button>
       </div>
-      <div class="form-field">
-        <label for="record-maxCapacity">Capacity</label
-        ><input
-          id="record-maxCapacity"
-          type="number"
-          formControlName="maxCapacity"
-          [attr.aria-invalid]="invalid('maxCapacity')"
-          aria-describedby="record-maxCapacity-error"
-        />
-        <p class="field-help">Group capacity is set by its assigned room.</p>
-        @if (invalid('maxCapacity')) {
-          <p id="record-maxCapacity-error" class="field-error">Enter a capacity of at least 1.</p>
-        }
-      </div>
-    </fieldset>
-    <div class="form-actions">
-      <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
-        Cancel</button
-      ><button type="submit" class="btn-primary" [disabled]="saving()">
-        {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create room' }}
-      </button>
-    </div>
-  </form>
+    </form>
+  </app-dialog>
 }
 @if (deleteTarget(); as record) {
   <app-admin-confirm

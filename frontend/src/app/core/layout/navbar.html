@@ -7,7 +7,7 @@
     <div class="sidebar-bottom">
       <p class="meta px-4">{{ user()?.firstName }} {{ user()?.lastName }}</p>
       <nav class="app-navigation" aria-label="Account">
-        @if (user()?.role === 'ADMIN') { <a routerLink="/profile" routerLinkActive="active" ariaCurrentWhenActive="page"><app-icon name="user" />Profile</a><a routerLink="/courses"><app-icon name="book" />Public catalog</a> }
+        @if (isAdmin()) { <a routerLink="/profile" routerLinkActive="active" ariaCurrentWhenActive="page"><app-icon name="user" />Profile</a><a routerLink="/courses"><app-icon name="book" />Public catalog</a> }
         <button type="button" (click)="logout()"><app-icon name="logout" />Sign out</button>
       </nav>
     </div>
@@ -33,7 +33,7 @@
     <nav class="app-navigation" aria-label="Mobile">
       @if (appShell()) {
         @for (link of links(); track link.path) { <a [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page"><app-icon [name]="link.icon" />{{ link.label }}</a> }
-        @if (user()?.role === 'ADMIN') { <a routerLink="/profile"><app-icon name="user" />Profile</a><a routerLink="/courses"><app-icon name="book" />Public catalog</a> }
+        @if (isAdmin()) { <a routerLink="/profile"><app-icon name="user" />Profile</a><a routerLink="/courses"><app-icon name="book" />Public catalog</a> }
       } @else {
         <a routerLink="/courses"><app-icon name="book" />Courses</a><a routerLink="/" fragment="enrollment"><app-icon name="info" />How enrollment works</a>
         @if (user()) { <a [routerLink]="dashboard()"><app-icon name="home" />Dashboard</a><a routerLink="/profile"><app-icon name="user" />Profile</a> }

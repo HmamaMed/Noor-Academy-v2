@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/notifications/toast.service';
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -11,6 +12,7 @@ import { Icon } from '../../../shared/design/icon';
   templateUrl: './register.html',
 })
 export class Register {
+  private readonly toast = inject(ToastService);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -20,12 +22,22 @@ export class Register {
   protected showPassword = signal(false);
   protected showConfirmation = signal(false);
   protected redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
-  protected form = this.fb.nonNullable.group({
-    firstName: ['', Validators.required], lastName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', Validators.required], phone: [''],
-  }, { validators: (group) => group.get('password')?.value === group.get('confirmPassword')?.value ? null : { mismatch: true } });
+  protected form = this.fb.nonNullable.group(
+    {
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required],
+      phone: [''],
+    },
+    {
+      validators: (group) =>
+        group.get('password')?.value === group.get('confirmPassword')?.value
+          ? null
+          : { mismatch: true },
+    },
+  );
 
   submit(): void {
     if (this.loading()) return;
@@ -38,10 +50,17 @@ export class Register {
     this.loading.set(true);
     const { confirmPassword, ...request } = this.form.getRawValue();
     this.authService.register(request).subscribe({
-      next: () => this.router.navigateByUrl(this.redirectTo?.startsWith('/') && !this.redirectTo.startsWith('//') ? this.redirectTo : '/'),
+      next: () =>
+        this.router.navigateByUrl(
+          this.redirectTo?.startsWith('/') && !this.redirectTo.startsWith('//')
+            ? this.redirectTo
+            : '/',
+        ),
       error: (err) => {
         this.loading.set(false);
-        this.reportError(err.error?.message ?? 'We could not create your account. Please try again.');
+        this.toast.error(
+          err.error?.message ?? 'We could not create your account. Please try again.',
+        );
       },
     });
   }

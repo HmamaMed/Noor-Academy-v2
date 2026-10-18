@@ -4,6 +4,8 @@ import {
   HostListener,
   OnInit,
   computed,
+  effect,
+  untracked,
   inject,
   signal,
 } from '@angular/core';
@@ -101,6 +103,15 @@ export class ClassWorkspace implements OnInit {
     type: ['LESSON' as MaterialType, Validators.required],
     externalUrl: ['', Validators.maxLength(2000)],
   });
+
+  constructor() {
+    for (const source of [this.loadError, this.formError, this.removeError]) {
+      effect(() => {
+        const message = source();
+        if (message) untracked(() => this.toast.error(message));
+      });
+    }
+  }
 
   ngOnInit() {
     // A single cancellable stream prevents old route/retry responses from exposing stale materials.
@@ -320,6 +331,7 @@ export class ClassWorkspace implements OnInit {
         error: (err) => {
           this.downloading.set(null);
           this.downloadError.set(material);
+          this.toast.error('The attachment could not be downloaded. Please try again.');
           if (err.status === 403) this.refresh();
         },
       });

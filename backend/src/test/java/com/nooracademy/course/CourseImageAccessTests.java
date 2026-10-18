@@ -41,6 +41,15 @@ class CourseImageAccessTests {
         }
         verifyNoInteractions(service);
     }
+    @Test void protectedAdministratorHasTheSameAdminEndpointAccess() {
+        var account = com.nooracademy.user.User.builder().role(com.nooracademy.user.Role.SUPER_ADMIN).build();
+        var principal = new com.nooracademy.security.UserPrincipal(account);
+        SecurityContextHolder.getContext().setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities()));
+        controller.createWithImage(metadata, image);
+        controller.imageSettings();
+        verify(service).create(metadata, image);
+        verify(service).imageUploadsEnabled();
+    }
     @Test void administratorCanSaveImageAndPublicVisitorsCanLoadTheCover() {
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("admin", "", "ROLE_ADMIN"));
         var saved = new CourseResponse(1L, "Science", "Learn", "Discover", "/api/courses/1/image?v=new");

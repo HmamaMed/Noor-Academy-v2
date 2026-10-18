@@ -72,124 +72,133 @@
   }
 }
 @if (editorOpen()) {
-  <form
-    [formGroup]="form"
-    (ngSubmit)="submit()"
-    class="panel record-form"
-    aria-labelledby="record-editor-title"
+  <app-dialog
+    [label]="editingId() ? 'Edit course' : 'Create course'"
+    [wide]="true"
+    [busy]="saving()"
+    (closed)="closeEditor()"
   >
-    <div class="dialog-heading">
-      <h2 id="record-editor-title" tabindex="-1">
-        {{ editingId() ? 'Edit course' : 'Create course' }}
-      </h2>
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Close course editor"
-        [disabled]="saving()"
-        (click)="closeEditor()"
-      >
-        <app-icon name="close" />
-      </button>
-    </div>
-    @if (formError()) {
-      <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
-        {{ formError() }}
-      </p>
-    }
-    <fieldset [disabled]="saving()" class="stack">
-      <div class="form-field">
-        <label for="record-title">Course title</label
-        ><input
-          id="record-title"
-          type="text"
-          formControlName="title"
-          [attr.aria-invalid]="invalid('title')"
-          aria-describedby="record-title-error"
-        />
-
-        @if (invalid('title')) {
-          <p id="record-title-error" class="field-error">Enter a course title.</p>
-        }
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="record-form"
+      aria-labelledby="record-editor-title"
+    >
+      <div class="dialog-heading">
+        <h2 id="record-editor-title" tabindex="-1">
+          {{ editingId() ? 'Edit course' : 'Create course' }}
+        </h2>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Close course editor"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          <app-icon name="close" />
+        </button>
       </div>
-      <div class="form-field course-cover-editor">
-        <label for="course-image-file">Course image <span class="muted">(optional)</span></label>
-        @if (imagePreview(); as preview) {
-          <img
-            class="course-cover-preview"
-            [src]="preview"
-            alt="Selected course cover preview"
-            (load)="validatePreview($event)"
-            (error)="rejectPreview()"
+      @if (formError()) {
+        <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
+          {{ formError() }}
+        </p>
+      }
+      <fieldset [disabled]="saving()" class="stack">
+        <div class="form-field">
+          <label for="record-title">Course title</label
+          ><input
+            id="record-title"
+            type="text"
+            formControlName="title"
+            [attr.aria-invalid]="invalid('title')"
+            aria-describedby="record-title-error"
           />
-          <p class="meta mt-2">{{ selectedImage()?.name }}</p>
-          <button class="text-link" type="button" (click)="discardSelectedImage()">
-            {{ currentCourse()?.imageUrl ? 'Use current image' : 'Remove selected image' }}
-          </button>
-        } @else if (currentCourse(); as current) {
-          @if (current.imageUrl && !imageRemoved()) {
-            <app-course-image class="course-cover-preview" [course]="current" />
-            <button class="text-link" type="button" (click)="removeCurrentImage()">
-              Remove current image
+
+          @if (invalid('title')) {
+            <p id="record-title-error" class="field-error">Enter a course title.</p>
+          }
+        </div>
+        <div class="form-field course-cover-editor">
+          <label for="course-image-file">Course image <span class="muted">(optional)</span></label>
+          @if (imagePreview(); as preview) {
+            <img
+              class="course-cover-preview"
+              [src]="preview"
+              alt="Selected course cover preview"
+              (load)="validatePreview($event)"
+              (error)="rejectPreview()"
+            />
+            <p class="meta mt-2">{{ selectedImage()?.name }}</p>
+            <button class="text-link" type="button" (click)="discardSelectedImage()">
+              {{ currentCourse()?.imageUrl ? 'Use current image' : 'Remove selected image' }}
+            </button>
+          } @else if (currentCourse(); as current) {
+            @if (current.imageUrl && !imageRemoved()) {
+              <app-course-image class="course-cover-preview" [course]="current" />
+              <button class="text-link" type="button" (click)="removeCurrentImage()">
+                Remove current image
+              </button>
+            }
+          }
+          @if (imageRemoved()) {
+            <p class="notice mt-3">The current image will be removed when you save.</p>
+            <button type="button" class="text-link" (click)="discardSelectedImage()">
+              Keep current image
             </button>
           }
-        }
-        @if (imageRemoved()) {
-          <p class="notice mt-3">The current image will be removed when you save.</p>
-          <button type="button" class="text-link" (click)="discardSelectedImage()">
-            Keep current image
-          </button>
-        }
-        <input
-          id="course-image-file"
-          type="file"
-          accept="image/jpeg,image/png"
-          [disabled]="!imageSettings()?.uploadsEnabled"
-          (change)="selectImage($event)"
-          [attr.aria-invalid]="!!imageError()"
-          aria-describedby="course-image-help course-image-error"
-        />
-        <p id="course-image-help" class="field-help">
-          JPEG or PNG, up to 5 MB and 4096 × 4096 pixels. A landscape image works best. Shown on the
-          homepage, course catalog, and course details.
-        </p>
-        @if (imageError()) {
-          <p id="course-image-error" class="field-error" role="alert">{{ imageError() }}</p>
-          <button type="button" class="text-link" (click)="imageError.set('')">
-            Continue without this selection
-          </button>
-        }
-        @if (imageSettingsError()) {
-          <p class="field-help">
-            We couldn’t check image upload availability. Course text can still be saved.
+          <input
+            id="course-image-file"
+            type="file"
+            accept="image/jpeg,image/png"
+            [disabled]="!imageSettings()?.uploadsEnabled"
+            (change)="selectImage($event)"
+            [attr.aria-invalid]="!!imageError()"
+            aria-describedby="course-image-help course-image-error"
+          />
+          <p id="course-image-help" class="field-help">
+            JPEG or PNG, up to 5 MB and 4096 × 4096 pixels. A landscape image works best. Shown on
+            the homepage, course catalog, and course details.
           </p>
-          <button type="button" class="text-link" (click)="loadImageSettings()">Check again</button>
-        } @else if (!imageSettings()) {
-          <p class="field-help" role="status">Checking image uploads…</p>
-        } @else if (!imageSettings()?.uploadsEnabled) {
-          <p class="notice mt-3">
-            Image uploads are unavailable until academy storage is configured. You can still save
-            the course without an image.
-          </p>
-        }
+          @if (imageError()) {
+            <p id="course-image-error" class="field-error" role="alert">{{ imageError() }}</p>
+            <button type="button" class="text-link" (click)="imageError.set('')">
+              Continue without this selection
+            </button>
+          }
+          @if (imageSettingsError()) {
+            <p class="field-help">
+              We couldn’t check image upload availability. Course text can still be saved.
+            </p>
+            <button type="button" class="text-link" (click)="loadImageSettings()">
+              Check again
+            </button>
+          } @else if (!imageSettings()) {
+            <p class="field-help" role="status">Checking image uploads…</p>
+          } @else if (!imageSettings()?.uploadsEnabled) {
+            <p class="notice mt-3">
+              Image uploads are unavailable until academy storage is configured. You can still save
+              the course without an image.
+            </p>
+          }
+        </div>
+        <div class="form-field">
+          <label for="course-description">Description</label
+          ><textarea id="course-description" formControlName="description"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="course-syllabus">Syllabus</label
+          ><textarea id="course-syllabus" formControlName="syllabus" rows="8"></textarea>
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
+          Cancel</button
+        ><button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create course' }}
+        </button>
       </div>
-      <div class="form-field">
-        <label for="course-description">Description</label
-        ><textarea id="course-description" formControlName="description"></textarea>
-      </div>
-      <div class="form-field">
-        <label for="course-syllabus">Syllabus</label
-        ><textarea id="course-syllabus" formControlName="syllabus" rows="8"></textarea>
-      </div>
-    </fieldset>
-    <div class="form-actions">
-      <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
-        Cancel</button
-      ><button type="submit" class="btn-primary" [disabled]="saving()">
-        {{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create course' }}
-      </button>
-    </div>
-  </form>
+    </form>
+  </app-dialog>
 }
 @if (deleteTarget(); as record) {
   <app-admin-confirm

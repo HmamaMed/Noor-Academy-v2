@@ -78,17 +78,7 @@
         </div>
         <div class="form-field-full">
           <label for="profile-role">Role</label
-          ><input
-            id="profile-role"
-            [value]="
-              user()?.role === 'ADMIN'
-                ? 'Administrator'
-                : user()?.role === 'TEACHER'
-                  ? 'Teacher'
-                  : 'Student'
-            "
-            readonly
-          />
+          ><input id="profile-role" [value]="roleLabel(user()?.role)" readonly />
         </div>
       </fieldset>
       <div class="form-actions">
