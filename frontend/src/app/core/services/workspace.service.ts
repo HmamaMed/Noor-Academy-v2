@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Material, MaterialRequest, Workspace } from '../models/material.model';
+export interface AttachmentDownload { url: string; expiresAt: string; }
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
   private http = inject(HttpClient);
@@ -21,6 +22,7 @@ export class WorkspaceService {
     return this.http.delete<void>(`${this.url(groupId)}/materials/${id}`);
   }
   download(groupId: number, id: number) {
-    return this.http.get(`${this.url(groupId)}/materials/${id}/file`, { responseType: 'blob' });
+    const url = `${this.url(groupId)}/materials/${id}`;
+    return this.http.get<AttachmentDownload>(`${url}/download`);
   }
 }

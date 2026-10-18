@@ -13,7 +13,8 @@ import com.nooracademy.room.dto.RoomRequest;
 import com.nooracademy.user.*;
 import com.nooracademy.user.dto.CreateUserRequest;
 import com.nooracademy.notification.*;
-import com.nooracademy.storage.DriveStorage;
+import com.nooracademy.storage.R2Storage;
+import com.nooracademy.material.MaterialRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.junit.jupiter.*;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import tools.jackson.databind.ObjectMapper;
@@ -58,7 +60,8 @@ class NoorAcademyBackendApplicationTests {
     @Autowired GroupService groups;
     @Autowired EnrollmentService enrollments;
     @Autowired Recorder recorder;
-    @MockitoBean DriveStorage drive;
+    @MockitoBean R2Storage r2;
+    @MockitoSpyBean MaterialRepository materialRepository;
     @MockitoBean MailService mail;
     User teacher, otherTeacher, student, otherStudent;
     String adminToken, teacherToken, otherTeacherToken, studentToken, otherStudentToken;
@@ -212,18 +215,47 @@ class NoorAcademyBackendApplicationTests {
         assertEquals(403,api("DELETE","/workspaces/"+groupId+"/materials/"+id(created),studentToken,null).statusCode());
         assertEquals(204,api("DELETE","/workspaces/"+groupId+"/materials/"+id(created),teacherToken,null).statusCode());
     }
-    @Test void uploadsAndDownloadsStayBehindClassPermissions() throws Exception {
-        when(drive.upload(anyString(),anyString(),any())).thenReturn("private-file");
-        when(drive.download("private-file")).thenReturn("PDF content".getBytes());
+    @Test void r2LinksRequireConfirmedEnrollmentAndRemainAvailableForCompletedGroups() throws Exception {
+        when(r2.upload(anyString(),any())).thenReturn("materials/private-key");
+        when(r2.download("materials/private-key","lesson.pdf"))
+                .thenReturn(new R2Storage.DownloadLink("https://test.r2.cloudflarestorage.com/private?signature=test",Instant.now().plusSeconds(300)));
+        assertEquals(403,material(otherTeacherToken,true).statusCode());
+        verify(r2,never()).upload(anyString(),any());
         var created=material(teacherToken,true); assertEquals(201,created.statusCode(),created.body());
-        var path="/workspaces/"+groupId+"/materials/"+id(created)+"/file";
+        long materialId=id(created);
+        assertEquals("materials/private-key",jdbc.queryForObject("SELECT storage_key FROM materials WHERE id=?",String.class,materialId));
+        String path="/workspaces/"+groupId+"/materials/"+materialId+"/download";
+        assertEquals(401,api("GET",path,null,null).statusCode());
+        assertEquals(403,api("GET",path,studentToken,null).statusCode());
+        var enrollment=enrollments.apply(student,groupId);
+        assertEquals(403,api("GET",path,studentToken,null).statusCode());
         assertEquals(403,api("GET",path,otherStudentToken,null).statusCode());
-        enrollments.confirm(enrollments.apply(student,groupId).id());
-        var response=api("GET",path,studentToken,null); assertEquals(200,response.statusCode());
+        assertEquals(403,api("GET",path,otherTeacherToken,null).statusCode());
+        verify(r2,never()).download(anyString(),anyString());
+        enrollments.confirm(enrollment.id());
+        var response=api("GET",path,studentToken,null);
+        assertEquals(200,response.statusCode(),response.body());
+        assertTrue(response.body().contains("signature=test"));
         assertEquals("private, no-store",response.headers().firstValue("Cache-Control").orElseThrow());
-        assertTrue(response.headers().firstValue("Content-Disposition").orElseThrow().contains("attachment"));
-        assertEquals(204,api("DELETE","/workspaces/"+groupId+"/materials/"+id(created),adminToken,null).statusCode());
-        verify(drive).delete("private-file");
+        groups.updateStatus(groupId,new GroupStatusUpdateRequest(GroupStatus.COMPLETED));
+        assertEquals(200,api("GET",path,studentToken,null).statusCode());
+        assertEquals(204,api("DELETE","/workspaces/"+groupId+"/materials/"+materialId,teacherToken,null).statusCode());
+        verify(r2).delete("materials/private-key");
+    }
+    @Test void r2UploadIsRemovedWhenDatabaseTransactionRollsBack() throws Exception {
+        when(r2.upload(anyString(),any())).thenReturn("materials/rollback-key");
+        doThrow(new org.springframework.dao.DataIntegrityViolationException("simulated database failure"))
+                .when(materialRepository).saveAndFlush(any());
+        assertEquals(409,material(teacherToken,true).statusCode());
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM materials",Integer.class));
+        verify(r2).delete("materials/rollback-key");
+    }
+    @Test void optionalUnconfiguredSmtpDoesNotBlockDeploymentHealth() throws Exception {
+        // No SMTP server is running at localhost:587. PostgreSQL must still be checked.
+        var request=HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/actuator/health")).GET().build();
+        var response=HttpClient.newHttpClient().send(request,HttpResponse.BodyHandlers.ofString());
+        assertEquals(200,response.statusCode(),response.body());
+        assertTrue(response.body().contains("\"status\":\"UP\""));
     }
     @Test void passwordResetIsSingleUseAndRevokesOldTokens() throws Exception {
         assertEquals(200,api("POST","/auth/forgot-password",null,Map.of("email",student.getEmail())).statusCode());

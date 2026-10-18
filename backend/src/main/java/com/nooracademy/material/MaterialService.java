@@ -3,7 +3,8 @@ package com.nooracademy.material;
 import com.nooracademy.common.exception.*;
 import com.nooracademy.enrollment.*;
 import com.nooracademy.group.*;
-import com.nooracademy.storage.DriveStorage;
+import com.nooracademy.storage.R2Storage;
+import com.nooracademy.storage.R2Storage.DownloadLink;
 import com.nooracademy.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,11 +23,11 @@ public class MaterialService {
     private final GroupRepository groups;
     private final GroupService groupService;
     private final EnrollmentRepository enrollments;
-    private final DriveStorage drive;
+    private final R2Storage storage;
 
     public WorkspaceResponse workspace(Long groupId, User actor) {
         Group group = accessibleGroup(groupId, actor, false);
-        return new WorkspaceResponse(groupService.findById(groupId), canManage(group, actor), drive.enabled(),
+        return new WorkspaceResponse(groupService.findById(groupId), canManage(group, actor), storage.enabled(),
                 materials.findByGroupIdOrderByCreatedAtDesc(groupId).stream().map(this::response).toList());
     }
 
@@ -54,18 +55,24 @@ public class MaterialService {
         material.setExternalUrl(url); material.setCreatedAt(Instant.now());
         if (file != null && !file.isEmpty()) {
             if (file.getSize() > 25L * 1024 * 1024) throw new BadRequestException("Files must be 25 MB or smaller");
-            String name = file.getOriginalFilename() == null ? "attachment" : file.getOriginalFilename().replaceAll("[\\\\/\r\n]", "_");
-            if (name.length() > 200) name = name.substring(name.length() - 200);
+            String name = safeFileName(file.getOriginalFilename());
             try {
-                String id = drive.upload(name, file.getContentType() == null ? "application/octet-stream" : file.getContentType(), file.getBytes());
-                material.setDriveFileId(id); material.setFileName(name); material.setFileSize(file.getSize());
+                String key = storage.upload(name, file.getBytes());
+                material.setStorageKey(key);
+                material.setFileName(name); material.setFileSize(file.getSize());
                 // Compensate if the DB transaction fails after the external upload succeeds.
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override public void afterCompletion(int status) { if (status != STATUS_COMMITTED) drive.delete(id); }
+                    @Override public void afterCompletion(int status) { if (status != STATUS_COMMITTED) storage.delete(key); }
                 });
             } catch (IOException ex) { throw new BadRequestException("Could not read the uploaded file"); }
         }
         return response(materials.saveAndFlush(material));
+    }
+
+    static String safeFileName(String value) {
+        String name = value == null ? "attachment" : value.replaceAll("[\\\\/\\p{Cntrl}]", "_").strip();
+        if (name.isBlank() || name.equals(".") || name.equals("..")) name = "attachment";
+        return name.length() > 200 ? name.substring(name.length() - 200) : name;
     }
 
     static String validateUrl(String value) {
@@ -78,22 +85,22 @@ public class MaterialService {
         } catch (IllegalArgumentException ex) { throw new BadRequestException("Use an HTTPS Google Drive or Google Docs link"); }
     }
 
-    public Download download(Long groupId, Long id, User actor) {
+    public DownloadLink downloadLink(Long groupId, Long id, User actor) {
         accessibleGroup(groupId, actor, false);
         Material material = get(groupId, id);
-        if (material.getDriveFileId() == null) throw new NotFoundException("No uploaded file attached");
-        return new Download(material.getFileName(), drive.download(material.getDriveFileId()));
+        String key = material.getStorageKey();
+        if (key == null) throw new NotFoundException("No uploaded file attached");
+        return storage.download(key, material.getFileName());
     }
-    public record Download(String name, byte[] bytes) {}
 
     @Transactional
     public void delete(Long groupId, Long id, User actor) {
         accessibleGroup(groupId, actor, true);
         Material material = get(groupId, id);
-        String fileId = material.getDriveFileId();
+        String fileId = material.getStorageKey();
         materials.delete(material);
         if (fileId != null) TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override public void afterCommit() { drive.delete(fileId); }
+            @Override public void afterCommit() { storage.delete(fileId); }
         });
     }
 
@@ -102,7 +109,7 @@ public class MaterialService {
     }
     private MaterialResponse response(Material m) {
         return new MaterialResponse(m.getId(), m.getGroup().getId(), m.getTitle(), m.getDescription(), m.getType(),
-                m.getExternalUrl(), m.getDriveFileId() != null, m.getFileName(), m.getFileSize(),
+                m.getExternalUrl(), m.getStorageKey() != null, m.getFileName(), m.getFileSize(),
                 m.getAuthor().getFirstName() + " " + m.getAuthor().getLastName(), m.getCreatedAt());
     }
 }

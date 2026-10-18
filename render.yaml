@@ -12,7 +12,9 @@ services:
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        sync: false
+        value: "5432"
+      - key: DB_SSLMODE
+        value: require
       - key: DB_NAME
         sync: false
       - key: DB_USERNAME
@@ -25,11 +27,19 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
-      - key: GOOGLE_DRIVE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_DRIVE_CLIENT_SECRET
-        sync: false
-      - key: GOOGLE_DRIVE_REFRESH_TOKEN
-        sync: false
-      - key: GOOGLE_DRIVE_FOLDER_ID
-        sync: false
+      - key: JAVA_TOOL_OPTIONS
+        value: "-Xms64m -Xmx256m"
+      # Storage stays unavailable until private R2 credentials are added.
+      # See backend/.env.example and docs/DEPLOYMENT_FREE_TIER.md.
+      - key: R2_REGION
+        value: auto
+      - key: MAIL_ENABLED
+        value: "false"
+      - key: MAIL_HEALTH_ENABLED
+        value: "false"
+      - key: SMTP_HOST
+        value: smtp.resend.com
+      - key: SMTP_PORT
+        value: "2587"
+      - key: SMTP_USERNAME
+        value: resend

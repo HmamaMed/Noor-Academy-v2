@@ -1,8 +1,21 @@
 spring:
+  mail:
+    host: ${SMTP_HOST:smtp.resend.com}
+    port: ${SMTP_PORT:2587}
+    username: ${SMTP_USERNAME:resend}
+    properties:
+      mail.smtp.starttls.required: ${SMTP_STARTTLS:true}
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=${DB_SSLMODE:require}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      idle-timeout: 60000
+      keepalive-time: 0
+      connection-timeout: 10000
+      validation-timeout: 3000
   jpa:
     show-sql: false
 

@@ -17,7 +17,7 @@ public class Material {
     @Column(columnDefinition = "text") private String description;
     @Enumerated(EnumType.STRING) @Column(nullable = false) private MaterialType type;
     @Column(name = "external_url", length = 2000) private String externalUrl;
-    @Column(name = "drive_file_id") private String driveFileId;
+    @Column(name = "storage_key", length = 1024) private String storageKey;
     @Column(name = "file_name") private String fileName;
     @Column(name = "file_size") private Long fileSize;
     @Column(name = "created_at", nullable = false) private Instant createdAt;

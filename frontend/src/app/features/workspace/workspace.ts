@@ -308,13 +308,13 @@ export class ClassWorkspace implements OnInit {
       .download(material.groupId, material.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (blob) => {
-          const url = URL.createObjectURL(blob);
+        next: (download) => {
           const anchor = document.createElement('a');
-          anchor.href = url;
+          anchor.href = download.url;
           anchor.download = material.fileName ?? 'attachment';
+          anchor.rel = 'noopener noreferrer';
+          anchor.referrerPolicy = 'no-referrer';
           anchor.click();
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
           this.downloading.set(null);
         },
         error: (err) => {

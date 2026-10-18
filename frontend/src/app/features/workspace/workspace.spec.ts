@@ -138,4 +138,21 @@ describe('Class workspace API and editing boundaries', () => {
     expect(component['downloading']()).toBeNull();
     expect(component['workspace']()?.materials).toEqual([material]);
   });
+
+  it('opens a signed download with no referrer and without buffering the file', () => {
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const material = { id: 11, groupId: 4, fileName: 'lesson.pdf' } as Material;
+    service.download.mockReturnValue(of({ url: 'https://account.r2.cloudflarestorage.com/private?signature=test' }));
+    try {
+      const component = create();
+      component['download'](material);
+      expect(click).toHaveBeenCalledOnce();
+      const anchor = click.mock.instances[0] as HTMLAnchorElement;
+      expect(anchor.href).toBe('https://account.r2.cloudflarestorage.com/private?signature=test');
+      expect(anchor.referrerPolicy).toBe('no-referrer');
+      expect(component['downloading']()).toBeNull();
+    } finally {
+      click.mockRestore();
+    }
+  });
 });
