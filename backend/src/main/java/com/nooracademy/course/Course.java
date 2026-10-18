@@ -35,6 +35,12 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String syllabus;
 
+    @Column(name = "image_key")
+    private String imageKey;
+
+    @Column(name = "image_content_type")
+    private String imageContentType;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

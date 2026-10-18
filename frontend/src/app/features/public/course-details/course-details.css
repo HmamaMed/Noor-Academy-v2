@@ -3,7 +3,7 @@
 .breadcrumb a { text-decoration: underline; text-underline-offset: .25em; min-height: 2.75rem; display: inline-flex; align-items: center; }
 .detail-heading { display: grid; grid-template-columns: minmax(0,7fr) minmax(0,5fr); gap: 3rem; align-items: center; padding-bottom: 3rem; border-bottom: 1px solid var(--noor-border); }
 .detail-heading h1 { margin-block: 1rem; overflow-wrap: anywhere; }
-.detail-heading app-course-motif { min-height: 16rem; height: 100%; border-radius: var(--noor-radius-feature); }
+.detail-heading app-course-image { min-height: 16rem; height: 100%; border-radius: var(--noor-radius-feature); }
 .detail-grid { display: grid; grid-template-columns: minmax(0,7fr) minmax(0,5fr); gap: 3rem; margin-top: 3rem; align-items: start; }
 .course-overview { min-width: 0; }
 .course-copy { white-space: pre-line; overflow-wrap: anywhere; max-width: 65ch; margin-top: 1.5rem; color: var(--noor-text-muted); }
@@ -26,4 +26,4 @@
 .review-summary h3 { font-size: 1.125rem; }
 .pending-title { margin-block: 1rem; }
 @media (max-width: 1023px) { .detail-grid,.detail-heading { gap: 2rem; } .groups,.group-card { padding: 1.25rem; } }
-@media (max-width: 767px) { .detail-heading,.detail-grid { grid-template-columns: minmax(0,1fr); } .detail-heading { padding-bottom: 2rem; } .detail-heading app-course-motif { min-height: 10rem; } .detail-grid { margin-top: 2rem; } .group-title { flex-wrap: wrap; } .breadcrumb { margin-bottom: 1rem; } }
+@media (max-width: 767px) { .detail-heading,.detail-grid { grid-template-columns: minmax(0,1fr); } .detail-heading { padding-bottom: 2rem; } .detail-heading app-course-image { min-height: 10rem; } .detail-grid { margin-top: 2rem; } .group-title { flex-wrap: wrap; } .breadcrumb { margin-bottom: 1rem; } }

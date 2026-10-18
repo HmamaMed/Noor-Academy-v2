@@ -4,6 +4,7 @@ public record CourseResponse(
         Long id,
         String title,
         String description,
-        String syllabus
+        String syllabus,
+        String imageUrl
 ) {
 }

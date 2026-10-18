@@ -4,12 +4,11 @@ import { CourseService } from '../../../core/services/course.service';
 import { Course } from '../../../core/models/course.model';
 import { CourseCard } from '../../../shared/components/course-card';
 import { Icon } from '../../../shared/design/icon';
-import { LearningArt } from '../../../shared/design/learning-art';
 import { WorkspacePreview } from '../../../shared/design/workspace-preview';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, CourseCard, Icon, LearningArt, WorkspacePreview],
+  imports: [RouterLink, CourseCard, Icon, WorkspacePreview],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

@@ -2,16 +2,17 @@ import { AdminEditor } from '../admin-editor';
 import { AdminConfirm } from '../admin-confirm';
 import { Icon } from '../../../shared/design/icon';
 import { EmptyState } from '../../../shared/design/empty-state';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CourseService } from '../../../core/services/course.service';
-import { Course } from '../../../core/models/course.model';
+import { Course, CourseImageSettings } from '../../../core/models/course.model';
+import { CourseImage } from '../../../shared/design/course-image';
 
 @Component({
   selector: 'app-admin-courses',
-  imports: [ReactiveFormsModule, AdminConfirm, Icon, EmptyState],
+  imports: [ReactiveFormsModule, AdminConfirm, Icon, EmptyState, CourseImage],
   templateUrl: './admin-courses.html',
-  styleUrl: '../admin.css',
+  styleUrls: ['../admin.css', './admin-courses.css'],
 })
 export class AdminCourses extends AdminEditor implements OnInit {
   private fb = inject(FormBuilder);
@@ -20,6 +21,13 @@ export class AdminCourses extends AdminEditor implements OnInit {
   protected courses = signal<Course[]>([]);
 
   protected loading = signal(true);
+  protected imageSettings = signal<CourseImageSettings | null>(null);
+  protected imageSettingsError = signal(false);
+  protected currentCourse = signal<Course | null>(null);
+  protected selectedImage = signal<File | null>(null);
+  protected imagePreview = signal<string | null>(null);
+  protected imageRemoved = signal(false);
+  protected imageError = signal('');
   protected editingId = signal<number | null>(null);
   protected saving = signal(false);
 
@@ -32,10 +40,104 @@ export class AdminCourses extends AdminEditor implements OnInit {
   protected deleteTarget = signal<Course | null>(null);
   protected deleteError = signal('');
 
-  startCreate(): void { this.openEditor(() => this.cancelEdit()); }
+  constructor() {
+    super();
+    inject(DestroyRef).onDestroy(() => this.releasePreview());
+  }
+
+  startCreate(): void {
+    if (!this.saving()) this.openEditor(() => this.cancelEdit());
+  }
+
+  loadImageSettings(): void {
+    this.imageSettingsError.set(false);
+    this.courseService.imageSettings().subscribe({
+      next: (settings) => this.imageSettings.set(settings),
+      error: () => this.imageSettingsError.set(true),
+    });
+  }
+
+  selectImage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.imageError.set('');
+    if (!file) return;
+    const settings = this.imageSettings();
+    if (!settings?.uploadsEnabled) {
+      input.value = '';
+      return;
+    }
+    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size === 0) {
+      this.imageError.set('Choose a JPEG or PNG image.');
+      input.value = '';
+      return;
+    }
+    if (file.size > settings.maxBytes) {
+      this.imageError.set('Course images must be 5 MB or smaller.');
+      input.value = '';
+      return;
+    }
+    this.releasePreview();
+    this.selectedImage.set(file);
+    this.imagePreview.set(URL.createObjectURL(file));
+    this.imageRemoved.set(false);
+    this.form.markAsDirty();
+  }
+
+  validatePreview(event: Event): void {
+    const image = event.target as HTMLImageElement;
+    const max = this.imageSettings()?.maxDimension ?? 4096;
+    if (image.naturalWidth > max || image.naturalHeight > max)
+      this.rejectPreview('Course images must be no larger than 4096 × 4096 pixels.');
+  }
+
+  rejectPreview(message = 'This image could not be read. Choose a valid JPEG or PNG image.'): void {
+    this.discardSelectedImage();
+    this.imageError.set(message);
+  }
+
+  discardSelectedImage(): void {
+    this.releasePreview();
+    this.selectedImage.set(null);
+    this.imageRemoved.set(false);
+    this.imageError.set('');
+    this.clearImageInput();
+    this.form.markAsDirty();
+  }
+
+  removeCurrentImage(): void {
+    this.discardSelectedImage();
+    this.imageRemoved.set(true);
+  }
+
+  private releasePreview(): void {
+    const url = this.imagePreview();
+    if (url) URL.revokeObjectURL(url);
+    this.imagePreview.set(null);
+  }
+
+  private clearImageInput(): void {
+    const input = document.getElementById('course-image-file') as HTMLInputElement | null;
+    if (input) input.value = '';
+  }
+
+  private resetImages(): void {
+    this.releasePreview();
+    this.selectedImage.set(null);
+    this.currentCourse.set(null);
+    this.imageRemoved.set(false);
+    this.imageError.set('');
+    this.clearImageInput();
+  }
+
+  protected override finishEditor(): void {
+    super.finishEditor();
+    this.resetImages();
+  }
 
   ngOnInit(): void {
     this.load();
+    this.loadImageSettings();
   }
 
   load(): void {
@@ -54,10 +156,12 @@ export class AdminCourses extends AdminEditor implements OnInit {
   }
 
   startEdit(course: Course): void {
-    this.openEditor(() => this.editRecord(course));
+    if (!this.saving()) this.openEditor(() => this.editRecord(course));
   }
 
   private editRecord(course: Course): void {
+    this.resetImages();
+    this.currentCourse.set(course);
     this.editingId.set(course.id);
     this.form.setValue({
       title: course.title,
@@ -67,6 +171,7 @@ export class AdminCourses extends AdminEditor implements OnInit {
   }
 
   cancelEdit(): void {
+    this.resetImages();
     this.editingId.set(null);
     this.form.reset({ title: '', description: '', syllabus: '' });
   }
@@ -74,6 +179,11 @@ export class AdminCourses extends AdminEditor implements OnInit {
   submit(): void {
     if (this.saving()) return;
     this.formError.set('');
+    if (this.imageError()) {
+      this.formError.set(this.imageError());
+      this.focusError();
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.formError.set('Check the highlighted fields and try again.');
@@ -86,8 +196,8 @@ export class AdminCourses extends AdminEditor implements OnInit {
     const editingId = this.editingId();
 
     const obs = editingId
-      ? this.courseService.update(editingId, request)
-      : this.courseService.create(request);
+      ? this.courseService.update(editingId, request, this.selectedImage(), this.imageRemoved())
+      : this.courseService.create(request, this.selectedImage());
 
     obs.subscribe({
       next: () => {
@@ -124,7 +234,9 @@ export class AdminCourses extends AdminEditor implements OnInit {
       },
       error: (err) => {
         this.deleting.set(false);
-        this.deleteError.set(err.error?.message ?? 'Could not delete this course. Please try again.');
+        this.deleteError.set(
+          err.error?.message ?? 'Could not delete this course. Please try again.',
+        );
       },
     });
   }

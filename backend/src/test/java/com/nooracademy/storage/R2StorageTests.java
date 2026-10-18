@@ -65,6 +65,10 @@ class R2StorageTests {
             assertTrue(link.expiresAt().isAfter(before.plusSeconds(295)));
             assertTrue(link.expiresAt().isBefore(Instant.now().plusSeconds(301)));
             verify(client).headObject(HeadObjectRequest.builder().bucket("private-materials").key("materials/private-key").build());
+            var cover = storage.courseImage("course-images/cover", "image/png");
+            assertTrue(cover.url().contains("response-content-type=image%2Fpng"));
+            assertTrue(cover.url().contains("response-content-disposition=inline"));
+            assertTrue(cover.url().contains("X-Amz-Expires=300"));
         }
     }
 
@@ -95,6 +99,23 @@ class R2StorageTests {
         assertThrows(BadRequestException.class, () -> storage.upload("lesson.pdf", new byte[]{1}));
         assertThrows(BadRequestException.class, () -> storage.download("key", "lesson.pdf"));
         assertFalse(new R2Properties("endpoint", "bucket", "private-key", "private-secret", "auto").toString().contains("private-secret"));
+    }
+
+    @Test void courseImagesUseDistinctKeysAndInlineRasterType() {
+        var client = mock(S3Client.class);
+        var storage = new R2Storage(client, mock(S3Presigner.class), "private-materials");
+        String key = storage.uploadCourseImage(new byte[]{1, 2}, "image/png");
+        var request = ArgumentCaptor.forClass(PutObjectRequest.class);
+        verify(client).putObject(request.capture(), any(RequestBody.class));
+        assertTrue(key.matches("course-images/[a-f0-9-]{36}"));
+        assertEquals("image/png", request.getValue().contentType());
+        assertEquals("inline", request.getValue().contentDisposition());
+        assertNull(request.getValue().acl());
+        assertThrows(BadRequestException.class, () -> storage.uploadCourseImage(new byte[]{1}, "image/svg+xml"));
+    }
+    @Test void publicCourseImageSigningCannotExposePrivateMaterial() {
+        var storage = new R2Storage(mock(S3Client.class), mock(S3Presigner.class), "private-materials");
+        assertThrows(BadRequestException.class, () -> storage.courseImage("materials/private-key", "image/png"));
     }
 
     @Test void endpointRequiresCloudflareHttpsOriginAndAcceptsJurisdictions() {

@@ -12,10 +12,10 @@ import { Enrollment } from '../../../core/models/enrollment.model';
 import { StatusBadge } from '../../../shared/components/status-badge';
 import { NoorDialog } from '../../../shared/design/dialog';
 import { Icon } from '../../../shared/design/icon';
-import { CourseMotif } from '../../../shared/design/course-motif';
+import { CourseImage } from '../../../shared/design/course-image';
 
 @Component({
-  selector: 'app-course-details', imports: [RouterLink, DatePipe, TitleCasePipe, StatusBadge, NoorDialog, Icon, CourseMotif],
+  selector: 'app-course-details', imports: [RouterLink, DatePipe, TitleCasePipe, StatusBadge, NoorDialog, Icon, CourseImage],
   templateUrl: './course-details.html', styleUrl: './course-details.css',
 })
 export class CourseDetails implements OnInit {

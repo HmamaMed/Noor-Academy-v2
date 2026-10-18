@@ -24,8 +24,13 @@
   margin-top: 2rem;
   gap: 1.5rem;
 }
-.hero app-learning-art {
+.hero .hero-photo {
+  display: block;
   width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  border-radius: var(--noor-radius-feature);
 }
 .benefit-strip {
   border-block: 1px solid var(--noor-border);
@@ -190,8 +195,8 @@
   .hero .text-link {
     justify-content: center;
   }
-  .hero app-learning-art {
-    max-width: 24rem;
+  .hero .hero-photo {
+    max-width: 100%;
     margin: auto;
   }
   .benefits {

@@ -85,10 +85,20 @@ public class R2Storage {
 
     public String upload(String name, byte[] bytes) {
         requireEnabled();
-        String key = "materials/" + UUID.randomUUID();
+        return put("materials/" + UUID.randomUUID(), bytes, "application/octet-stream", disposition(name));
+    }
+
+    public String uploadCourseImage(byte[] bytes, String contentType) {
+        requireEnabled();
+        if (!java.util.Set.of("image/jpeg", "image/png").contains(contentType))
+            throw new BadRequestException("Unsupported course image type.");
+        return put("course-images/" + UUID.randomUUID(), bytes, contentType, "inline");
+    }
+
+    private String put(String key, byte[] bytes, String contentType, String contentDisposition) {
         try {
             client.putObject(PutObjectRequest.builder().bucket(bucket).key(key)
-                    .contentType("application/octet-stream").contentDisposition(disposition(name)).build(), RequestBody.fromBytes(bytes));
+                    .contentType(contentType).contentDisposition(contentDisposition).build(), RequestBody.fromBytes(bytes));
             return key;
         } catch (SdkException ex) {
             log.warn("R2 upload failed ({})", ex.getClass().getSimpleName());
@@ -99,13 +109,25 @@ public class R2Storage {
     }
 
     public DownloadLink download(String key, String name) {
+        return sign(key, "application/octet-stream", disposition(name));
+    }
+
+    /** Course covers are intentionally public; classroom attachments remain authorized downloads. */
+    public DownloadLink courseImage(String key, String contentType) {
+        if (key == null || !key.startsWith("course-images/")
+                || !java.util.Set.of("image/jpeg", "image/png").contains(contentType))
+            throw new BadRequestException("The course image is unavailable.");
+        return sign(key, contentType, "inline");
+    }
+
+    private DownloadLink sign(String key, String contentType, String contentDisposition) {
         requireEnabled();
         try {
             // Signing is local; check existence first so missing objects/credentials produce an in-app error.
             client.headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build());
             var signed = presigner.presignGetObject(GetObjectPresignRequest.builder().signatureDuration(DOWNLOAD_LIFETIME)
                     .getObjectRequest(GetObjectRequest.builder().bucket(bucket).key(key)
-                            .responseContentType("application/octet-stream").responseContentDisposition(disposition(name)).build()).build());
+                            .responseContentType(contentType).responseContentDisposition(contentDisposition).build()).build());
             if (!signed.isBrowserExecutable()) throw new BadRequestException("Could not create a browser download. Ask the administrator to check file storage.");
             return new DownloadLink(signed.url().toString(), signed.expiration());
         } catch (SdkException ex) {

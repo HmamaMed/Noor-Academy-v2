@@ -599,7 +599,7 @@
   .course-card-editorial .course-card-copy {
     padding: 0;
   }
-  .course-card-editorial .course-motif {
+  .course-card-editorial app-course-image {
     height: 100%;
     min-height: 10rem;
   }
@@ -916,7 +916,7 @@
     font-size: 1.25rem;
     line-height: 1.75rem;
   }
-  .course-card-editorial .course-motif {
+  .course-card-editorial app-course-image {
     min-height: 8rem;
   }
   .footer-inner {
