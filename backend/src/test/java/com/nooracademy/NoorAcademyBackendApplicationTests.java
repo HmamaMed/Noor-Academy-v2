@@ -69,7 +69,7 @@ class NoorAcademyBackendApplicationTests {
     final String password = "StrongPassword123";
 
     @BeforeEach void prepare() {
-        jdbc.execute("TRUNCATE materials, password_resets, enrollments, sessions, groups, rooms, courses, users RESTART IDENTITY CASCADE");
+        jdbc.execute("TRUNCATE contact_messages, materials, password_resets, enrollments, sessions, groups, rooms, courses, users RESTART IDENTITY CASCADE");
         recorder.events.clear();
         when(mail.enabled()).thenReturn(true);
         adminToken = token(create("admin", Role.ADMIN));
@@ -109,6 +109,143 @@ class NoorAcademyBackendApplicationTests {
         return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
     long id(HttpResponse<String> response) { return ((Number) json.readValue(response.body(), Map.class).get("id")).longValue(); }
+
+    @Test void completedStudentStoriesRequireReviewAndExposeOnlyTheConsentedPublicIdentity() throws Exception {
+        var enrollment = enrollments.apply(student, groupId);
+        enrollments.confirm(enrollment.id());
+        var request = Map.of("enrollmentId", enrollment.id(), "content", "The lessons helped me become more confident when reading Arabic.", "publicConsent", true);
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode());
+        groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.COMPLETED));
+        var submitted = api("POST", "/testimonials", studentToken, request);
+        assertEquals(201, submitted.statusCode());
+        long testimonialId = id(submitted);
+        assertEquals("PENDING", json.readTree(submitted.body()).get("status").asString());
+        assertEquals(0, json.readTree(api("GET", "/testimonials", null, null).body()).size());
+        assertEquals(1, json.readTree(api("GET", "/testimonials/mine", studentToken, null).body()).size());
+        assertEquals(0, json.readTree(api("GET", "/testimonials/mine", otherStudentToken, null).body()).size());
+        assertEquals(1, json.readTree(api("GET", "/testimonials/admin?status=PENDING", adminToken, null).body()).get("totalElements").asInt());
+        assertEquals(200, api("PATCH", "/testimonials/" + testimonialId + "/status", adminToken, Map.of("status", "APPROVED")).statusCode());
+        var published = json.readTree(api("GET", "/testimonials", null, null).body());
+        assertEquals(1, published.size());
+        assertEquals("student U.", published.get(0).get("studentName").asString());
+        assertEquals("Arabic", published.get(0).get("courseTitle").asString());
+        assertFalse(published.get(0).has("enrollmentId"));
+        assertFalse(published.get(0).has("email"));
+        assertFalse(published.get(0).has("groupName"));
+        assertEquals(200, api("PATCH", "/testimonials/" + testimonialId + "/status", adminToken, Map.of("status", "HIDDEN")).statusCode());
+        assertEquals(0, json.readTree(api("GET", "/testimonials", null, null).body()).size());
+    }
+
+    @Test void testimonialSubmissionRejectsWrongRolesOwnershipMissingConsentAndDuplicates() throws Exception {
+        var enrollment = enrollments.apply(student, groupId);
+        var request = new HashMap<String, Object>(Map.of("enrollmentId", enrollment.id(), "content", "A thoughtful course that helped me learn at my own pace.", "publicConsent", true));
+        groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.COMPLETED));
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode()); // Pending enrollment.
+        jdbc.update("UPDATE enrollments SET status = 'CONFIRMED' WHERE id = ?", enrollment.id());
+        assertEquals(401, api("POST", "/testimonials", null, request).statusCode());
+        assertEquals(403, api("POST", "/testimonials", teacherToken, request).statusCode());
+        assertEquals(403, api("POST", "/testimonials", adminToken, request).statusCode());
+        assertEquals(404, api("POST", "/testimonials", otherStudentToken, request).statusCode());
+        request.put("publicConsent", false);
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode());
+        request.remove("publicConsent");
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode());
+        request.put("publicConsent", true); request.put("content", " ".repeat(30));
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode());
+        request.put("content", "x".repeat(1201));
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode());
+        request.put("content", "Short");
+        assertEquals(400, api("POST", "/testimonials", studentToken, request).statusCode());
+        request.put("content", "An honest reflection on the class I completed.");
+        assertEquals(201, api("POST", "/testimonials", studentToken, request).statusCode());
+        assertEquals(409, api("POST", "/testimonials", studentToken, request).statusCode());
+    }
+
+    @Test void studentCanWithdrawTheirPublishedTestimonialButCannotModerateOrRemoveSomeoneElses() throws Exception {
+        var enrollment = enrollments.apply(student, groupId); enrollments.confirm(enrollment.id());
+        groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.COMPLETED));
+        long testimonialId = id(api("POST", "/testimonials", studentToken, Map.of("enrollmentId", enrollment.id(), "content", "I found the teacher's explanations clear and helpful.", "publicConsent", true)));
+        String statusPath = "/testimonials/" + testimonialId + "/status";
+        assertEquals(401, api("GET", "/testimonials/admin", null, null).statusCode());
+        assertEquals(403, api("GET", "/testimonials/admin", studentToken, null).statusCode());
+        assertEquals(403, api("GET", "/testimonials/admin", teacherToken, null).statusCode());
+        assertEquals(403, api("PATCH", statusPath, studentToken, Map.of("status", "APPROVED")).statusCode());
+        assertEquals(403, api("PATCH", statusPath, teacherToken, Map.of("status", "APPROVED")).statusCode());
+        assertEquals(200, api("PATCH", statusPath, adminToken, Map.of("status", "APPROVED")).statusCode());
+        assertEquals(404, api("DELETE", "/testimonials/" + testimonialId, otherStudentToken, null).statusCode());
+        assertEquals(403, api("DELETE", "/testimonials/" + testimonialId, teacherToken, null).statusCode());
+        assertEquals(204, api("DELETE", "/testimonials/" + testimonialId, studentToken, null).statusCode());
+        assertEquals(0, json.readTree(api("GET", "/testimonials", null, null).body()).size());
+        assertEquals(0, json.readTree(api("GET", "/testimonials/mine", studentToken, null).body()).size());
+        assertEquals(404, api("PATCH", statusPath, adminToken, Map.of("status", "APPROVED")).statusCode());
+    }
+
+    @Test void publishedTestimonialsDisappearIfTheClassOrEnrollmentIsNoLongerEligible() throws Exception {
+        var enrollment = enrollments.apply(student, groupId); enrollments.confirm(enrollment.id());
+        groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.COMPLETED));
+        long testimonialId = id(api("POST", "/testimonials", studentToken, Map.of("enrollmentId", enrollment.id(), "content", "This course helped me develop a consistent learning habit.", "publicConsent", true)));
+        assertEquals(200, api("PATCH", "/testimonials/" + testimonialId + "/status", adminToken, Map.of("status", "APPROVED")).statusCode());
+        groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.CANCELLED));
+        assertEquals(0, json.readTree(api("GET", "/testimonials", null, null).body()).size());
+        assertEquals(400, api("PATCH", "/testimonials/" + testimonialId + "/status", adminToken, Map.of("status", "APPROVED")).statusCode());
+        groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.COMPLETED));
+        jdbc.update("UPDATE enrollments SET status = 'CANCELLED' WHERE id = ?", enrollment.id());
+        assertEquals(0, json.readTree(api("GET", "/testimonials", null, null).body()).size());
+    }
+
+    @Test void visitorMessagesPersistInAnAdminOnlyInboxAndCanBeMarkedUnread() throws Exception {
+        var message = Map.of("name", "Visitor", "email", "visitor@example.test", "subject", "Arabic classes", "message", "Where can I attend?");
+        assertEquals(201, api("POST", "/contact/messages", null, message).statusCode());
+        assertEquals(401, api("GET", "/contact/messages", null, null).statusCode());
+        assertEquals(403, api("GET", "/contact/messages", studentToken, null).statusCode());
+        assertEquals(403, api("GET", "/contact/messages", teacherToken, null).statusCode());
+        var inbox = json.readTree(api("GET", "/contact/messages", adminToken, null).body());
+        assertEquals(1, inbox.get("totalElements").asInt());
+        assertEquals(1, inbox.get("unreadCount").asInt());
+        var saved = inbox.get("content").get(0);
+        assertEquals("Where can I attend?", saved.get("message").asString());
+        long messageId = saved.get("id").asLong();
+        assertEquals(403, api("PATCH", "/contact/messages/" + messageId, studentToken, Map.of("read", true)).statusCode());
+        assertEquals(200, api("PATCH", "/contact/messages/" + messageId, adminToken, Map.of("read", true)).statusCode());
+        assertEquals(0, json.readTree(api("GET", "/contact/messages", adminToken, null).body()).get("unreadCount").asInt());
+        assertEquals(200, api("PATCH", "/contact/messages/" + messageId, adminToken, Map.of("read", false)).statusCode());
+        assertEquals(1, json.readTree(api("GET", "/contact/messages", adminToken, null).body()).get("unreadCount").asInt());
+        assertEquals(404, api("PATCH", "/contact/messages/99999", adminToken, Map.of("read", true)).statusCode());
+    }
+
+    @Test void contactValidatesMessagesAndLimitsRepeatedSubmissions() throws Exception {
+        var message = new HashMap<String, Object>(Map.of("name", "Visitor", "email", "visitor@example.test", "subject", "Question", "message", "Please help."));
+        message.put("email", "invalid");
+        assertEquals(400, api("POST", "/contact/messages", null, message).statusCode());
+        message.put("email", "visitor@example.test"); message.put("message", " ");
+        assertEquals(400, api("POST", "/contact/messages", null, message).statusCode());
+        message.put("message", "x".repeat(5001));
+        assertEquals(400, api("POST", "/contact/messages", null, message).statusCode());
+        message.put("message", "Please help.");
+        for (int i = 0; i < 3; i++) assertEquals(201, api("POST", "/contact/messages", null, message).statusCode());
+        assertEquals(400, api("POST", "/contact/messages", null, message).statusCode());
+        assertEquals(3, jdbc.queryForObject("SELECT COUNT(*) FROM contact_messages", Integer.class));
+    }
+
+    @Test void onlyAdminsCanPublishFooterDetailsAndUnsafeLinksOrInvalidPinsAreRejected() throws Exception {
+        var settings = new HashMap<String, Object>(Map.of("email", "hello@example.test", "phone", "+212 600 000 000", "instagramUrl", "https://www.instagram.com/example", "facebookUrl", "", "whatsappUrl", "", "locationName", "Academy classroom", "address", "Example address", "latitude", 33.5731, "longitude", -7.5898));
+        assertEquals(200, api("GET", "/contact/settings", null, null).statusCode());
+        assertEquals(401, api("PUT", "/contact/settings", null, settings).statusCode());
+        assertEquals(403, api("PUT", "/contact/settings", teacherToken, settings).statusCode());
+        assertEquals(403, api("PUT", "/contact/settings", studentToken, settings).statusCode());
+        assertEquals(200, api("PUT", "/contact/settings", adminToken, settings).statusCode());
+        var published = json.readTree(api("GET", "/contact/settings", null, null).body());
+        assertEquals("Academy classroom", published.get("locationName").asString());
+        assertEquals(33.5731, published.get("latitude").asDouble(), 0.00001);
+        settings.put("instagramUrl", "javascript:alert(1)");
+        assertEquals(400, api("PUT", "/contact/settings", adminToken, settings).statusCode());
+        settings.put("instagramUrl", ""); settings.put("latitude", 91);
+        assertEquals(400, api("PUT", "/contact/settings", adminToken, settings).statusCode());
+        settings.put("latitude", 33.5731); settings.put("longitude", null);
+        assertEquals(400, api("PUT", "/contact/settings", adminToken, settings).statusCode());
+        settings.put("latitude", null);
+        assertEquals(200, api("PUT", "/contact/settings", adminToken, settings).statusCode());
+    }
 
     @Test void protectedAdministratorCannotBeDeletedOrDemotedEvenByDirectSql() throws Exception {
         User owner = create("owner", Role.ADMIN);

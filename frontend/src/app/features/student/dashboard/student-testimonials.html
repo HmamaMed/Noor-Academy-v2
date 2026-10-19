@@ -1,0 +1,155 @@
+<section class="panel student-stories" id="your-voice" aria-labelledby="student-stories-heading">
+  <div class="story-heading">
+    <app-icon name="quote" />
+    <div>
+      <h2 id="student-stories-heading">Your experience could inspire someone.</h2>
+      <p class="muted">Share an honest reflection after your class is marked completed.</p>
+    </div>
+  </div>
+  @if (loading()) {
+    <p class="story-hint" role="status">Loading your testimonials…</p>
+  } @else if (failed()) {
+    <div class="notice notice-error" role="alert">
+      <div>
+        <p>We couldn’t load your testimonials.</p>
+        <button type="button" class="text-link" (click)="load()">Try again</button>
+      </div>
+    </div>
+  } @else {
+    @for (enrollment of available(); track enrollment.id) {
+      <div class="story-course">
+        <div>
+          <h3>{{ enrollment.courseTitle }}</h3>
+          <p class="meta">{{ enrollment.groupName }}</p>
+        </div>
+        @if (testimonialFor(enrollment.id); as testimonial) {
+          <span class="meta">{{ statusLabel(testimonial.status) }}</span
+          ><button type="button" class="btn-secondary" (click)="open(enrollment)">
+            View your testimonial
+          </button>
+        } @else {
+          <button type="button" class="btn-secondary" (click)="open(enrollment)">
+            Share your experience <app-icon name="arrow" />
+          </button>
+        }
+      </div>
+    } @empty {
+      <p class="story-hint">
+        Your story is still taking shape. Once your confirmed class is marked completed, you can
+        leave a testimonial here.
+      </p>
+    }
+  }
+</section>
+@if (selected(); as enrollment) {
+  <app-dialog
+    label="Your learning story"
+    [busy]="busy()"
+    (closed)="confirmDiscard() ? keepWriting() : close()"
+  >
+    <div class="dialog-heading">
+      <h2>{{ confirmDiscard() ? 'Discard your draft?' : 'Your learning story' }}</h2>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Close testimonial"
+        [disabled]="busy()"
+        (click)="confirmDiscard() ? keepWriting() : close()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    @if (confirmDiscard()) {
+      <p class="story-intro">Your unsent testimonial will be lost.</p>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="keepWriting()">Keep writing</button
+        ><button type="button" class="btn-danger" (click)="discardDraft()">Discard draft</button>
+      </div>
+    } @else {
+      <p class="story-intro">{{ enrollment.courseTitle }} · {{ enrollment.groupName }}</p>
+      @if (error()) {
+        <p
+          id="testimonial-form-error"
+          class="notice notice-error story-error"
+          tabindex="-1"
+          role="alert"
+        >
+          {{ error() }}
+        </p>
+      }
+      @if (existing(); as testimonial) {
+        <p class="meta">{{ statusLabel(testimonial.status) }}</p>
+        <blockquote class="story-content">{{ testimonial.content }}</blockquote>
+        @if (confirmRemoval()) {
+          <p>
+            Remove this testimonial? It will also disappear from the homepage if it’s published.
+          </p>
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              [disabled]="busy()"
+              (click)="confirmRemoval.set(false)"
+            >
+              Keep testimonial</button
+            ><button type="button" class="btn-danger" [disabled]="busy()" (click)="withdraw()">
+              {{ busy() ? 'Removing…' : 'Remove testimonial' }}
+            </button>
+          </div>
+        } @else {
+          <p class="field-help">You can remove your testimonial at any time.</p>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="confirmRemoval.set(true)">
+              Remove testimonial</button
+            ><button type="button" class="btn-primary" (click)="close()">Done</button>
+          </div>
+        }
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <fieldset [disabled]="busy()">
+            <label for="testimonial-content">What was your experience like?</label>
+            <textarea
+              id="testimonial-content"
+              rows="6"
+              formControlName="content"
+              minlength="20"
+              maxlength="1200"
+              required
+              placeholder="What helped you learn? What changed for you? What could be better?"
+              [attr.aria-invalid]="form.controls.content.touched && form.controls.content.invalid"
+              aria-describedby="testimonial-content-help"
+            ></textarea>
+            <p id="testimonial-content-help" class="field-help">
+              20–1,200 characters · {{ form.controls.content.value.length }}/1,200
+            </p>
+            <label class="story-consent" for="testimonial-consent"
+              ><input
+                id="testimonial-consent"
+                type="checkbox"
+                formControlName="publicConsent"
+                required
+                [attr.aria-invalid]="
+                  form.controls.publicConsent.touched && form.controls.publicConsent.invalid
+                "
+              /><span
+                >I agree to share this testimonial publicly with my first name, last initial, and
+                course name.</span
+              ></label
+            >
+          </fieldset>
+          <p class="field-help">
+            Our team reviews testimonials before publishing them. Your email is never shown. You can
+            remove your testimonial later.
+          </p>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" [disabled]="busy()" (click)="close()">
+              Cancel</button
+            ><button type="submit" class="btn-primary" [disabled]="busy()">
+              {{ busy() ? 'Sending…' : 'Submit for review' }}
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </app-dialog>
+}

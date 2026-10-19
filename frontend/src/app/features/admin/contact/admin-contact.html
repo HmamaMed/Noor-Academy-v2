@@ -1,0 +1,237 @@
+<div class="page-heading">
+  <div>
+    <h1>Messages</h1>
+    <p>A conversation is the beginning of something good.</p>
+  </div>
+  <button type="button" class="btn-secondary" [disabled]="settingsLoading()" (click)="editFooter()">
+    <app-icon name="pin" />{{ settingsLoading() ? 'Loading…' : 'Footer & location' }}
+  </button>
+</div>
+@if (footerLoadError()) {
+  <p class="notice notice-error record-feedback" role="alert">{{ footerLoadError() }}</p>
+}
+@if (success()) {
+  <p class="notice notice-success record-feedback" role="status">{{ success() }}</p>
+}
+<div class="inbox-heading">
+  <p class="muted">
+    {{ inbox()?.unreadCount ?? 0 }} unread · {{ inbox()?.totalElements ?? 0 }}
+    {{ inbox()?.totalElements === 1 ? 'message' : 'messages' }}
+  </p>
+  <button type="button" class="btn-secondary" [disabled]="loading()" (click)="load()">
+    Refresh
+  </button>
+</div>
+@if (loadError()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load your inbox.</h2>
+    <p>{{ loadError() }}</p>
+    <button type="button" class="btn-secondary" (click)="load()">Try again</button>
+  </div>
+} @else if (loading() && !inbox()) {
+  <div class="panel record-loading" role="status" aria-label="Loading messages">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+} @else if (inbox()?.content?.length) {
+  <div class="message-list" [attr.aria-busy]="loading()">
+    @for (message of inbox()!.content; track message.id) {
+      <button
+        type="button"
+        class="message-row"
+        [class.message-unread]="!message.read"
+        (click)="openMessage(message)"
+      >
+        <span class="message-avatar" aria-hidden="true"><app-icon name="mail" /></span>
+        <span class="message-summary"
+          ><span class="message-sender"
+            >{{ message.name }}
+            @if (!message.read) {
+              <span class="unread-label">New</span>
+            }</span
+          ><span class="message-subject">{{ message.subject }}</span
+          ><span class="message-excerpt">{{ message.message }}</span></span
+        >
+        <span class="message-date"
+          >{{ message.createdAt | date: 'MMM d, y' }}<app-icon name="arrow"
+        /></span>
+      </button>
+    }
+  </div>
+  <div class="inbox-pagination">
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="loading() || page() === 0"
+      (click)="load(page() - 1)"
+    >
+      Previous
+    </button>
+    <p class="meta">Page {{ page() + 1 }} of {{ inbox()!.totalPages }}</p>
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="loading() || page() + 1 >= inbox()!.totalPages"
+      (click)="load(page() + 1)"
+    >
+      Next
+    </button>
+  </div>
+} @else {
+  <div class="empty-state">
+    <app-icon name="mail" />
+    <h2>Your inbox is ready.</h2>
+    <p>Messages sent through the website’s contact form will appear here.</p>
+  </div>
+}
+@if (selected(); as message) {
+  <app-dialog label="Contact message" [busy]="updating()" (closed)="selected.set(null)">
+    <div class="dialog-heading">
+      <h2>From {{ message.name }}</h2>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Close message"
+        [disabled]="updating()"
+        (click)="selected.set(null)"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    <p class="message-meta">{{ message.email }} · {{ message.createdAt | date: 'medium' }}</p>
+    <h3 class="message-detail-subject">{{ message.subject }}</h3>
+    <p class="message-body">{{ message.message }}</p>
+    @if (messageError()) {
+      <p class="notice notice-error" role="alert">{{ messageError() }}</p>
+    }
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn-secondary"
+        [disabled]="updating()"
+        (click)="setRead(message, !message.read)"
+      >
+        {{ message.read ? 'Mark unread' : 'Mark read' }}</button
+      ><a class="btn-primary" [href]="replyUrl(message)"><app-icon name="mail" />Reply by email</a>
+    </div>
+    <p class="field-help">Reply opens your email app with the sender’s address.</p>
+  </app-dialog>
+}
+@if (editorOpen()) {
+  <app-dialog
+    label="Footer and location settings"
+    [wide]="true"
+    [busy]="saving()"
+    (closed)="closeEditor()"
+  >
+    <form class="record-form" [formGroup]="form" (ngSubmit)="saveFooter()" novalidate>
+      <div class="dialog-heading">
+        <h2 id="record-editor-title" tabindex="-1">Make it yours.</h2>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Close footer settings"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          <app-icon name="close" />
+        </button>
+      </div>
+      <p class="settings-intro">
+        Add your contact details, social accounts, and the place where your classes happen. Leave
+        optional fields blank to hide them.
+      </p>
+      @if (formError()) {
+        <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
+          {{ formError() }}
+        </p>
+      }
+      <fieldset class="form-grid" [disabled]="saving()">
+        @for (field of fields; track field.name) {
+          <div class="form-field" [class.form-field-full]="field.name === 'address'">
+            <label [for]="'footer-' + field.name">{{ field.label }}</label
+            ><input
+              [id]="'footer-' + field.name"
+              [type]="field.type"
+              [formControlName]="field.name"
+              [placeholder]="field.placeholder"
+              [maxlength]="field.max"
+              [attr.aria-invalid]="invalid(field.name)"
+              [attr.aria-describedby]="
+                invalid(field.name) ? 'footer-' + field.name + '-error' : null
+              "
+            />
+            @if (invalid(field.name)) {
+              <p [id]="'footer-' + field.name + '-error'" class="field-error">
+                Check this field. Use a valid email, phone number, or full https:// link.
+              </p>
+            }
+          </div>
+        }
+        <div class="form-field-full settings-map-heading">
+          <h3>Pin your course location</h3>
+          <p class="field-help">
+            In Google Maps, right-click your location and copy the two coordinates. The first is
+            latitude, the second is longitude.
+          </p>
+        </div>
+        <div class="form-field">
+          <label for="footer-latitude">Latitude</label
+          ><input
+            id="footer-latitude"
+            type="number"
+            step="any"
+            min="-85"
+            max="85"
+            formControlName="latitude"
+            placeholder="33.5731"
+            [attr.aria-invalid]="invalid('latitude')"
+            aria-describedby="footer-coordinates-help"
+          />
+        </div>
+        <div class="form-field">
+          <label for="footer-longitude">Longitude</label
+          ><input
+            id="footer-longitude"
+            type="number"
+            step="any"
+            min="-180"
+            max="180"
+            formControlName="longitude"
+            placeholder="-7.5898"
+            [attr.aria-invalid]="invalid('longitude')"
+            aria-describedby="footer-coordinates-help"
+          />
+        </div>
+        <p id="footer-coordinates-help" class="field-help form-field-full">
+          Latitude: −85 to 85. Longitude: −180 to 180. Add both coordinates to show a map, or clear
+          both to hide it.
+        </p>
+        <div class="form-field-full">
+          <app-location-map
+            [latitude]="form.controls.latitude.value"
+            [longitude]="form.controls.longitude.value"
+            label="Course location preview"
+          />
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeEditor()">
+          Cancel</button
+        ><button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Save footer' }}
+        </button>
+      </div>
+    </form>
+  </app-dialog>
+}
+@if (discardAction()) {
+  <app-admin-confirm
+    title="Discard changes?"
+    message="Your unsaved footer changes will be lost."
+    acceptLabel="Discard changes"
+    cancelLabel="Keep editing"
+    (accepted)="discardChanges()"
+    (cancelled)="keepEditing()"
+  />
+}

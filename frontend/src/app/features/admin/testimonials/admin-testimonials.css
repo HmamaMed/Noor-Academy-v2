@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+.review-toolbar,
+.review-actions,
+.review-heading,
+.review-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.review-toolbar > div {
+  width: min(100%, 18rem);
+}
+.review-note {
+  color: var(--noor-text-muted);
+  font-size: 0.875rem;
+  max-width: 70ch;
+  margin-block: 1.5rem 2rem;
+}
+.review-list {
+  display: grid;
+  gap: 1.5rem;
+}
+.review-heading h2 {
+  font-size: 1.125rem;
+}
+.review-heading p {
+  margin-top: 0.375rem;
+}
+.review-status {
+  border-radius: 1rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  background: var(--noor-neutral-soft);
+}
+.review-status[data-status='PENDING'] {
+  color: var(--noor-warning);
+  background: var(--noor-warning-soft);
+}
+.review-status[data-status='APPROVED'] {
+  color: var(--noor-success);
+  background: var(--noor-success-soft);
+}
+blockquote {
+  margin-block: 1.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.review-actions {
+  border-top: 1px solid var(--noor-border);
+  padding-top: 1.25rem;
+}
+.review-error {
+  margin-bottom: 1.5rem;
+}
+.review-pagination {
+  margin-top: 1.5rem;
+}
+@media (max-width: 600px) {
+  .review-actions > p {
+    flex-basis: 100%;
+  }
+  .review-actions .actions {
+    width: 100%;
+  }
+  .review-actions button {
+    flex: 1;
+  }
+  .review-pagination {
+    gap: 0.5rem;
+  }
+  .review-pagination button {
+    padding-inline: 0.75rem;
+  }
+}

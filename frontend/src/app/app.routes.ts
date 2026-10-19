@@ -31,6 +31,7 @@ export const routes: Routes = [
   {
     path: 'student/dashboard',
     canActivate: [authGuard],
+    canDeactivate: [keepUnsavedChanges],
     data: { roles: ['STUDENT'] },
     loadComponent: () =>
       import('./features/student/dashboard/student-dashboard').then((m) => m.StudentDashboard),
@@ -49,6 +50,15 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/layout/admin-layout').then((m) => m.AdminLayout),
     children: [
       { path: '', redirectTo: 'courses', pathMatch: 'full' },
+      {
+        path: 'testimonials',
+        loadComponent: () => import('./features/admin/testimonials/admin-testimonials').then((m) => m.AdminTestimonials),
+      },
+      {
+        path: 'messages',
+        canDeactivate: [keepUnsavedChanges],
+        loadComponent: () => import('./features/admin/contact/admin-contact').then((m) => m.AdminContact),
+      },
       {
         path: 'courses',
         canDeactivate: [keepUnsavedChanges],

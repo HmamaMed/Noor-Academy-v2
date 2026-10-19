@@ -52,6 +52,18 @@ Demo accounts include `admin@noor.academy`, `teacher1@noor.academy`, and `studen
 - Class materials: teacher/admin publishing, category filters, lesson text, Google Drive links, private R2 attachments, and deletion. Students must have confirmed enrollment to read materials, including materials from completed groups. R2 downloads use authorized links that expire after five minutes.
 - Optional SMTP enrollment notifications and password recovery. Reset tokens are random, stored as hashes, expire after 30 minutes, and are single-use. A successful reset invalidates previously issued JWTs.
 
+## Student testimonials
+
+The homepage shows up to six approved student testimonials immediately after the enrollment steps, with a welcoming empty state until the first is published. In **Student dashboard → Your story**, confirmed students can submit one testimonial per enrollment once an administrator marks their group **Completed**. A past end date alone does not unlock submission. Students explicitly agree to public sharing and can remove their testimonial later.
+
+New testimonials wait under **Admin → Testimonials**. Administrators can publish or hide the student's original words. Public cards show only the first name, last initial, and course; email and enrollment details remain private. Only testimonials for still-confirmed enrollments in completed groups appear publicly. Flyway migration V8 creates the testimonials table on backend startup.
+
+## Footer and contact inbox
+
+Visitors can send enquiries through the footer’s contact form without an account. Messages are saved in PostgreSQL and appear under **Admin → Messages**, where administrators can mark them read or unread and open a reply in their email app. Contact messages do not require SMTP. Repeated submissions from the same email are limited to three per ten minutes.
+
+In **Messages → Footer & location**, set the public email/phone, Instagram, Facebook, and WhatsApp links, location name/address, and latitude/longitude. Both coordinates are required for the map; the editor includes a preview. Configured locations use an OpenStreetMap embed and a Google Maps directions link. Empty social/contact fields stay hidden. Until a location is configured, the footer shows an illustration and invites visitors to ask about class locations. Flyway migration V7 creates the inbox and footer settings when the backend starts.
+
 ## Connect storage
 
 Text posts and existing Drive links work immediately. For private Cloudflare R2 attachments, set `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY` on the backend. Keep the bucket private. See [R2 setup and deployment](docs/DEPLOYMENT_FREE_TIER.md#8-configure-cloudflare-r2-attachment-storage).

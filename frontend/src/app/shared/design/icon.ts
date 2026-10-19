@@ -21,6 +21,13 @@ const paths: Record<string, string> = {
   lock: 'M5 10h14v11H5V10Zm3 0V6a4 4 0 0 1 8 0v4m-4 5v2',
   download: 'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
   plus: 'M12 4v16M4 12h16',
+  quote: 'M10 5H4v7h5c0 3-1 5-4 7m15-14h-6v7h5c0 3-1 5-4 7',
+  mail: 'M3 5h18v14H3V5Zm0 0 9 8 9-8',
+  phone: 'M8 3H4a1 1 0 0 0-1 1c0 10 7 17 17 17a1 1 0 0 0 1-1v-4l-5-2-2 3a15 15 0 0 1-7-7l3-2-2-5Z',
+  send: 'm21 3-7 18-4-7-7-4L21 3Zm0 0L10 14',
+  instagram: 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm9 9a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm1-5h.01',
+  facebook: 'M14 21v-8h3l.5-4H14V7c0-1 .5-1.5 1.5-1.5H18V2.2L15 2c-3 0-5 2-5 5v2H7v4h3v8',
+  whatsapp: 'M21 11.5a9 9 0 0 1-13.5 7.8L3 21l1.7-4.5A9 9 0 1 1 21 11.5ZM8 7l2 3-1 1a9 9 0 0 0 4 4l1-1 3 2c-1 2-3 2-5 1-3-1-5-3-6-6-1-2-1-3 2-4Z',
 };
 @Component({
   selector: 'app-icon',

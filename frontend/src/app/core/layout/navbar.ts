@@ -19,6 +19,17 @@ export class Navbar {
   appShell = input(false);
   protected user = toSignal(this.auth.currentUser$, { initialValue: this.auth.currentUser });
   protected menuOpen = signal(false);
+  protected userName = computed(() => {
+    const user = this.user();
+    return [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.email || '';
+  });
+  protected userInitials = computed(() => {
+    const user = this.user();
+    const initials = [user?.firstName, user?.lastName]
+      .map((name) => Array.from(name?.trim() || '')[0] || '')
+      .join('');
+    return (initials || Array.from(user?.email || '')[0] || '?').toUpperCase();
+  });
   protected isAdmin = computed(() => isAdminRole(this.user()?.role));
   protected dashboard = computed(() =>
     this.isAdmin()
@@ -35,6 +46,8 @@ export class Navbar {
           { path: '/admin/courses', label: 'Courses', icon: 'book' },
           { path: '/admin/rooms', label: 'Rooms', icon: 'room' },
           { path: '/admin/users', label: 'Users', icon: 'user' },
+          { path: '/admin/messages', label: 'Messages', icon: 'mail' },
+          { path: '/admin/testimonials', label: 'Testimonials', icon: 'quote' },
         ]
       : [
           { path: this.dashboard(), label: 'Dashboard', icon: 'home' },

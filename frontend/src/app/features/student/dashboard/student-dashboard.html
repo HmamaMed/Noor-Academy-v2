@@ -41,6 +41,7 @@
         [attr.aria-current]="section() === 'past-groups' ? 'location' : null"
         >Past groups</a
       >
+      <a [routerLink]="[]" fragment="your-voice" [attr.aria-current]="section() === 'your-voice' ? 'location' : null">Your story</a>
     </nav>
     <div class="dashboard-grid">
       <section class="panel panel-soft next-class" aria-labelledby="next-class-heading">
@@ -197,6 +198,7 @@
         </ul>
       </section>
     </div>
+    <app-student-testimonials [enrollments]="enrollments()" />
   }
 </div>
 @if (selectedApplication(); as enrollment) {

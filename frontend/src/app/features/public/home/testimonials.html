@@ -1,0 +1,70 @@
+<section class="testimonials-section" aria-labelledby="testimonials-heading">
+  <div class="public-container">
+    <div class="testimonials-heading">
+      <div>
+        <span class="eyebrow">THE PEOPLE BEHIND THE PROGRESS</span>
+        <h2 class="section-title" id="testimonials-heading">Every learner has a story.</h2>
+      </div>
+      <p>Small steps. New confidence.<br />Experiences shared by our students.</p>
+    </div>
+    @if (loading()) {
+      <div class="testimonial-loading" role="status">
+        <span class="sr-only">Loading student testimonials…</span>
+        <div class="skeleton" aria-hidden="true"></div>
+      </div>
+    } @else if (error()) {
+      <div class="notice notice-error" role="alert">
+        <app-icon name="info" />
+        <div>
+          <p>We couldn’t load student stories.</p>
+          <button class="text-link" type="button" (click)="load()">Try again</button>
+        </div>
+      </div>
+    } @else if (testimonials().length) {
+      <div class="testimonials-grid">
+        @for (testimonial of testimonials(); track testimonial.id) {
+          <figure class="testimonial-card">
+            <app-icon class="testimonial-quote" name="quote" />
+            <blockquote>
+              <p>{{ testimonial.content }}</p>
+            </blockquote>
+            <figcaption>
+              <span class="testimonial-avatar" aria-hidden="true">{{
+                initials(testimonial.studentName)
+              }}</span
+              ><span
+                ><strong>{{ testimonial.studentName }}</strong
+                ><span>{{ testimonial.courseTitle }}</span></span
+              >
+            </figcaption>
+          </figure>
+        }
+      </div>
+    } @else {
+      <div class="testimonials-empty">
+        <div class="empty-story-art" aria-hidden="true"><span></span><app-icon name="quote" /></div>
+        <div class="empty-story-copy">
+          <p class="story-kicker">THE FIRST STORY COULD BE YOURS</p>
+          <h3>No testimonials just yet.</h3>
+          <p>Every learning story starts somewhere. We hope you’ll be the first to share yours.</p>
+          @if (user()?.role === 'STUDENT') {
+            <a routerLink="/student/dashboard" fragment="your-voice" class="text-link"
+              >Share your experience <app-icon name="arrow"
+            /></a>
+          } @else if (!user()) {
+            <a
+              routerLink="/login"
+              [queryParams]="{ redirectTo: '/student/dashboard#your-voice' }"
+              class="text-link"
+              >Sign in to share your story <app-icon name="arrow"
+            /></a>
+          }
+        </div>
+      </div>
+    }
+    <p class="testimonial-note">
+      <app-icon name="check" />Shared by confirmed students after their class is completed, and
+      published with their permission.
+    </p>
+  </div>
+</section>

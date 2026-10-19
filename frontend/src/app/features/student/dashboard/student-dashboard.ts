@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -10,14 +10,17 @@ import { CourseMotif } from '../../../shared/design/course-motif';
 import { Icon } from '../../../shared/design/icon';
 import { NoorDialog } from '../../../shared/design/dialog';
 import { dateKey, nextSession, weeklySessions } from '../../../shared/utils/schedule';
+import { StudentTestimonials } from './student-testimonials';
 
 @Component({
   selector: 'app-student-dashboard',
-  imports: [StatusBadge, RouterLink, DatePipe, TitleCasePipe, CourseMotif, Icon, NoorDialog],
+  imports: [StatusBadge, RouterLink, DatePipe, TitleCasePipe, CourseMotif, Icon, NoorDialog, StudentTestimonials],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
 export class StudentDashboard implements OnInit {
+  private readonly studentTestimonials = viewChild(StudentTestimonials);
+  canLeave(): boolean | Promise<boolean> { return this.studentTestimonials()?.canLeave() ?? true; }
   private readonly toast = inject(ToastService);
   private readonly enrollmentService = inject(EnrollmentService);
   protected section = toSignal(inject(ActivatedRoute).fragment);

@@ -1,0 +1,125 @@
+<div class="page-heading">
+  <div>
+    <h1>Testimonials</h1>
+    <p>Real experiences from students who completed a class.</p>
+  </div>
+</div>
+<div class="review-toolbar">
+  <div>
+    <label for="testimonial-filter">Show</label
+    ><select
+      id="testimonial-filter"
+      [value]="filter()"
+      [disabled]="loading() || savingId() !== null"
+      (change)="filterChanged($event)"
+    >
+      <option value="PENDING">Awaiting review</option>
+      <option value="APPROVED">Published</option>
+      <option value="HIDDEN">Hidden</option>
+      <option value="">All testimonials</option>
+    </select>
+  </div>
+  <button
+    type="button"
+    class="btn-secondary"
+    [disabled]="loading() || savingId() !== null"
+    (click)="load()"
+  >
+    Refresh
+  </button>
+</div>
+<p class="review-note">
+  Students agree to public sharing before submitting. Publishing shows their first name, last
+  initial, course, and original words on the homepage.
+</p>
+@if (actionError()) {
+  <p class="notice notice-error review-error" role="alert">{{ actionError() }}</p>
+}
+@if (error()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load testimonials.</h2>
+    <p>{{ error() }}</p>
+    <button type="button" class="btn-secondary" (click)="load()">Try again</button>
+  </div>
+} @else if (loading() && !reviews()) {
+  <p role="status" class="muted">Loading testimonials…</p>
+} @else if (reviews()?.content?.length) {
+  <div class="review-list" [attr.aria-busy]="loading()">
+    @for (testimonial of reviews()!.content; track testimonial.id) {
+      <article class="panel testimonial-review">
+        <div class="review-heading">
+          <div>
+            <h2>{{ testimonial.studentName }}</h2>
+            <p class="meta">{{ testimonial.courseTitle }} · {{ testimonial.groupName }}</p>
+          </div>
+          <span class="review-status" [attr.data-status]="testimonial.status">{{
+            testimonial.status === 'PENDING'
+              ? 'Awaiting review'
+              : testimonial.status === 'APPROVED'
+                ? 'Published'
+                : 'Hidden'
+          }}</span>
+        </div>
+        <blockquote>{{ testimonial.content }}</blockquote>
+        <div class="review-actions">
+          <p class="meta">Submitted {{ testimonial.createdAt | date: 'mediumDate' }}</p>
+          <div class="actions">
+            @if (testimonial.status !== 'HIDDEN') {
+              <button
+                type="button"
+                class="btn-secondary"
+                [disabled]="savingId() !== null || loading()"
+                (click)="moderate(testimonial.id, 'HIDDEN')"
+              >
+                {{ savingId() === testimonial.id ? 'Updating…' : 'Hide' }}
+              </button>
+            }
+            @if (testimonial.status !== 'APPROVED') {
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="savingId() !== null || loading()"
+                (click)="moderate(testimonial.id, 'APPROVED')"
+              >
+                <app-icon name="check" />{{
+                  savingId() === testimonial.id ? 'Updating…' : 'Publish'
+                }}
+              </button>
+            }
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+  <div class="review-pagination">
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="loading() || savingId() !== null || page() === 0"
+      (click)="load(page() - 1)"
+    >
+      Previous
+    </button>
+    <p class="meta">Page {{ page() + 1 }} of {{ reviews()!.totalPages }}</p>
+    <button
+      type="button"
+      class="btn-secondary"
+      [disabled]="loading() || savingId() !== null || page() + 1 >= reviews()!.totalPages"
+      (click)="load(page() + 1)"
+    >
+      Next
+    </button>
+  </div>
+} @else {
+  <div class="empty-state">
+    <app-icon name="quote" />
+    <h2>{{ filter() === 'PENDING' ? 'You’re all caught up.' : 'No testimonials here yet.' }}</h2>
+    <p>
+      {{
+        filter() === 'PENDING'
+          ? 'New student testimonials will appear here for your review.'
+          : 'Try another filter to see other student stories.'
+      }}
+    </p>
+  </div>
+}

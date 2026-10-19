@@ -1,0 +1,217 @@
+<footer class="academy-footer" id="contact">
+  <div class="public-container">
+    <div class="footer-welcome">
+      <div>
+        <p class="footer-eyebrow">EVERY JOURNEY STARTS WITH A CONVERSATION</p>
+        <h2>A little curiosity.<br />A brighter beginning.</h2>
+      </div>
+      <div class="footer-invitation">
+        <p>
+          Finding the right course? Planning your first class? We’re here to help you take the next
+          step.
+        </p>
+        <button type="button" class="footer-contact-button" (click)="openContact()">
+          Let’s talk <app-icon name="arrow" />
+        </button>
+      </div>
+    </div>
+    <div class="footer-columns">
+      <div class="footer-about">
+        <a routerLink="/" aria-label="Noor Academy home"><app-brand [inverse]="true" /></a>
+        <p>A place to ask questions, build confidence, and discover what you’re capable of.</p>
+        <nav class="footer-socials" aria-label="Stay connected">
+          @for (social of socials(); track social.label) {
+            <a
+              [href]="social.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              [attr.aria-label]="social.label + ' (opens in a new tab)'"
+              [title]="social.label"
+              ><app-icon [name]="social.icon"
+            /></a>
+          }
+          <button
+            type="button"
+            aria-label="Contact Noor Academy"
+            title="Contact us"
+            (click)="openContact()"
+          >
+            <app-icon name="mail" />
+          </button>
+        </nav>
+        <p class="footer-small">A little closer. A little further, together.</p>
+      </div>
+      <div class="footer-explore">
+        <h3>Make yourself at home</h3>
+        <nav aria-label="Footer">
+          <a routerLink="/courses">Explore our courses <app-icon name="arrow" /></a>
+          <a routerLink="/login">Your learning space</a>
+          <button type="button" (click)="openContact()">Contact us</button>
+        </nav>
+        <div class="footer-contact-details">
+          @if (settings().email) {
+            <a [href]="'mailto:' + settings().email"
+              ><app-icon name="mail" />{{ settings().email }}</a
+            >
+          }
+          @if (settings().phone) {
+            <a [href]="'tel:' + settings().phone"
+              ><app-icon name="phone" />{{ settings().phone }}</a
+            >
+          }
+        </div>
+      </div>
+      <div class="footer-location">
+        <div class="footer-location-heading">
+          <h3>Meet us here</h3>
+          <app-icon name="pin" />
+        </div>
+        <app-location-map
+          [latitude]="settings().latitude"
+          [longitude]="settings().longitude"
+          [label]="settings().locationName || 'Noor Academy course location'"
+        />
+        <div class="footer-location-info">
+          <div>
+            <p class="footer-location-name">
+              {{ settings().locationName || 'Your place to grow' }}
+            </p>
+            <p class="footer-small">
+              {{ settings().address || 'Contact us for course locations and class details.' }}
+            </p>
+          </div>
+          @if (directionsUrl(); as url) {
+            <a
+              class="footer-directions"
+              [href]="url"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Get directions (opens in a new tab)"
+              ><app-icon name="arrow"
+            /></a>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© {{ year }} Noor Academy. All rights reserved.</p>
+      <span>Clear guidance. Thoughtful learning.</span>
+    </div>
+  </div>
+</footer>
+@if (contactOpen()) {
+  <app-dialog label="Contact Noor Academy" [busy]="sending()" (closed)="closeContact()">
+    <div class="dialog-heading">
+      <h2>Let’s talk.</h2>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Close contact form"
+        [disabled]="sending()"
+        (click)="closeContact()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    @if (sent()) {
+      <div class="contact-success" id="contact-success" tabindex="-1" role="status">
+        <span><app-icon name="check" /></span>
+        <h3>You’re in the right hands.</h3>
+        <p>Your message has reached the Noor Academy team. We’ll reply to the email you shared.</p>
+        <button type="button" class="btn-primary" (click)="closeContact()">All done</button>
+      </div>
+    } @else {
+      <p class="contact-intro">
+        A question, an idea, or a little guidance. Send a message to our team.
+      </p>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (error()) {
+          <p
+            class="notice notice-error contact-error"
+            id="contact-error"
+            tabindex="-1"
+            role="alert"
+          >
+            {{ error() }}
+          </p>
+        }
+        <fieldset class="form-grid" [disabled]="sending()">
+          <div class="form-field">
+            <label for="contact-name">Your name</label>
+            <input
+              id="contact-name"
+              autocomplete="name"
+              formControlName="name"
+              maxlength="100"
+              required
+              [attr.aria-invalid]="invalid('name')"
+              [attr.aria-describedby]="invalid('name') ? 'contact-name-error' : null"
+            />
+            @if (invalid('name')) {
+              <p id="contact-name-error" class="field-error">Please enter your name.</p>
+            }
+          </div>
+          <div class="form-field">
+            <label for="contact-email">Email address</label>
+            <input
+              id="contact-email"
+              type="email"
+              autocomplete="email"
+              formControlName="email"
+              maxlength="254"
+              required
+              [attr.aria-invalid]="invalid('email')"
+              [attr.aria-describedby]="invalid('email') ? 'contact-email-error' : null"
+            />
+            @if (invalid('email')) {
+              <p id="contact-email-error" class="field-error">
+                Enter a valid email so we can reply.
+              </p>
+            }
+          </div>
+          <div class="form-field form-field-full">
+            <label for="contact-subject">What’s on your mind?</label>
+            <input
+              id="contact-subject"
+              formControlName="subject"
+              placeholder="A course, enrollment, or something else…"
+              maxlength="160"
+              required
+              [attr.aria-invalid]="invalid('subject')"
+              [attr.aria-describedby]="invalid('subject') ? 'contact-subject-error' : null"
+            />
+            @if (invalid('subject')) {
+              <p id="contact-subject-error" class="field-error">Add a short subject.</p>
+            }
+          </div>
+          <div class="form-field form-field-full">
+            <label for="contact-message">Your message</label>
+            <textarea
+              id="contact-message"
+              formControlName="message"
+              rows="4"
+              maxlength="5000"
+              placeholder="Tell us a little more…"
+              required
+              [attr.aria-invalid]="invalid('message')"
+              [attr.aria-describedby]="invalid('message') ? 'contact-message-error' : null"
+            ></textarea>
+            @if (invalid('message')) {
+              <p id="contact-message-error" class="field-error">
+                Write a message of up to 5,000 characters.
+              </p>
+            }
+          </div>
+        </fieldset>
+        <p class="field-help">
+          Your details are shared with our team so we can respond to your enquiry.
+        </p>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="sending()">
+            {{ sending() ? 'Sending…' : 'Send message' }}<app-icon name="send" />
+          </button>
+        </div>
+      </form>
+    }
+  </app-dialog>
+}

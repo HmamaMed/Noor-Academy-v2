@@ -474,8 +474,34 @@
     text-decoration: underline;
     text-underline-offset: 0.75rem;
   }
-  .mobile-menu-trigger {
+  .mobile-account-trigger {
     display: none;
+  }
+  .mobile-avatar {
+    width: var(--noor-touch-min);
+    height: var(--noor-touch-min);
+    flex-shrink: 0;
+    justify-content: center;
+    border: 1px solid var(--noor-primary);
+    border-radius: 50%;
+    background: var(--noor-primary);
+    color: var(--noor-surface);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .mobile-avatar:hover {
+    background: var(--noor-primary-hover);
+    border-color: var(--noor-primary-hover);
+  }
+  .mobile-login {
+    padding-inline: 0.75rem;
+    border-radius: var(--noor-radius-control);
+    color: var(--noor-primary);
+    font-weight: 600;
+  }
+  .mobile-login:hover {
+    background: var(--noor-primary-soft);
   }
   .app-sidebar {
     position: fixed;
@@ -538,21 +564,6 @@
   }
   .app-main h1 {
     font-family: var(--noor-font-body);
-  }
-  .site-footer {
-    border-top: 1px solid var(--noor-border);
-    padding-block: 2rem;
-  }
-  .footer-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-  }
-  .footer-inner nav {
-    display: flex;
-    gap: 2rem;
-    font-size: 0.875rem;
   }
   .course-grid {
     display: grid;
@@ -842,11 +853,10 @@
   .desktop-links {
     display: none;
   }
-  .mobile-menu-trigger {
+  .mobile-account-trigger {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 2.75rem;
+    min-height: var(--noor-touch-min);
   }
   .site-header {
     height: var(--noor-header-mobile);
@@ -918,15 +928,6 @@
   }
   .course-card-editorial app-course-image {
     min-height: 8rem;
-  }
-  .footer-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-  .footer-inner nav {
-    flex-wrap: wrap;
-    gap: 1.5rem;
   }
   .auth-page {
     padding-block: 2rem 3.5rem;

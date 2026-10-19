@@ -3,7 +3,9 @@
     <a routerLink="/" class="auth-brand-link" aria-label="Noor Academy home"><app-brand variant="stacked" /></a>
     <h1>Welcome back.</h1>
     <p class="muted mt-3">Sign in to continue your learning.</p>
-    @if (redirectTo) { <p class="notice mt-6">After signing in, you can review your selected group and submit an application.</p> }
+    @if (redirectTo === '/student/dashboard#your-voice') {
+      <p class="notice mt-6">After signing in, you can share your experience from a completed class.</p>
+    } @else if (redirectTo) { <p class="notice mt-6">After signing in, you can review your selected group and submit an application.</p> }
     @if (error()) { <div id="login-error" class="notice notice-error mt-6" tabindex="-1" role="alert">{{ error() }}</div> }
     <form [formGroup]="form" (ngSubmit)="submit()" class="stack" novalidate>
       <div>
