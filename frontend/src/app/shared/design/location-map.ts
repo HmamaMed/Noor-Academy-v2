@@ -7,16 +7,33 @@ import { Icon } from './icon';
   imports: [Icon],
   template: `
     @if (mapUrl(); as url) {
-      <iframe [src]="url" [title]="label()" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      <iframe
+        [src]="url"
+        [title]="label()"
+        [inert]="!!googleMapsUrl()"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      ></iframe>
     } @else {
       <div class="map-placeholder">
         <span class="map-pin"><app-icon name="pin" /></span
         ><span>Good things happen<br />when we learn together.</span>
       </div>
     }
+    @if (googleMapsUrl(); as url) {
+      <a
+        class="map-link"
+        [href]="url"
+        target="_blank"
+        rel="noopener noreferrer"
+        [attr.aria-label]="'Open ' + label() + ' in Google Maps (opens in a new tab)'"
+        ><span>Open in Google Maps <app-icon name="arrow" /></span
+      ></a>
+    }
   `,
   styles: `
     :host {
+      position: relative;
       display: block;
       overflow: hidden;
       border-radius: 0.75rem;
@@ -27,6 +44,36 @@ import { Icon } from './icon';
       width: 100%;
       height: 11rem;
       border: 0;
+    }
+    .map-link {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-start;
+      padding: 0.5rem;
+    }
+    .map-link > span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 2.75rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      background: var(--noor-surface);
+      color: var(--noor-primary);
+      box-shadow: 0 2px 8px #163d3526;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .map-link app-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+    .map-link:hover > span {
+      background: var(--noor-primary-soft);
+    }
+    .map-link:focus-visible {
+      outline-offset: -4px;
     }
     .map-placeholder {
       min-height: 11rem;
@@ -63,6 +110,7 @@ export class LocationMap {
   latitude = input<number | null>(null);
   longitude = input<number | null>(null);
   label = input('Course location');
+  googleMapsUrl = input<string | null>(null);
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly mapUrl = computed(() => {
     const lat = this.latitude();

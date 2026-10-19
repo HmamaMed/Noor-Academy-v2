@@ -2,14 +2,11 @@
   display: block;
 }
 .academy-footer {
-  position: relative;
-  overflow: hidden;
   padding-top: 4rem;
   color: #f7f5ef;
   background: #163d35;
 }
 .footer-welcome {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -90,8 +87,7 @@
   height: 1.125rem;
 }
 .footer-socials a:hover,
-.footer-socials button:hover,
-.footer-directions:hover {
+.footer-socials button:hover {
   background: #ffffff14;
   border-color: #d9bd89;
 }
@@ -166,6 +162,10 @@
   margin-bottom: 0.25rem;
   font-size: 0.875rem;
   font-weight: 500;
+}
+.footer-location-info:any-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
 }
 .footer-small,
 .footer-about > .footer-small {

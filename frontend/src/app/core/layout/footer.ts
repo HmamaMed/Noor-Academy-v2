@@ -32,10 +32,12 @@ export class Footer implements OnInit {
     ].filter((social) => social.url),
   );
   protected readonly directionsUrl = computed(() => {
-    const { latitude, longitude } = this.settings();
-    return latitude === null || longitude === null
-      ? null
-      : `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    const { latitude, longitude, address } = this.settings();
+    const query =
+      latitude !== null && longitude !== null ? `${latitude},${longitude}` : address.trim();
+    return query
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+      : null;
   });
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(/\S/)]],

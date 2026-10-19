@@ -70,8 +70,21 @@
           [latitude]="settings().latitude"
           [longitude]="settings().longitude"
           [label]="settings().locationName || 'Noor Academy course location'"
+          [googleMapsUrl]="directionsUrl()"
         />
-        <div class="footer-location-info">
+        <a
+          class="footer-location-info"
+          [attr.href]="directionsUrl()"
+          [attr.target]="directionsUrl() ? '_blank' : null"
+          rel="noopener noreferrer"
+          [attr.aria-label]="
+            directionsUrl()
+              ? 'Open ' +
+                (settings().locationName || 'course location') +
+                ' in Google Maps (opens in a new tab)'
+              : null
+          "
+        >
           <div>
             <p class="footer-location-name">
               {{ settings().locationName || 'Your place to grow' }}
@@ -80,17 +93,10 @@
               {{ settings().address || 'Contact us for course locations and class details.' }}
             </p>
           </div>
-          @if (directionsUrl(); as url) {
-            <a
-              class="footer-directions"
-              [href]="url"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Get directions (opens in a new tab)"
-              ><app-icon name="arrow"
-            /></a>
+          @if (directionsUrl()) {
+            <span class="footer-directions" aria-hidden="true"><app-icon name="arrow" /></span>
           }
-        </div>
+        </a>
       </div>
     </div>
     <div class="footer-bottom">

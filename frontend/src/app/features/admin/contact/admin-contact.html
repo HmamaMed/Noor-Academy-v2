@@ -139,7 +139,8 @@
       </div>
       <p class="settings-intro">
         Add your contact details, social accounts, and the place where your classes happen. Leave
-        optional fields blank to hide them.
+        optional fields blank to hide them. Paste your full social profile links; their icons appear
+        in the footer after you save.
       </p>
       @if (formError()) {
         <p id="record-form-error" class="notice notice-error" role="alert" tabindex="-1">
@@ -161,6 +162,11 @@
                 invalid(field.name) ? 'footer-' + field.name + '-error' : null
               "
             />
+            @if (field.name === 'whatsappUrl') {
+              <p class="field-help">
+                Use https://wa.me/ followed by your country code and phone number, with digits only.
+              </p>
+            }
             @if (invalid(field.name)) {
               <p [id]="'footer-' + field.name + '-error'" class="field-error">
                 Check this field. Use a valid email, phone number, or full https:// link.
@@ -205,7 +211,8 @@
         </div>
         <p id="footer-coordinates-help" class="field-help form-field-full">
           Latitude: −85 to 85. Longitude: −180 to 180. Add both coordinates to show a map, or clear
-          both to hide it.
+          both to hide it. Visitors can click the map or address to open the location in Google
+          Maps.
         </p>
         <div class="form-field-full">
           <app-location-map
