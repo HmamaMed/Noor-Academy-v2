@@ -115,25 +115,31 @@
                 @let seats = seatAvailability(group);
                 <div
                   class="seat-availability"
-                  [class.seats-low]="seats.remaining > 0 && seats.percentage <= 25"
+                  [class.seats-low]="seats.remaining > 0 && seats.percentage >= 75"
                   [class.seats-closed]="availability(group) !== 'OPEN'"
                 >
                   <div class="seat-label">
-                    <span>Seats remaining</span
-                    ><strong
-                      >{{ seats.remaining }}<span> / {{ seats.capacity }}</span></strong
+                    <span
+                      ><strong>{{ seats.remaining }}</strong>
+                      {{ seats.remaining === 1 ? 'seat' : 'seats' }} remaining</span
                     >
+                    <span>{{ seats.filled }} / {{ seats.capacity }} filled</span>
                   </div>
                   @if (seats.capacity > 0) {
                     <div
                       class="seat-track"
                       role="meter"
-                      [attr.aria-label]="'Seats remaining in ' + group.groupName"
+                      [attr.aria-label]="'Seats filled in ' + group.groupName"
                       aria-valuemin="0"
                       [attr.aria-valuemax]="seats.capacity"
-                      [attr.aria-valuenow]="seats.remaining"
+                      [attr.aria-valuenow]="seats.filled"
                       [attr.aria-valuetext]="
-                        seats.remaining + ' of ' + seats.capacity + ' seats remaining'
+                        seats.filled +
+                        ' of ' +
+                        seats.capacity +
+                        ' seats filled, ' +
+                        seats.remaining +
+                        ' remaining'
                       "
                     >
                       <span [style.width.%]="seats.percentage"></span>

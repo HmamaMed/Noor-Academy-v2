@@ -43,8 +43,8 @@ describe('Course application confirmation', () => {
     endDate: '2099-06-01',
     status: 'ACTIVE',
     sessions: [{ dayOfWeek: 'MONDAY', startTime: '18:00:00', endTime: '19:00:00' }],
-    confirmedSeats: 6,
-    remainingSeats: 6,
+    confirmedSeats: 8,
+    remainingSeats: 4,
   };
   const pending: Enrollment = {
     id: 5,
@@ -113,8 +113,9 @@ describe('Course application confirmation', () => {
       'View available groups',
     );
     const meter = fixture.nativeElement.querySelector('[role="meter"]');
-    expect(meter.getAttribute('aria-valuenow')).toBe('6');
+    expect(meter.getAttribute('aria-valuenow')).toBe('8');
     expect(meter.getAttribute('aria-valuemax')).toBe('12');
+    expect(meter.getAttribute('aria-valuetext')).toBe('8 of 12 seats filled, 4 remaining');
     expect(dialog.textContent).toContain('Evening class');
     expect(dialog.textContent).not.toContain(group.teacherName);
     expect(dialog.textContent).not.toContain('18:00');
@@ -138,7 +139,7 @@ describe('Course application confirmation', () => {
     expect((dialog.querySelector('.btn-primary') as HTMLButtonElement).disabled).toBe(true);
     expect(
       fixture.nativeElement.querySelector('[role="meter"]').getAttribute('aria-valuenow'),
-    ).toBe('0');
+    ).toBe('12');
   });
 
   it('opens the existing application instead of posting a duplicate discovered at confirmation', () => {

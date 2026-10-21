@@ -142,11 +142,6 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.seat-label strong span {
-  color: var(--noor-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 400;
-}
 .seat-track {
   height: 0.5rem;
   overflow: hidden;

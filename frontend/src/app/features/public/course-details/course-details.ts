@@ -77,7 +77,8 @@ export class CourseDetails implements OnInit {
   protected seatAvailability(group: Group) {
     const capacity = Math.max(0, group.roomCapacity);
     const remaining = Math.min(capacity, Math.max(0, group.remainingSeats));
-    return { capacity, remaining, percentage: capacity ? remaining / capacity * 100 : 0 };
+    const filled = capacity - remaining;
+    return { capacity, remaining, filled, percentage: capacity ? filled / capacity * 100 : 0 };
   }
   availability(group: Group) {
     if (group.status === 'COMPLETED') return 'COMPLETED';
