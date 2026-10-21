@@ -26,7 +26,7 @@
     @if (user()) {
       <button type="button" class="mobile-account-trigger mobile-avatar" aria-haspopup="dialog" [attr.aria-label]="'Open navigation for ' + userName()" [title]="userName()" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(true)"><span aria-hidden="true">{{ userInitials() }}</span></button>
     } @else {
-      <a routerLink="/login" class="mobile-account-trigger mobile-login">Login</a>
+      <a routerLink="/login" class="mobile-account-trigger mobile-login"><span class="mobile-login-icon" aria-hidden="true"><app-icon name="user" /></span><span>Log in</span></a>
     }
   </div>
 </header>

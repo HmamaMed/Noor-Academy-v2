@@ -495,13 +495,42 @@
     border-color: var(--noor-primary-hover);
   }
   .mobile-login {
-    padding-inline: 0.75rem;
-    border-radius: var(--noor-radius-control);
-    color: var(--noor-primary);
+    flex-shrink: 0;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem 0.375rem 0.375rem;
+    border: 1px solid var(--noor-primary);
+    border-radius: var(--noor-radius-pill);
+    background: var(--noor-primary);
+    color: var(--noor-surface);
+    box-shadow: 0 3px 10px #163d351a;
+    font-size: 0.8125rem;
     font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background-color var(--noor-motion-feedback) var(--noor-motion-ease),
+      box-shadow var(--noor-motion-feedback) var(--noor-motion-ease);
+  }
+  .mobile-login-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid #ffffff24;
+    border-radius: 50%;
+    background: #ffffff1a;
+  }
+  .mobile-login-icon app-icon {
+    width: 1rem;
+    height: 1rem;
   }
   .mobile-login:hover {
-    background: var(--noor-primary-soft);
+    background: var(--noor-primary-hover);
+    box-shadow: 0 4px 12px #163d3526;
+  }
+  .mobile-login:active {
+    box-shadow: none;
   }
   .app-sidebar {
     position: fixed;
