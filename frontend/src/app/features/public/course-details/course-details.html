@@ -253,12 +253,18 @@
   </app-dialog>
 }
 @if (application(); as enrollment) {
-  <app-dialog label="Application status" (closed)="application.set(null)">
+  <app-dialog
+    label="Application status"
+    [wide]="enrollment.status === 'PENDING' && !expired(enrollment)"
+    [busy]="paymentBusy()"
+    (closed)="closeApplication()"
+  >
     <div class="dialog-heading">
       <app-status-badge [status]="expired(enrollment) ? 'EXPIRED' : enrollment.status" /><button
         class="icon-button"
         aria-label="Close application status"
-        (click)="application.set(null)"
+        [disabled]="paymentBusy()"
+        (click)="closeApplication()"
       >
         <app-icon name="close" />
       </button>
@@ -294,18 +300,7 @@
           Expires {{ enrollment.expiresAt | date: "d MMM y 'at' HH:mm" : 'UTC' }} UTC.
         </p>
       }
-      <p class="mt-4">
-        Your application is awaiting confirmation. Enrollment is confirmed after payment is received
-        and an administrator approves your application.
-      </p>
-      <div class="notice notice-warning mt-6">
-        <app-icon name="info" />
-        <p>A seat is not guaranteed.</p>
-      </div>
-      <p class="field-help mt-4">
-        Payment instructions have not been provided. The academy must supply its approved payment
-        guidance.
-      </p>
+      <app-enrollment-payment [enrollment]="enrollment" (busyChange)="paymentBusy.set($event)" />
       <a routerLink="/student/dashboard" class="btn-primary w-full mt-6"
         >Go to dashboard <app-icon name="arrow"
       /></a>

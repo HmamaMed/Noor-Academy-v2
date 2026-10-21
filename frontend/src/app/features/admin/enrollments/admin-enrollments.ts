@@ -21,10 +21,23 @@ import { EmptyState } from '../../../shared/design/empty-state';
 import { Icon } from '../../../shared/design/icon';
 import { NoorDialog } from '../../../shared/design/dialog';
 import { AdminConfirm } from '../admin-confirm';
+import { RouterLink } from '@angular/router';
+import { PaymentService } from '../../../core/services/payment.service';
+import { PaymentReceipt } from '../../../shared/components/payment-receipt';
 
 @Component({
   selector: 'app-admin-enrollments',
-  imports: [DatePipe, TitleCasePipe, StatusBadge, EmptyState, Icon, NoorDialog, AdminConfirm],
+  imports: [
+    DatePipe,
+    TitleCasePipe,
+    StatusBadge,
+    EmptyState,
+    Icon,
+    NoorDialog,
+    AdminConfirm,
+    RouterLink,
+    PaymentReceipt,
+  ],
   templateUrl: './admin-enrollments.html',
   styleUrl: '../admin.css',
 })
@@ -34,6 +47,9 @@ export class AdminEnrollments implements OnInit {
   private readonly enrollmentService = inject(EnrollmentService);
   private reviewRequest = 0;
   private readonly toast = inject(ToastService);
+  private readonly payments = inject(PaymentService);
+  protected readonly receiptEnrollmentIds = signal<number[]>([]);
+  protected readonly receiptLoadFailed = signal(false);
 
   protected groups = signal<Group[]>([]);
   protected enrollments = signal<Enrollment[]>([]);
@@ -85,6 +101,15 @@ export class AdminEnrollments implements OnInit {
 
   load(): void {
     if (this.submitting()) return;
+    this.receiptLoadFailed.set(false);
+    this.payments
+      .receipts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (receipts) =>
+          this.receiptEnrollmentIds.set(receipts.map((receipt) => receipt.enrollmentId)),
+        error: () => this.receiptLoadFailed.set(true),
+      });
     this.loading.set(true);
     this.loadError.set('');
     // The API exposes rosters by group only. Bound concurrency when assembling the queue.

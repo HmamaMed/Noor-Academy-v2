@@ -1,0 +1,28 @@
+.payment-settings-form {
+  max-width: 62rem;
+}
+.settings-sections {
+  display: grid;
+  gap: 1.5rem;
+}
+.settings-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+.settings-heading > app-icon {
+  color: var(--noor-primary);
+  margin-top: 0.125rem;
+}
+.settings-heading h2 {
+  font-size: 1.25rem;
+}
+.settings-heading p {
+  margin-top: 0.5rem;
+  color: var(--noor-text-muted);
+  font-size: 0.875rem;
+}
+.panel > .form-field + .form-field {
+  margin-top: 1.5rem;
+}

@@ -1,0 +1,111 @@
+<section class="payment-panel" aria-label="Payment options">
+  @if (!payable()) {
+    <p class="notice notice-warning">
+      This application is no longer awaiting payment within its deadline. Check its current status
+      with the academy before sending payment.
+    </p>
+  } @else {
+    <div class="payment-intro">
+      <span class="eyebrow">YOUR NEXT STEP</span>
+      <h3>Two ways to make it yours.</h3>
+      <p>
+        Choose how to pay for application #{{ enrollment().id }}. Your place is confirmed after
+        payment is received and an admin approves your enrollment.
+      </p>
+    </div>
+    @if (loading()) {
+      <p role="status" class="muted">Loading payment instructions…</p>
+    } @else if (failed()) {
+      <div class="notice notice-error" role="alert">
+        <div>
+          <p>We couldn’t load payment details. Please try again before making a transfer.</p>
+          <button class="text-link" type="button" (click)="load()">Try again</button>
+        </div>
+      </div>
+    } @else if (settings(); as payment) {
+      <div class="payment-options">
+        <article class="payment-option payment-visit">
+          <span class="payment-badge">RECOMMENDED · FASTEST CONFIRMATION</span
+          ><app-icon name="pin" />
+          <h4>Visit us & pay in person</h4>
+          <p>
+            Pay directly at the academy. Our team can confirm your place during your visit once
+            payment is received and a seat is available.
+          </p>
+          @if (location().address) {
+            <p class="payment-location">
+              <strong>{{ location().locationName || 'Noor Academy' }}</strong
+              ><span>{{ location().address }}</span>
+            </p>
+          } @else {
+            <p class="payment-detail">
+              Contact the academy for the payment address before visiting.
+            </p>
+          }
+          @if (payment.openingHours) {
+            <p class="payment-detail"><app-icon name="clock" />{{ payment.openingHours }}</p>
+          }
+          @if (payment.visitInstructions) {
+            <p class="payment-instructions">{{ payment.visitInstructions }}</p>
+          }
+          @if (mapUrl(); as url) {
+            <a [href]="url" target="_blank" rel="noopener noreferrer" class="text-link"
+              >Open in Google Maps <app-icon name="arrow"
+            /></a>
+          }
+        </article>
+        <article class="payment-option">
+          <span class="payment-badge payment-badge-neutral">RECEIPT REQUIRED · ADMIN REVIEW</span
+          ><app-icon name="bank" />
+          <h4>Pay by bank transfer</h4>
+          <p>
+            Transfer to the academy’s account, then upload your receipt below so our team can verify
+            your payment.
+          </p>
+          @if (payment.rib) {
+            <dl class="bank-details">
+              <div>
+                <dt>Bank</dt>
+                <dd>{{ payment.bankName }}</dd>
+              </div>
+              <div>
+                <dt>Account holder</dt>
+                <dd>{{ payment.accountHolder }}</dd>
+              </div>
+              <div>
+                <dt>RIB</dt>
+                <dd>
+                  <code>{{ payment.rib }}</code
+                  ><button class="text-link" type="button" (click)="copyRib()">
+                    {{ copied() ? 'Copied' : 'Copy RIB' }}
+                  </button>
+                </dd>
+              </div>
+            </dl>
+            @if (copyError()) {
+              <p class="field-help" role="status">Select and copy the RIB above manually.</p>
+            }
+            <p class="field-help">
+              Confirm the course fee with the academy before transferring. Include your name and
+              application #{{ enrollment().id }} in the transfer reference.
+            </p>
+          } @else {
+            <p class="notice">
+              Bank details have not been published yet. Contact the academy before transferring, or
+              pay in person.
+            </p>
+          }
+          @if (payment.bankInstructions) {
+            <p class="payment-instructions">{{ payment.bankInstructions }}</p>
+          }
+          <app-payment-receipt
+            [enrollment]="enrollment()"
+            [allowUpload]="true"
+            [uploadsEnabled]="payment.receiptUploadsEnabled"
+            (busyChange)="busyChange.emit($event)"
+          />
+        </article>
+      </div>
+    }
+  }
+</section>

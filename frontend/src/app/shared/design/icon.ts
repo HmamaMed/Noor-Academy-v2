@@ -20,6 +20,8 @@ const paths: Record<string, string> = {
   room: 'M4 21V3h12v18M2 21h20m-6-14h4v14M12 11v2',
   lock: 'M5 10h14v11H5V10Zm3 0V6a4 4 0 0 1 8 0v4m-4 5v2',
   download: 'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+  upload: 'M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5',
+  bank: 'm3 9 9-6 9 6H3Zm2 3v7m5-7v7m4-7v7m5-7v7M3 22h18',
   plus: 'M12 4v16M4 12h16',
   quote: 'M10 5H4v7h5c0 3-1 5-4 7m15-14h-6v7h5c0 3-1 5-4 7',
   mail: 'M3 5h18v14H3V5Zm0 0 9 8 9-8',

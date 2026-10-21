@@ -29,6 +29,7 @@ public class EnrollmentService {
     private final EnrollmentProperties enrollmentProperties;
     private final jakarta.persistence.EntityManager entityManager;
     private final org.springframework.context.ApplicationEventPublisher events;
+    private final com.nooracademy.payment.PaymentReceiptService paymentReceipts;
 
     private void notifyStudent(Enrollment enrollment, String message) {
         events.publishEvent(new com.nooracademy.notification.MailNotification(enrollment.getStudent().getEmail(),
@@ -57,6 +58,7 @@ public class EnrollmentService {
             throw new ConflictException("This group is full");
         }
 
+        if (existing != null) paymentReceipts.clearForReapplication(existing.getId());
         Enrollment enrollment = existing == null ? new Enrollment() : existing;
         enrollment.setStudent(student);
         enrollment.setGroup(group);

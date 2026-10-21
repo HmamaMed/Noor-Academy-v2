@@ -42,6 +42,7 @@ export class Navbar {
     this.isAdmin()
       ? [
           { path: '/admin/enrollments', label: 'Enrollments', icon: 'check' },
+          { path: '/admin/payment-settings', label: 'Payments', icon: 'bank' },
           { path: '/admin/groups', label: 'Groups', icon: 'users' },
           { path: '/admin/courses', label: 'Courses', icon: 'book' },
           { path: '/admin/rooms', label: 'Rooms', icon: 'room' },

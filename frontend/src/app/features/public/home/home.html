@@ -16,9 +16,11 @@
     src="/img/noor-learning-hero.webp"
     srcset="/img/noor-learning-hero-960.webp 960w, /img/noor-learning-hero.webp 1536w"
     sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1248px) 42vw, 500px"
-    width="1536" height="1024"
+    width="1536"
+    height="1024"
     alt="Illustrative learning scene: two learners sharing ideas over a notebook and laptop in natural light."
-    fetchpriority="high" decoding="async"
+    fetchpriority="high"
+    decoding="async"
   />
 </section>
 <section class="benefit-strip" aria-label="Learning at Noor Academy">
@@ -68,39 +70,7 @@
     </div>
   }
 </section>
-<section id="enrollment" class="enrollment-section" aria-labelledby="enrollment-heading">
-  <div class="public-container enrollment-layout">
-    <h2 id="enrollment-heading" class="section-title">A clear path<br />into your class.</h2>
-    <div>
-      <ol class="enrollment-steps">
-        <li>
-          <span class="step-number">01</span>
-          <div>
-            <h3>Choose your group</h3>
-            <p>Compare schedules, teachers and availability.</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-number">02</span>
-          <div>
-            <h3>Apply and arrange payment</h3>
-            <p>Your request stays pending for up to 72 hours.</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-number">03</span>
-          <div>
-            <h3>Receive confirmation</h3>
-            <p>An administrator confirms enrollment after receiving payment.</p>
-          </div>
-        </li>
-      </ol>
-      <p class="notice notice-warning">
-        <app-icon name="info" />An application does not guarantee a seat.
-      </p>
-    </div>
-  </div>
-</section>
+<app-enrollment-guide />
 <app-testimonials />
 <section class="public-container home-section experience" aria-labelledby="experience-heading">
   <div>

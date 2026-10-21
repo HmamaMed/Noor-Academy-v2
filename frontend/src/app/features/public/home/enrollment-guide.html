@@ -1,0 +1,89 @@
+<section class="enrollment-guide" id="enrollment" aria-labelledby="enrollment-heading">
+  <div class="public-container journey-layout">
+    <div class="journey-intro">
+      <span class="eyebrow">FROM FIRST CLICK TO FIRST CLASS</span>
+      <h2 class="section-title" id="enrollment-heading">A clear path<br />into your class.</h2>
+      <p>One application. Two ways to pay. A place to start something new.</p>
+      <a routerLink="/courses" class="text-link">Find your class <app-icon name="arrow" /></a>
+      <div class="journey-reminder">
+        <app-icon name="clock" />
+        <p>
+          Applications stay pending for up to <strong>72 hours</strong>. Arrange payment and
+          confirmation within that window.
+        </p>
+      </div>
+    </div>
+    <ol class="journey-steps">
+      <li>
+        <span class="journey-number">01</span>
+        <div>
+          <h3>Find the group that fits</h3>
+          <p>
+            Explore a course and choose a schedule, teacher, and location that work for you. Check
+            the available seats.
+          </p>
+        </div>
+      </li>
+      <li>
+        <span class="journey-number">02</span>
+        <div>
+          <h3>Send your application</h3>
+          <p>
+            Sign in as a student and confirm your request. Your application appears in your
+            dashboard with its payment instructions and deadline.
+          </p>
+          <span class="journey-tag"><app-icon name="clock" />Application pending</span>
+        </div>
+      </li>
+      <li class="journey-payment">
+        <span class="journey-number">03</span>
+        <div>
+          <h3>Choose how you’d like to pay</h3>
+          <p>
+            Visit us for the quickest confirmation, or send a bank transfer and share the receipt.
+          </p>
+          <div class="journey-options">
+            <article class="journey-option journey-recommended">
+              <span class="method-tag">RECOMMENDED</span><app-icon name="pin" />
+              <h4>Visit & pay in person</h4>
+              <p>
+                Pay directly at the academy. Our team can confirm your place during the same visit
+                once payment and availability are verified.
+              </p>
+              <span class="method-result"
+                ><app-icon name="check" />Confirmation during your visit</span
+              ><a routerLink="/" fragment="contact" class="text-link"
+                >Find us <app-icon name="arrow"
+              /></a>
+            </article>
+            <article class="journey-option">
+              <span class="method-tag method-secondary">BANK TRANSFER</span><app-icon name="bank" />
+              <h4>Transfer & upload a receipt</h4>
+              <p>
+                Use the academy’s RIB shown in your application. Upload your PDF or photo receipt,
+                then wait for our team to verify payment.
+              </p>
+              <span class="method-result"
+                ><app-icon name="file" />Receipt + admin review required</span
+              >
+            </article>
+          </div>
+        </div>
+      </li>
+      <li class="journey-confirmed">
+        <span class="journey-number"><app-icon name="check" /></span>
+        <div>
+          <h3>You’re in. Let the learning begin.</h3>
+          <p>
+            Once an administrator confirms your enrollment, your seat is secured and your class
+            workspace and materials become available.
+          </p>
+          <p class="journey-fineprint">
+            An application or receipt alone does not reserve a seat. Confirmation depends on
+            payment, availability, and the application deadline.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>

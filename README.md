@@ -64,11 +64,19 @@ Visitors can send enquiries through the footer’s contact form without an accou
 
 In **Messages → Footer & location**, set the public email/phone, Instagram, Facebook, and WhatsApp links, location name/address, and latitude/longitude. Both coordinates are required for the map; the editor includes a preview. The footer’s map and address open the pinned location in Google Maps. With an address alone, they open a Google Maps address search. The map preview uses OpenStreetMap. Empty social/contact fields stay hidden; paste full public profile URLs and save to show their icons. WhatsApp links use `https://wa.me/` followed by the international phone number with digits only. Until a location is configured, the footer shows an illustration and invites visitors to ask about class locations. Flyway migration V7 creates the inbox and footer settings when the backend starts.
 
+## Payment options and receipts
+
+In **Admin → Payments**, publish the bank name, account holder, RIB, visiting hours, and instructions for each method. Leave all three bank fields blank until the real details are ready. The visiting address and Google Maps pin come from **Admin → Messages → Footer & location**.
+
+Students see both methods in their pending application: paying in person is recommended for confirmation during their visit, subject to payment verification and seat availability. Bank transfers require a receipt, uploaded using the drop zone (one PDF, JPG, or PNG up to 5 MB). Students can replace a receipt before the application deadline. Files use private R2 storage and are accessible only to the student and administrators through temporary download links; uploads stay disabled until R2 is configured.
+
+In **Admin → Enrollments**, applications with receipts are marked and the review panel provides a download. Administrators must verify the payment and confirm enrollment themselves. Uploading never confirms enrollment, reserves a seat, or extends the existing 72-hour deadline. Reapplying after cancellation clears the previous application’s receipt. Flyway migration **V9** creates the payment settings and receipt metadata on backend startup; bank details start empty.
+
 ## Connect storage
 
 Text posts and existing Drive links work immediately. For private Cloudflare R2 attachments, set `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY` on the backend. Keep the bucket private. See [R2 setup and deployment](docs/DEPLOYMENT_FREE_TIER.md#8-configure-cloudflare-r2-attachment-storage).
 
-Private attachments use R2 only; Google OAuth credentials are not used. Ordinary Google Drive/Docs links can still be shared as resource links. Uploads are limited to 25 MB. Uploads stay disabled until all R2 settings are present.
+Private attachments use R2 only; Google OAuth credentials are not used. Ordinary Google Drive/Docs links can still be shared as resource links. Material uploads are limited to 25 MB; payment receipts are limited to 5 MB. Uploads stay disabled until all R2 settings are present.
 
 Object storage stores attachments; you still need a hosted backend and database. Render and Cloudflare Worker deployment configuration is included.
 

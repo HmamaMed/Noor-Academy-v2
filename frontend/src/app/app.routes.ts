@@ -51,13 +51,23 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'courses', pathMatch: 'full' },
       {
+        path: 'payment-settings',
+        canDeactivate: [keepUnsavedChanges],
+        loadComponent: () =>
+          import('./features/admin/payments/payment-settings').then((m) => m.PaymentSettings),
+      },
+      {
         path: 'testimonials',
-        loadComponent: () => import('./features/admin/testimonials/admin-testimonials').then((m) => m.AdminTestimonials),
+        loadComponent: () =>
+          import('./features/admin/testimonials/admin-testimonials').then(
+            (m) => m.AdminTestimonials,
+          ),
       },
       {
         path: 'messages',
         canDeactivate: [keepUnsavedChanges],
-        loadComponent: () => import('./features/admin/contact/admin-contact').then((m) => m.AdminContact),
+        loadComponent: () =>
+          import('./features/admin/contact/admin-contact').then((m) => m.AdminContact),
       },
       {
         path: 'courses',

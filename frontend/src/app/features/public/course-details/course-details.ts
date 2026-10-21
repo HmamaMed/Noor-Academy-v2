@@ -13,9 +13,10 @@ import { StatusBadge } from '../../../shared/components/status-badge';
 import { NoorDialog } from '../../../shared/design/dialog';
 import { Icon } from '../../../shared/design/icon';
 import { CourseImage } from '../../../shared/design/course-image';
+import { EnrollmentPayment } from '../../../shared/components/enrollment-payment';
 
 @Component({
-  selector: 'app-course-details', imports: [RouterLink, DatePipe, TitleCasePipe, StatusBadge, NoorDialog, Icon, CourseImage],
+  selector: 'app-course-details', imports: [RouterLink, DatePipe, TitleCasePipe, StatusBadge, NoorDialog, Icon, CourseImage, EnrollmentPayment],
   templateUrl: './course-details.html', styleUrl: './course-details.css',
 })
 export class CourseDetails implements OnInit {
@@ -42,6 +43,10 @@ export class CourseDetails implements OnInit {
   protected application = signal<Enrollment | null>(null);
   protected error = signal<string | null>(null);
   protected received = signal(false);
+  protected paymentBusy = signal(false);
+  protected closeApplication() {
+    if (!this.paymentBusy()) this.application.set(null);
+  }
 
   ngOnInit(): void { this.load(); }
   load() {

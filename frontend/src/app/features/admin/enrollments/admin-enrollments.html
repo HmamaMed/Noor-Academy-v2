@@ -2,6 +2,9 @@
   <div>
     <h1>Enrollment requests</h1>
     <p>Review applications and confirm enrollment after payment.</p>
+    <a routerLink="/admin/payment-settings" class="text-link"
+      >Edit payment details <app-icon name="arrow"
+    /></a>
   </div>
   <button class="btn-secondary" [disabled]="loading() || submitting()" (click)="load()">
     {{ loading() ? 'Refreshing…' : 'Refresh' }}
@@ -10,6 +13,12 @@
 @if (success()) {
   <p class="notice notice-success record-feedback" role="status">
     <app-icon name="check" />{{ success() }}
+  </p>
+}
+@if (receiptLoadFailed()) {
+  <p class="notice notice-warning record-feedback" role="alert">
+    Receipt indicators could not be refreshed. Open an application to check its receipt, or refresh
+    this page.
   </p>
 }
 @if (loadError()) {
@@ -71,6 +80,9 @@
             <tr [class.row-selected]="selected()?.id === item.id">
               <td data-label="Student">
                 <span class="record-title">{{ item.studentName }}</span>
+                @if (receiptEnrollmentIds().includes(item.id)) {
+                  <span class="record-summary">Bank receipt submitted</span>
+                }
               </td>
               <td data-label="Course / group">
                 {{ item.courseTitle }}<span class="record-summary">{{ item.groupName }}</span>
@@ -248,6 +260,7 @@
         </div>
       }
     </dl>
+    <app-payment-receipt [enrollment]="item" />
     @if (item.status === 'PENDING') {
       <div class="notice notice-warning">
         <app-icon name="info" />

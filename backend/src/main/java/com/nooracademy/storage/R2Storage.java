@@ -95,6 +95,11 @@ public class R2Storage {
         return put("course-images/" + UUID.randomUUID(), bytes, contentType, "inline");
     }
 
+    public String uploadReceipt(String name, byte[] bytes) {
+        requireEnabled();
+        return put("payment-receipts/" + UUID.randomUUID(), bytes, "application/octet-stream", disposition(name));
+    }
+
     private String put(String key, byte[] bytes, String contentType, String contentDisposition) {
         try {
             client.putObject(PutObjectRequest.builder().bucket(bucket).key(key)

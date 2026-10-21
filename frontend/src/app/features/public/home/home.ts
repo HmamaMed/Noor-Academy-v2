@@ -6,10 +6,11 @@ import { CourseCard } from '../../../shared/components/course-card';
 import { Icon } from '../../../shared/design/icon';
 import { WorkspacePreview } from '../../../shared/design/workspace-preview';
 import { Testimonials } from './testimonials';
+import { EnrollmentGuide } from './enrollment-guide';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, CourseCard, Icon, WorkspacePreview, Testimonials],
+  imports: [RouterLink, CourseCard, Icon, WorkspacePreview, Testimonials, EnrollmentGuide],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

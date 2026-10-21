@@ -1,0 +1,96 @@
+<div class="receipt-section">
+  <h4><app-icon name="file" />Transfer receipt</h4>
+  @if (loading()) {
+    <p class="field-help" role="status">Checking your receipt…</p>
+  } @else if (loadFailed()) {
+    <div class="notice notice-error" role="alert">
+      <div>
+        <p>We couldn’t check the receipt.</p>
+        <button type="button" class="text-link" (click)="retry()">Try again</button>
+      </div>
+    </div>
+  } @else {
+    @if (receipt(); as receipt) {
+      <div class="receipt-file">
+        <app-icon name="file" />
+        <div>
+          <strong>{{ receipt.fileName }}</strong
+          ><span
+            >Received {{ receipt.uploadedAt | date: 'd MMM y, HH:mm' }} ·
+            {{ (receipt.fileSize / 1024).toFixed(0) }} KB</span
+          >
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Download payment receipt"
+          [disabled]="downloading() || uploading()"
+          (click)="download()"
+        >
+          <app-icon name="download" />
+        </button>
+      </div>
+    } @else if (!allowUpload()) {
+      <p class="field-help">No bank transfer receipt has been submitted.</p>
+    }
+    @if (canUpload()) {
+      <label
+        class="receipt-dropzone"
+        [class.dragging]="dragging()"
+        [class.disabled]="uploading()"
+        [for]="fileId()"
+        (dragover)="dragOver($event)"
+        (dragleave)="dragging.set(false)"
+        (drop)="drop($event)"
+      >
+        <input
+          [id]="fileId()"
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+          [disabled]="uploading()"
+          (change)="fileChanged($event)"
+        />
+        <app-icon name="upload" /><strong>{{
+          receipt() ? 'Choose a replacement receipt' : 'Drop your receipt here'
+        }}</strong
+        ><span>or click to choose a file · PDF, JPG, PNG · max 5 MB</span>
+      </label>
+      @if (selectedFile(); as file) {
+        <div class="receipt-selection">
+          <span>{{ file.name }}</span
+          ><button
+            type="button"
+            class="text-link"
+            [disabled]="uploading()"
+            (click)="selectedFile.set(null)"
+          >
+            Remove
+          </button>
+        </div>
+        <button
+          type="button"
+          class="btn-primary receipt-send"
+          [disabled]="uploading()"
+          (click)="upload()"
+        >
+          {{ uploading() ? 'Sending receipt…' : receipt() ? 'Replace receipt' : 'Send receipt'
+          }}<app-icon name="upload" />
+        </button>
+      }
+      <p class="field-help">
+        Only you and academy admins can access this file. Uploading a receipt does not reserve a
+        seat or extend your application deadline.
+      </p>
+    } @else if (allowUpload() && !uploadsEnabled()) {
+      <p class="field-help">
+        Receipt uploads are currently unavailable. Please contact the academy or pay in person.
+      </p>
+    }
+  }
+  @if (error()) {
+    <p class="notice notice-error receipt-feedback" role="alert">{{ error() }}</p>
+  }
+  @if (success()) {
+    <p class="notice notice-success receipt-feedback" role="status">{{ success() }}</p>
+  }
+</div>

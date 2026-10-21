@@ -1,0 +1,148 @@
+<div class="page-heading">
+  <div>
+    <h1>Payment details</h1>
+    <p>Give students a clear next step after they apply.</p>
+  </div>
+  <a routerLink="/admin/enrollments" class="btn-secondary">Enrollment requests</a>
+</div>
+@if (success()) {
+  <p class="notice notice-success record-feedback" role="status">{{ success() }}</p>
+}
+@if (loading()) {
+  <p role="status" class="muted">Loading payment details…</p>
+} @else if (loadError()) {
+  <div class="empty-state" role="alert">
+    <h2>We couldn’t load payment settings.</h2>
+    <p>{{ loadError() }}</p>
+    <button type="button" class="btn-primary" (click)="load()">Try again</button>
+  </div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()" class="payment-settings-form" novalidate>
+    @if (formError()) {
+      <p
+        class="notice notice-error record-feedback"
+        id="record-form-error"
+        tabindex="-1"
+        role="alert"
+      >
+        {{ formError() }}
+      </p>
+    }
+    <fieldset [disabled]="saving()" class="settings-sections">
+      <section class="panel">
+        <div class="settings-heading">
+          <app-icon name="pin" />
+          <div>
+            <h2>Pay at the academy</h2>
+            <p>
+              The recommended option for confirmation during the visit, once payment and
+              availability are verified.
+            </p>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="payment-hours">Visiting / payment hours</label
+          ><input
+            id="payment-hours"
+            formControlName="openingHours"
+            maxlength="300"
+            placeholder="Enter the hours when someone can receive payments"
+            [attr.aria-invalid]="invalid('openingHours')"
+          />
+        </div>
+        <div class="form-field">
+          <label for="payment-visit">Visiting instructions</label
+          ><textarea
+            id="payment-visit"
+            formControlName="visitInstructions"
+            maxlength="1000"
+            placeholder="Who to ask for, which entrance to use, or what to bring"
+            [attr.aria-invalid]="invalid('visitInstructions')"
+          ></textarea>
+        </div>
+        <p class="field-help">
+          The payment address and Google Maps pin come from
+          <a routerLink="/admin/messages" class="text-link">Messages → Footer & location</a>.
+        </p>
+      </section>
+      <section class="panel">
+        <div class="settings-heading">
+          <app-icon name="bank" />
+          <div>
+            <h2>Bank transfer</h2>
+            <p>
+              These details are shared with students after they apply. Leave all three bank fields
+              blank to show a “contact us” message.
+            </p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="payment-bank">Bank name</label
+            ><input
+              id="payment-bank"
+              formControlName="bankName"
+              maxlength="160"
+              [attr.aria-invalid]="invalid('bankName')"
+            />
+          </div>
+          <div class="form-field">
+            <label for="payment-holder">Account holder</label
+            ><input
+              id="payment-holder"
+              formControlName="accountHolder"
+              maxlength="160"
+              [attr.aria-invalid]="invalid('accountHolder')"
+            />
+          </div>
+          <div class="form-field form-field-full">
+            <label for="payment-rib">RIB</label
+            ><input
+              id="payment-rib"
+              formControlName="rib"
+              maxlength="80"
+              autocomplete="off"
+              [attr.aria-invalid]="invalid('rib')"
+              aria-describedby="payment-rib-help"
+            />
+            <p id="payment-rib-help" class="field-help">
+              Check the number carefully before saving. Students can copy this exact RIB.
+            </p>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="payment-bank-instructions">Bank transfer instructions</label
+            ><textarea
+              id="payment-bank-instructions"
+              formControlName="bankInstructions"
+              maxlength="1000"
+              placeholder="Any additional instructions students should follow"
+              [attr.aria-invalid]="invalid('bankInstructions')"
+            ></textarea>
+          </div>
+        </div>
+        <p class="notice admin-section" [class.notice-warning]="!settings()?.receiptUploadsEnabled">
+          <app-icon [name]="settings()?.receiptUploadsEnabled ? 'check' : 'info'" />{{
+            settings()?.receiptUploadsEnabled
+              ? 'Private receipt uploads are available. Students can send PDF, JPG, or PNG files up to 5 MB.'
+              : 'Receipt uploads are unavailable until private R2 storage is configured on the backend. Students can still pay in person.'
+          }}
+        </p>
+      </section>
+    </fieldset>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save payment details' }}
+      </button>
+    </div>
+  </form>
+}
+@if (discardAction()) {
+  <app-admin-confirm
+    title="Discard payment changes?"
+    message="Your unsaved payment instructions will be lost."
+    acceptLabel="Discard changes"
+    cancelLabel="Keep editing"
+    (accepted)="discardChanges()"
+    (cancelled)="keepEditing()"
+  />
+}

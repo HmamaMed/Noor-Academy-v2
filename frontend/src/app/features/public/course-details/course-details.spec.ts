@@ -10,6 +10,7 @@ import { CourseService } from '../../../core/services/course.service';
 import { EnrollmentService } from '../../../core/services/enrollment.service';
 import { GroupService } from '../../../core/services/group.service';
 import { NoorDialog } from '../../../shared/design/dialog';
+import { EnrollmentPayment } from '../../../shared/components/enrollment-payment';
 import { CourseDetails } from './course-details';
 
 @Component({
@@ -19,7 +20,14 @@ import { CourseDetails } from './course-details';
 class TestDialog {
   label = input('');
   busy = input(false);
+  wide = input(false);
   closed = output<void>();
+}
+
+@Component({ selector: 'app-enrollment-payment', template: '' })
+class TestPayment {
+  enrollment = input.required<Enrollment>();
+  busyChange = output<boolean>();
 }
 
 describe('Course application confirmation', () => {
@@ -94,8 +102,8 @@ describe('Course application confirmation', () => {
         { provide: EnrollmentService, useValue: { findMine, apply } },
       ],
     }).overrideComponent(CourseDetails, {
-      remove: { imports: [NoorDialog] },
-      add: { imports: [TestDialog] },
+      remove: { imports: [NoorDialog, EnrollmentPayment] },
+      add: { imports: [TestDialog, TestPayment] },
     });
   });
 

@@ -11,16 +11,29 @@ import { Icon } from '../../../shared/design/icon';
 import { NoorDialog } from '../../../shared/design/dialog';
 import { dateKey, nextSession, weeklySessions } from '../../../shared/utils/schedule';
 import { StudentTestimonials } from './student-testimonials';
+import { EnrollmentPayment } from '../../../shared/components/enrollment-payment';
 
 @Component({
   selector: 'app-student-dashboard',
-  imports: [StatusBadge, RouterLink, DatePipe, TitleCasePipe, CourseMotif, Icon, NoorDialog, StudentTestimonials],
+  imports: [
+    StatusBadge,
+    RouterLink,
+    DatePipe,
+    TitleCasePipe,
+    CourseMotif,
+    Icon,
+    NoorDialog,
+    StudentTestimonials,
+    EnrollmentPayment,
+  ],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
 export class StudentDashboard implements OnInit {
   private readonly studentTestimonials = viewChild(StudentTestimonials);
-  canLeave(): boolean | Promise<boolean> { return this.studentTestimonials()?.canLeave() ?? true; }
+  canLeave(): boolean | Promise<boolean> {
+    return this.paymentBusy() ? false : (this.studentTestimonials()?.canLeave() ?? true);
+  }
   private readonly toast = inject(ToastService);
   private readonly enrollmentService = inject(EnrollmentService);
   protected section = toSignal(inject(ActivatedRoute).fragment);
@@ -33,6 +46,10 @@ export class StudentDashboard implements OnInit {
   protected selectedApplication = signal<Enrollment | null>(null);
   protected confirmCancellation = signal(false);
   protected applicationError = signal('');
+  protected paymentBusy = signal(false);
+  protected closeApplication() {
+    if (!this.paymentBusy()) this.selectedApplication.set(null);
+  }
   protected confirmed = computed(() =>
     this.enrollments().filter(
       (e) =>
@@ -81,7 +98,7 @@ export class StudentDashboard implements OnInit {
     this.selectedApplication.set(enrollment);
   }
   protected cancel(enrollment: Enrollment) {
-    if (this.cancellingId() !== null) return;
+    if (this.cancellingId() !== null || this.paymentBusy()) return;
     this.cancellingId.set(enrollment.id);
     this.applicationError.set('');
     this.enrollmentService.cancel(enrollment.id).subscribe({

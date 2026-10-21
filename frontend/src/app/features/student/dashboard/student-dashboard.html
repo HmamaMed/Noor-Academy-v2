@@ -41,7 +41,12 @@
         [attr.aria-current]="section() === 'past-groups' ? 'location' : null"
         >Past groups</a
       >
-      <a [routerLink]="[]" fragment="your-voice" [attr.aria-current]="section() === 'your-voice' ? 'location' : null">Your story</a>
+      <a
+        [routerLink]="[]"
+        fragment="your-voice"
+        [attr.aria-current]="section() === 'your-voice' ? 'location' : null"
+        >Your story</a
+      >
     </nav>
     <div class="dashboard-grid">
       <section class="panel panel-soft next-class" aria-labelledby="next-class-heading">
@@ -110,7 +115,7 @@
               Awaiting manual payment and administrator approval. A seat is not guaranteed.
             </p>
             <button class="btn-secondary" (click)="viewApplication(enrollment)">
-              View application
+              Payment & application
             </button>
           </article>
         } @empty {
@@ -204,8 +209,9 @@
 @if (selectedApplication(); as enrollment) {
   <app-dialog
     label="Application details"
-    [busy]="cancellingId() !== null"
-    (closed)="selectedApplication.set(null)"
+    [wide]="true"
+    [busy]="cancellingId() !== null || paymentBusy()"
+    (closed)="closeApplication()"
   >
     <div class="dialog-heading">
       <div>
@@ -215,8 +221,8 @@
       <button
         class="icon-button"
         aria-label="Close application details"
-        [disabled]="cancellingId() !== null"
-        (click)="selectedApplication.set(null)"
+        [disabled]="cancellingId() !== null || paymentBusy()"
+        (click)="closeApplication()"
       >
         <app-icon name="close" />
       </button>
@@ -243,14 +249,7 @@
           Expires {{ enrollment.expiresAt | date: "d MMM y 'at' HH:mm" : 'UTC' }} UTC.
         </p>
       }
-      <div class="notice notice-warning">
-        <app-icon name="clock" />
-        <p>
-          Your application is awaiting confirmation. Enrollment is confirmed after payment is
-          received and an administrator approves your application. A seat is not guaranteed.
-        </p>
-      </div>
-      <p class="meta">The academy must provide manual payment instructions.</p>
+      <app-enrollment-payment [enrollment]="enrollment" (busyChange)="paymentBusy.set($event)" />
       @if (applicationError()) {
         <p class="notice notice-error" role="alert">{{ applicationError() }}</p>
       }
@@ -259,13 +258,13 @@
         <div class="actions">
           <button
             class="btn-secondary"
-            [disabled]="cancellingId() !== null"
+            [disabled]="cancellingId() !== null || paymentBusy()"
             (click)="confirmCancellation.set(false)"
           >
             Keep application</button
           ><button
             class="btn-danger"
-            [disabled]="cancellingId() !== null"
+            [disabled]="cancellingId() !== null || paymentBusy()"
             (click)="cancel(enrollment)"
           >
             {{ cancellingId() ? 'Cancelling…' : 'Cancel application' }}
@@ -273,9 +272,15 @@
         </div>
       } @else {
         <div class="form-actions">
-          <button class="btn-danger" (click)="confirmCancellation.set(true)">
+          <button
+            class="btn-danger"
+            [disabled]="paymentBusy()"
+            (click)="confirmCancellation.set(true)"
+          >
             Cancel application</button
-          ><button class="btn-secondary" (click)="selectedApplication.set(null)">Close</button>
+          ><button class="btn-secondary" [disabled]="paymentBusy()" (click)="closeApplication()">
+            Close
+          </button>
         </div>
       }
     </div>

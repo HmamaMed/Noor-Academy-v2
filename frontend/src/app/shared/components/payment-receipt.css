@@ -1,0 +1,113 @@
+:host {
+  display: block;
+}
+.receipt-section {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--noor-border);
+}
+h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+h4 app-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.receipt-dropzone {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 1.5rem 1rem;
+  border: 1px dashed var(--noor-border-control);
+  border-radius: 0.75rem;
+  background: var(--noor-background);
+  text-align: center;
+  cursor: pointer;
+}
+.receipt-dropzone input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.receipt-dropzone:focus-within {
+  outline: 3px solid var(--noor-primary);
+  outline-offset: 3px;
+}
+.receipt-dropzone.dragging,
+.receipt-dropzone:hover {
+  background: var(--noor-primary-soft);
+  border-color: var(--noor-primary);
+}
+.receipt-dropzone.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.receipt-dropzone > app-icon {
+  color: var(--noor-primary);
+}
+.receipt-dropzone strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.receipt-dropzone > span {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--noor-text-muted);
+}
+.receipt-file {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--noor-border);
+  border-radius: 0.5rem;
+}
+.receipt-file > div {
+  flex: 1;
+  min-width: 0;
+}
+.receipt-file strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 0.8125rem;
+}
+.receipt-file span {
+  display: block;
+  color: var(--noor-text-muted);
+  font-size: 0.6875rem;
+  margin-top: 0.25rem;
+}
+.receipt-file > app-icon {
+  color: var(--noor-primary);
+}
+.receipt-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+}
+.receipt-selection > span {
+  overflow-wrap: anywhere;
+}
+.receipt-selection button {
+  flex-shrink: 0;
+}
+.receipt-send {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+.receipt-feedback {
+  margin-top: 1rem;
+}
