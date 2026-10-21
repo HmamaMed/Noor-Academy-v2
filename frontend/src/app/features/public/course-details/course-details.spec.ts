@@ -87,6 +87,8 @@ describe('Course application confirmation', () => {
         {
           provide: ActivatedRoute,
           useValue: {
+            paramMap: of(convertToParamMap({ id: '1' })),
+            queryParamMap: of(convertToParamMap({})),
             snapshot: {
               paramMap: convertToParamMap({ id: '1' }),
               queryParamMap: convertToParamMap({}),

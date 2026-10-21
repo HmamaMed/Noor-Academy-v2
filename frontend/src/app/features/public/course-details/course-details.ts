@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { distinctUntilChanged, forkJoin, map, Subscription } from 'rxjs';
 import { CourseService } from '../../../core/services/course.service';
 import { GroupService } from '../../../core/services/group.service';
 import { EnrollmentService } from '../../../core/services/enrollment.service';
@@ -27,7 +28,11 @@ export class CourseDetails implements OnInit {
   private enrollmentService = inject(EnrollmentService);
   protected authService = inject(AuthService);
   private courseId = Number(this.route.snapshot.paramMap.get('id'));
-  protected intentGroupId = Number(this.route.snapshot.queryParamMap.get('group'));
+  private readonly destroyRef = inject(DestroyRef);
+  private courseRequest?: Subscription;
+  private groupsRequest?: Subscription;
+  private enrollmentsRequest?: Subscription;
+  protected intentGroupId = signal(Number(this.route.snapshot.queryParamMap.get('group')));
   protected course = signal<Course | null>(null);
   protected groups = signal<Group[]>([]);
   protected enrollments = signal<Enrollment[]>([]);
@@ -48,27 +53,44 @@ export class CourseDetails implements OnInit {
     if (!this.paymentBusy()) this.application.set(null);
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.intentGroupId.set(Number(params.get('group')));
+    });
+    this.route.paramMap.pipe(
+      map(params => Number(params.get('id'))),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(id => {
+      this.courseId = id;
+      this.reviewGroup.set(null); this.application.set(null); this.error.set(null); this.received.set(false);
+      this.load();
+    });
+  }
   load() {
+    this.courseRequest?.unsubscribe(); this.groupsRequest?.unsubscribe(); this.enrollmentsRequest?.unsubscribe();
+    this.course.set(null); this.groups.set([]); this.enrollments.set([]);
     this.loading.set(true); this.courseError.set(false); this.notFound.set(false);
     if (!Number.isSafeInteger(this.courseId) || this.courseId <= 0) { this.notFound.set(true); this.loading.set(false); return; }
-    this.courseService.findById(this.courseId).subscribe({
+    this.courseRequest = this.courseService.findById(this.courseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (course) => { this.course.set(course); this.loading.set(false); },
       error: (err) => { this.loading.set(false); if (err.status === 404 || err.status === 400) this.notFound.set(true); else this.courseError.set(true); },
     });
     this.loadGroups(); this.loadEnrollments();
   }
   loadGroups() {
+    this.groupsRequest?.unsubscribe();
     this.groupsLoading.set(true); this.groupsError.set(false);
-    this.groupService.findAll().subscribe({
+    this.groupsRequest = this.groupService.findAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (groups) => { this.groups.set(groups.filter(g => g.courseId === this.courseId)); this.groupsLoading.set(false); },
       error: () => { this.groupsError.set(true); this.groupsLoading.set(false); },
     });
   }
   loadEnrollments() {
+    this.enrollmentsRequest?.unsubscribe();
     if (!this.authService.isAuthenticated || !this.authService.hasRole('STUDENT')) return;
     this.enrollmentLoading.set(true); this.enrollmentError.set(false);
-    this.enrollmentService.findMine().subscribe({
+    this.enrollmentsRequest = this.enrollmentService.findMine().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (enrollments) => {
         this.enrollments.set(enrollments); this.enrollmentLoading.set(false);
         const group = this.reviewGroup();
