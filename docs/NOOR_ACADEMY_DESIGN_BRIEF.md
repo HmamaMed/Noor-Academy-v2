@@ -20,7 +20,9 @@ Success means:
 
 Noor Academy is an academy management and class materials platform. Classes are organized into scheduled groups with assigned teachers, rooms, and limited capacity.
 
-The repository's demonstration catalog contains **Quran Memorization, Arabic Language Fundamentals, Islamic Studies, and Tajweed Mastery**. Use these as example course content. They suggest an Islamic and Arabic learning direction, but the final academy positioning and live catalog still need owner confirmation.
+The owner has confirmed that **Noor Academy is about enlightenment through learning, curiosity, and personal growth across subjects**. Its launch identity is not religious. Islamic courses may be offered in the future as one subject among others.
+
+The repository's historical demonstration catalog includes Quran Memorization, Arabic Language Fundamentals, Islamic Studies, and Tajweed Mastery. These are demonstration records, not confirmation of the academy's launch offering or its positioning. Confirm real course titles with the owner before publishing a launch catalog.
 
 ### Audiences and their tasks
 
@@ -57,7 +59,7 @@ Course records currently contain a title, description, and syllabus. Group recor
 
 ## 3. Proposed brand identity
 
-**Working positioning:** A welcoming academy for meaningful learning, with guided classes and an organized study experience.
+**Confirmed positioning:** A welcoming academy that helps people broaden their understanding and grow through learning. Enlightenment, curiosity, clarity, and personal growth guide the identity across course subjects.
 
 **Working promise:** Clear guidance. Thoughtful learning. Steady growth.
 
@@ -65,9 +67,9 @@ Course records currently contain a title, description, and syllabus. Group recor
 
 **Voice:** Clear and encouraging. Speak to learners directly. Use short sentences and concrete actions. Avoid exaggerated promises, corporate jargon, and pressure-based enrollment language.
 
-The name “Noor” offers a creative theme of **light, clarity, and growth**. Express this through spacious layouts, gentle illumination, and a restrained visual motif. This is a proposed creative direction, not an existing approved brand guideline.
+The name “Noor” expresses **light, clarity, and growth**. Express this through spacious layouts, thoughtful typography, and a restrained visual motif. Arabic calligraphy may represent the academy's name without defining a religious focus. Specific logo refinements remain visual proposals until reviewed by the owner.
 
-If the owner confirms the Islamic learning positioning, use subtle geometric details and respectful educational imagery. Keep decorative patterns away from dense text and forms. Do not use sacred text as filler or decoration.
+Use imagery about discovery, ideas, learning, and human development. Keep the main identity broad: avoid religious symbols or sacred text as brand decoration. Future specialist courses can have their own subject-appropriate visuals without changing the academy's overall positioning.
 
 ### Example copy direction
 

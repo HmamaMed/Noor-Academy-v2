@@ -1,0 +1,22 @@
+Built-in image generation tool. Original logo files preserved.
+
+FIRST REFINEMENT
+
+Use case: logo-brand / style-transfer edit.
+Asset type: refined primary horizontal logo for the existing Noor Academy website.
+Input image 1 is the user's existing logo and the edit target, not a layout to reproduce literally.
+Primary request: professionally refine this exact existing identity for a broad learning academy about enlightenment, curiosity, knowledge and personal growth. The academy is NOT religiously positioned; Islamic courses are only a possible future subject. Arabic is the language of the name, not a religious positioning.
+Preserve: the recognizable flowing Arabic Noor calligraphic silhouette from the reference, including its sweeping upward stroke, lower bowl and single accent dot. Preserve its reading and orientation; do not mirror, invent letters or replace it with a generic flame, sun or N.
+Refine: remove the surrounding rounded rectangle, ALL contrasting outlines and the long yellow underline. Redraw the mark as clean solid forest-green #163D35 shapes with balanced open counters and slightly less extreme vertical proportions. Make the single dot muted brass-gold #B58A43. Calm, clear, contemporary, confident and welcoming, suitable for a learning organization across many disciplines.
+Layout: a compact, optically balanced horizontal lockup on a truly transparent background. Calligraphic symbol on the left. On the right, the exact words "noor academy", lowercase, on one line in a refined medium-weight editorial serif with generous counters and carefully adjusted spacing. The name must be prominent and readable; the symbol must NOT tower several times above the wordmark. Aim for symbol height roughly 1.4 times the lowercase wordmark's total visible height. Balanced gap and modest even transparent margins. Overall logo aspect ratio approximately 4:1.
+Colors: forest green #163D35 for mark and wordmark, brass-gold #B58A43 for the dot only. Actual transparent alpha elsewhere, including internal counters.
+Rendering: crisp flat vector-like artwork, smooth deliberate curves, two colors only, no textures, gradients, shadows, mockup objects, extra taglines or labels.
+Avoid religious symbols, mosques, crescents, stars, sacred text, ornamental frames, decorative underline, extra dots, tiny letters, 3D, metallic effects. One logo only.
+
+PROPORTION REFINEMENT
+
+Use case: logo-brand / precise-object-edit.
+Input image 1 is the edit target: the refined green and gold Noor Academy logo.
+Change ONLY the relative scale and spacing of the existing elements to make a compact, professional horizontal website logo. Preserve the actual Arabic calligraphic shapes and reading, the existing lowercase English text "noor academy" exactly, the serif letterforms, and the green/gold identity.
+The Arabic symbol is still too tall. Reduce the complete Arabic symbol including its gold dot to about 55-60% of its CURRENT height relative to the English wordmark. Keep the English wordmark at its current size. Vertically center the smaller complete symbol with the English text's visible lettering. Increase the clear gap between symbol and wordmark to approximately the width of one lowercase "o"; no part of the calligraphic flourish should touch the text. Resulting complete logo should be a clean wide lockup around 5:1, with balanced small transparent margins.
+Keep genuine alpha transparency in the background and letter counters. Flat solid forest green #163D35 and muted gold #B58A43 only. Smooth clean vector-like edges. No gradients, texture, shadows, outlines, frame, underline, extra dots, extra text, or religious imagery. One logo only.

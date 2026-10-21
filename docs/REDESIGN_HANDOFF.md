@@ -4,6 +4,14 @@ Implemented from the [UI specification](../Noor-Academy-Design-Kit/Noor-Academy-
 
 Open the [screenshot comparison gallery](redesign/index.html) to review each route at 1440 px and 390 px beside links to its reference boards. Captures use the isolated local review database and its demonstration records, not real academy identities or the design kit's static example records. Additional screenshots cover dialogs and recovery states.
 
+## Crash recovery — 18 October 2026
+
+The unfinished branding integration referenced missing stacked-logo, symbol, and favicon PNG files. The shared brand component now reuses the supplied refined PNG for horizontal, stacked, and symbol presentations using SVG viewports; the original pixels and letterforms remain unchanged. Header, sidebar, account forms, and footer all resolve to the existing asset. The existing favicon is retained pending a dedicated small icon. See the [branding notes](branding/README.md).
+
+The production build passes with `NG_BUILD_MAX_WORKERS=1`, and the frontend suite passed all 19 tests during this continuation. Static checks confirm that referenced brand assets exist, the supplied design tokens are unchanged, and the diff has no whitespace errors. Development API configuration remains `http://localhost:8080/api`; production continues to use its separate environment file.
+
+At the user's request, no further browser simulations or servers were launched after the resource concern. Development servers and the temporary review database are stopped. The screenshot gallery and browser results below are evidence from the earlier redesign review; they do not show the latest logo integration, which has only been checked through source inspection and compilation.
+
 ## Delivered
 
 - The existing Angular standalone components, reactive forms, RxJS services, lazy routes, and role guards remain in use. No frontend framework or UI library was added.
@@ -21,7 +29,7 @@ Confirmed students retain workspace access for completed groups. Teachers see as
 
 The frontend continues to use supported first/last names, optional phone numbers, course title/description/syllabus, actual group names, room capacity, and weekly sessions. It does not add course price, rating, difficulty, progress, checkout, submissions, grading, chat, or video fields.
 
-## Verification
+## Earlier redesign verification
 
 - `cd frontend && npm run build`: production build passes within existing budgets.
 - `cd frontend && npm test -- --watch=false`: 16 tests pass. New cases cover stale/denied workspace responses, read-only publishing permissions, retained failed-publish input, unsaved changes, download failure recovery, and cancelled/completed sign-out.
@@ -36,7 +44,7 @@ The checks above are development evidence, not a complete WCAG conformance audit
 
 | Requirement | Current handling / remaining decision |
 | --- | --- |
-| Standalone hero image, textures, course illustrations, approved logo | The kit supplies flattened screen boards, not reusable source assets. The implementation uses a provisional rising-light mark and code-native abstract artwork. Supply approved standalone assets for a closer match to the raster imagery. |
+| Standalone hero image, textures, course illustrations, final logo masters | The kit supplies flattened screen boards. Code-native abstract illustrations remain in use. The supplied refined PNG is now used for branding; approved vector masters and a dedicated small favicon remain outstanding. |
 | Academy timezone | No academy timezone is configured in the API. Dashboards label device-local schedule ordering; application timestamps are explicitly UTC. Configure an academy timezone before promising academy-time conversions. |
 | Separate Expired enrollment status | The backend records expiry as `CANCELLED` and has no cancellation-reason field. The admin UI explains this; it does not invent an Expired tab or infer the cause of a cancellation. |
 | Per-group capacity input | Capacity comes from the assigned room's `maxCapacity`. Group forms display that capacity. A separate editable group capacity would require an API/schema change. |
@@ -44,7 +52,7 @@ The checks above are development evidence, not a complete WCAG conformance audit
 | Multiple resource links or attachments | The material schema supports one optional Drive/Docs link and one optional file. The publisher preserves that contract. The existing `OTHER` category is retained. |
 | Persisted payment verification | The existing redesign's checkbox is a local confirmation safeguard. It is not saved as an accounting/payment record; owner adoption remains a design decision. |
 | Manual payment instructions, contact and policy content | Not supplied. Application views state that the academy must provide payment instructions. No invented banking details, addresses, policy pages, or dead placeholder links were added. |
-| Live uploads and password recovery email | Require configured Drive storage and SMTP respectively. UI availability and server failures remain visible; no simulated production success is shown. |
-| Approved catalog copy and brand positioning | Existing API content is preserved. Approve the demonstration descriptions/syllabi, mission, brand mark, and language decisions before launch. |
+| Live uploads and password recovery email | Require configured R2 storage and SMTP respectively. UI availability and server failures remain visible; no simulated production success is shown. |
+| Approved catalog copy and logo | The owner-confirmed positioning is broad learning, curiosity, and personal growth. Existing API catalog content is preserved; historical demonstration subjects do not define the launch catalog. Review actual launch courses, the logo refinement, and language decisions before launch. |
 
 Public group visibility also follows the existing API: inactive and completed groups are withheld from anonymous/student catalog queries. Their state screenshots use authorized administrator data. A group explicitly marked `FULL` stays closed even if the server reports remaining capacity; its copy says it is marked full instead of falsely claiming zero seats.

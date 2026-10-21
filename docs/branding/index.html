@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Noor Academy — logo refinement</title>
+  <style>
+    :root { color-scheme: light; --forest: #163d35; --gold: #b58a43; --ivory: #f7f5ef; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--ivory); color: var(--forest); font-family: Inter, Arial, sans-serif; line-height: 1.6; }
+    main { max-width: 1120px; margin: auto; padding: 56px 24px; }
+    .eyebrow { margin: 0 0 14px; font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { margin: 0 0 16px; font: 400 clamp(32px, 5vw, 54px)/1.15 Georgia, serif; letter-spacing: -.025em; }
+    .intro { max-width: 660px; margin: 0; color: #52635b; }
+    .stage { display: grid; place-items: center; margin: 36px 0 12px; padding: clamp(28px, 6vw, 72px); min-height: 280px; border: 1px solid #dce3dc; border-radius: 16px; background: white; }
+    .stage .logo-view { width: min(100%, 760px); }
+    .logo-view { display: block; position: relative; width: 100%; aspect-ratio: 1923 / 340; overflow: hidden; }
+    .logo-view img { position: absolute; display: block; width: 112.9485%; max-width: none; height: auto; left: -7.1243%; top: -59.4118%; }
+    .caption { margin: 10px 0 30px; color: #52635b; font-size: 13px; }
+    .navigation { display: flex; align-items: center; justify-content: space-between; gap: 28px; min-height: 88px; padding: 18px 26px; border: 1px solid #dce3dc; border-radius: 12px; background: #fff; }
+    .navigation .logo-view { width: 220px; max-width: 55%; flex-shrink: 0; }
+    .navigation span { font-size: 13px; }
+    .navigation .links { display: flex; align-items: center; gap: 26px; }
+    .navigation .button { border-radius: 7px; padding: 10px 16px; color: white; background: var(--forest); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { display: flex; flex-direction: column; justify-content: space-between; gap: 26px; min-height: 220px; border: 1px solid #dce3dc; border-radius: 12px; padding: 30px; background: white; }
+    .card .logo-view { width: 100%; margin: auto; }
+    .card p { margin: 0; font-size: 12px; color: #52635b; }
+    .dark { background: var(--forest); border-color: var(--forest); }
+    .dark img { filter: brightness(0) invert(1); }
+    .dark p { color: #e8f0eb; }
+    .swatches { display: flex; flex-wrap: wrap; gap: 20px; margin: 32px 0; }
+    .swatch { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+    .swatch i { display: inline-block; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #dce3dc; }
+    footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid #dce3dc; color: #52635b; font-size: 13px; }
+    a { color: inherit; text-underline-offset: 3px; }
+    @media (max-width: 640px) {
+      main { padding: 32px 18px; }
+      .grid { grid-template-columns: 1fr; }
+      .navigation { padding: 18px; gap: 12px; }
+      .navigation .logo-view { width: 160px; max-width: 55%; }
+      .navigation .links > span:first-child { display: none; }
+      .navigation .links { gap: 0; }
+      .navigation .button { padding: 9px 12px; white-space: nowrap; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Noor Academy · Identity refinement · v2</p>
+    <h1>Light. Learning. Growth.</h1>
+    <p class="intro">A refinement of the existing Noor mark for an academy built around curiosity, broader understanding, and personal growth across subjects.</p>
+
+    <div class="stage"><span class="logo-view"><img src="../../frontend/public/img/noor-academy-refined-v2.png" alt="Refined Noor Academy logo: flowing green Noor mark with a gold dot and a readable English name"></span></div>
+    <p class="caption">Primary proposal · green and gold · transparent PNG</p>
+
+    <div class="navigation" aria-label="Illustrative website header">
+      <span class="logo-view"><img src="../../frontend/public/img/noor-academy-refined-v2.png" alt="Noor Academy"></span>
+      <div class="links" aria-hidden="true"><span>Courses</span><span class="button">Explore courses</span></div>
+    </div>
+    <p class="caption">Navigation-size preview · the English name should remain readable alongside the symbol.</p>
+
+    <div class="grid">
+      <div class="card">
+        <span class="logo-view"><img src="../../frontend/public/img/noor-academy-refined-v2.png" alt="The refined logo on a white background"></span>
+        <p>Forest and muted gold on a light surface.</p>
+      </div>
+      <div class="card dark">
+        <span class="logo-view"><img src="../../frontend/public/img/noor-academy-refined-v2.png" alt="Single-colour white rendering of the refined logo on forest green"></span>
+        <p>Single-colour reverse · CSS preview, using the same silhouette.</p>
+      </div>
+    </div>
+
+    <div class="swatches" aria-label="Brand palette">
+      <span class="swatch"><i style="background:#163d35"></i>Forest #163D35</span>
+      <span class="swatch"><i style="background:#b58a43"></i>Gold #B58A43</span>
+      <span class="swatch"><i style="background:#f7f5ef"></i>Ivory #F7F5EF</span>
+    </div>
+    <footer>
+      <p>The Arabic mark represents the name Noor. The identity is about enlightenment through learning; it does not define a religious curriculum. Original logo files are retained.</p>
+      <p><a href="../../frontend/public/img/noor-academy-refined-v2.png">Open the transparent logo</a> · <a href="README.md">Design notes</a> · <a href="refinement-prompt.txt">Image-generation prompt</a></p>
+      <p>Visual proposal created with the built-in image generation tool. The PNG is raster artwork; an approved vector master and dedicated small icon are separate production assets.</p>
+    </footer>
+  </main>
+</body>
+</html>
