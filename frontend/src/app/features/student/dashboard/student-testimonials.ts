@@ -1,15 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-  computed,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, HostListener, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Enrollment } from '../../../core/models/enrollment.model';
 import {
@@ -27,13 +16,11 @@ import { Icon } from '../../../shared/design/icon';
   templateUrl: './student-testimonials.html',
   styleUrl: './student-testimonials.css',
 })
-export class StudentTestimonials implements OnInit, AfterViewInit {
+export class StudentTestimonials implements OnInit {
   enrollments = input.required<Enrollment[]>();
   private readonly service = inject(TestimonialService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly testimonials = signal<Testimonial[]>([]);
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
@@ -65,16 +52,6 @@ export class StudentTestimonials implements OnInit, AfterViewInit {
   });
   ngOnInit() {
     this.load();
-  }
-  ngAfterViewInit() {
-    // The dashboard loads enrollments before creating this section, after router scrolling.
-    if (this.route.snapshot.fragment === 'your-voice') {
-      setTimeout(() =>
-        this.element.nativeElement
-          .querySelector<HTMLElement>('#your-voice')
-          ?.scrollIntoView({ block: 'start' }),
-      );
-    }
   }
   protected load() {
     this.loading.set(true);

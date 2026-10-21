@@ -32,6 +32,7 @@ export const routes: Routes = [
     path: 'student/dashboard',
     canActivate: [authGuard],
     canDeactivate: [keepUnsavedChanges],
+    runGuardsAndResolvers: 'always',
     data: { roles: ['STUDENT'] },
     loadComponent: () =>
       import('./features/student/dashboard/student-dashboard').then((m) => m.StudentDashboard),

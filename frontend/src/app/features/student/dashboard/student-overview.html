@@ -1,0 +1,67 @@
+<div class="dashboard-overview" aria-label="Learning overview">
+  <section class="panel panel-soft next-class" aria-labelledby="next-class-heading">
+    @if (nextClass(); as nextClass) {
+      <div class="next-label">
+        <span class="eyebrow">Next class</span><app-status-badge status="CONFIRMED" />
+      </div>
+      <h2 id="next-class-heading">{{ nextClass.group.courseTitle }}</h2>
+      <p class="meta">{{ nextClass.group.groupName }}</p>
+      <ul class="class-facts">
+        <li>
+          <app-icon name="calendar" /><span
+            >{{ nextClass.date | date: 'EEE, d MMM y' }}<br />{{
+              nextClass.session.startTime.slice(0, 5)
+            }}–{{ nextClass.session.endTime.slice(0, 5) }}</span
+          >
+        </li>
+        <li><app-icon name="user" />{{ nextClass.group.teacherName }}</li>
+        <li><app-icon name="pin" />{{ nextClass.group.roomName }}</li>
+      </ul>
+      <a class="btn-primary" [routerLink]="['/classroom', nextClass.group.groupId]"
+        >Open workspace <app-icon name="arrow"
+      /></a>
+      <app-course-motif class="next-decoration" [title]="nextClass.group.courseTitle" />
+    } @else {
+      <app-icon name="calendar" />
+      <h2 id="next-class-heading">
+        {{
+          enrolledCount() ? 'No upcoming sessions scheduled' : 'Find a class that fits your week'
+        }}
+      </h2>
+      <p class="muted">
+        {{
+          enrolledCount()
+            ? 'Open the This week tab to find your groups and materials.'
+            : 'Explore the courses and choose a group that works for you.'
+        }}
+      </p>
+      @if (!enrolledCount()) {
+        <a routerLink="/courses" class="btn-primary">Explore courses <app-icon name="arrow" /></a>
+      }
+    }
+  </section>
+  <section class="panel dashboard-snapshot" aria-labelledby="snapshot-heading">
+    <h2 id="snapshot-heading">At a glance</h2>
+    <dl class="dashboard-stats">
+      <div>
+        <dt>Enrolled groups</dt>
+        <dd>{{ enrolledCount() }}</dd>
+      </div>
+      <div>
+        <dt>Sessions this week</dt>
+        <dd>{{ sessionCount() }}</dd>
+      </div>
+      <div>
+        <dt>Pending applications</dt>
+        <dd>{{ pendingCount() }}</dd>
+      </div>
+    </dl>
+    @if (pendingCount()) {
+      <button type="button" class="text-link" (click)="applicationsRequested.emit()">
+        Review your applications <app-icon name="arrow" />
+      </button>
+    } @else {
+      <a routerLink="/courses" class="text-link">Explore courses <app-icon name="arrow" /></a>
+    }
+  </section>
+</div>

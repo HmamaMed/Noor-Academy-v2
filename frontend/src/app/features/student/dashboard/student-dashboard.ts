@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EnrollmentService } from '../../../core/services/enrollment.service';
 import { Enrollment } from '../../../core/models/enrollment.model';
@@ -12,6 +12,9 @@ import { NoorDialog } from '../../../shared/design/dialog';
 import { dateKey, nextSession, weeklySessions } from '../../../shared/utils/schedule';
 import { StudentTestimonials } from './student-testimonials';
 import { EnrollmentPayment } from '../../../shared/components/enrollment-payment';
+import { StudentOverview } from './student-overview';
+
+type DashboardTab = 'this-week' | 'applications' | 'past-groups' | 'your-voice';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -25,6 +28,7 @@ import { EnrollmentPayment } from '../../../shared/components/enrollment-payment
     NoorDialog,
     StudentTestimonials,
     EnrollmentPayment,
+    StudentOverview,
   ],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
@@ -36,7 +40,18 @@ export class StudentDashboard implements OnInit {
   }
   private readonly toast = inject(ToastService);
   private readonly enrollmentService = inject(EnrollmentService);
-  protected section = toSignal(inject(ActivatedRoute).fragment);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly section = toSignal(this.route.fragment);
+  protected readonly tabs: { id: DashboardTab; label: string }[] = [
+    { id: 'this-week', label: 'This week' },
+    { id: 'applications', label: 'Applications' },
+    { id: 'past-groups', label: 'Past groups' },
+    { id: 'your-voice', label: 'Your story' },
+  ];
+  protected readonly activeTab = computed(
+    () => this.tabs.find((tab) => tab.id === this.section())?.id ?? 'this-week',
+  );
   protected readonly today = new Date();
   protected readonly localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   protected enrollments = signal<Enrollment[]>([]);
@@ -75,6 +90,39 @@ export class StudentDashboard implements OnInit {
   );
   protected next = computed(() => nextSession(this.scheduled(), this.today));
   protected agenda = computed(() => weeklySessions(this.scheduled(), this.today));
+  protected tabCount(tab: DashboardTab): number | null {
+    if (tab === 'this-week') return this.agenda().length;
+    if (tab === 'applications') return this.pending().length;
+    if (tab === 'past-groups') return this.history().length;
+    return null;
+  }
+  protected async selectTab(tab: DashboardTab) {
+    if (tab === this.activeTab()) return;
+    await this.router.navigate([], { relativeTo: this.route, fragment: tab });
+  }
+  protected onTabKeydown(event: KeyboardEvent, index: number) {
+    let target: number;
+    switch (event.key) {
+      case 'ArrowRight':
+        target = (index + 1) % this.tabs.length;
+        break;
+      case 'ArrowLeft':
+        target = (index + this.tabs.length - 1) % this.tabs.length;
+        break;
+      case 'Home':
+        target = 0;
+        break;
+      case 'End':
+        target = this.tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    void this.selectTab(this.tabs[target].id).then(() => {
+      document.getElementById(`dashboard-tab-${this.activeTab()}`)?.focus();
+    });
+  }
   ngOnInit() {
     this.load();
   }

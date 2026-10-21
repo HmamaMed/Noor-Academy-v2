@@ -24,105 +24,42 @@
       </div>
     </div>
   } @else {
-    <nav class="tabs dashboard-sections" aria-label="Dashboard sections">
-      <a
-        [routerLink]="[]"
-        fragment="this-week"
-        [attr.aria-current]="!section() || section() === 'this-week' ? 'location' : null"
-        >This week</a
-      ><a
-        [routerLink]="[]"
-        fragment="applications"
-        [attr.aria-current]="section() === 'applications' ? 'location' : null"
-        >Applications</a
-      ><a
-        [routerLink]="[]"
-        fragment="past-groups"
-        [attr.aria-current]="section() === 'past-groups' ? 'location' : null"
-        >Past groups</a
-      >
-      <a
-        [routerLink]="[]"
-        fragment="your-voice"
-        [attr.aria-current]="section() === 'your-voice' ? 'location' : null"
-        >Your story</a
-      >
-    </nav>
-    <div class="dashboard-grid">
-      <section class="panel panel-soft next-class" aria-labelledby="next-class-heading">
-        @if (next(); as nextClass) {
-          <div class="next-label">
-            <span class="eyebrow">Next class</span><app-status-badge status="CONFIRMED" />
-          </div>
-          <h2 id="next-class-heading">{{ nextClass.group.courseTitle }}</h2>
-          <p class="meta">{{ nextClass.group.groupName }}</p>
-          <ul class="class-facts">
-            <li>
-              <app-icon name="calendar" /><span
-                >{{ nextClass.date | date: 'EEE, d MMM y' }}<br />{{
-                  nextClass.session.startTime.slice(0, 5)
-                }}–{{ nextClass.session.endTime.slice(0, 5) }}</span
-              >
-            </li>
-            <li><app-icon name="user" />{{ nextClass.group.teacherName }}</li>
-            <li><app-icon name="pin" />{{ nextClass.group.roomName }}</li>
-          </ul>
-          <a class="btn-primary" [routerLink]="['/classroom', nextClass.group.groupId]"
-            >Open workspace <app-icon name="arrow"
-          /></a>
-          <app-course-motif class="next-decoration" [title]="nextClass.group.courseTitle" />
-        } @else {
-          <app-icon name="calendar" />
-          <h2 id="next-class-heading">
-            {{
-              confirmed().length
-                ? 'No upcoming sessions scheduled'
-                : 'Find a class that fits your week'
-            }}
-          </h2>
-          <p class="muted">
-            {{
-              confirmed().length
-                ? 'Your enrolled groups and materials are available below.'
-                : 'Explore the courses and choose a group that works for you.'
-            }}
-          </p>
-          @if (!confirmed().length) {
-            <a routerLink="/courses" class="btn-primary"
-              >Explore courses <app-icon name="arrow"
-            /></a>
+    <app-student-overview
+      [nextClass]="next()"
+      [enrolledCount]="confirmed().length"
+      [pendingCount]="pending().length"
+      [sessionCount]="agenda().length"
+      (applicationsRequested)="selectTab('applications')"
+    />
+    <div class="tabs dashboard-tabs" role="tablist" aria-label="Learning dashboard">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          [id]="'dashboard-tab-' + tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
+          [attr.aria-controls]="'dashboard-panel-' + tab.id"
+          [tabIndex]="activeTab() === tab.id ? 0 : -1"
+          (click)="selectTab(tab.id)"
+          (keydown)="onTabKeydown($event, $index)"
+        >
+          {{ tab.label }}
+          @let count = tabCount(tab.id);
+          @if (count !== null) {
+            <span class="tab-count">{{ count }}</span>
           }
-        }
-      </section>
-      <section id="applications" class="panel applications" aria-labelledby="applications-heading">
-        <h2 id="applications-heading">Pending applications</h2>
-        @for (enrollment of pending(); track enrollment.id) {
-          <article class="application-card">
-            <div class="group-intro">
-              <app-course-motif [title]="enrollment.courseTitle" />
-              <div>
-                <h3>{{ enrollment.courseTitle }}</h3>
-                <p class="meta">{{ enrollment.groupName }}</p>
-                <app-status-badge status="PENDING" />
-              </div>
-            </div>
-            @if (enrollment.expiresAt) {
-              <p class="deadline">
-                Expires {{ enrollment.expiresAt | date: "d MMM y 'at' HH:mm" : 'UTC' }} UTC.
-              </p>
-            }
-            <p class="meta">
-              Awaiting manual payment and administrator approval. A seat is not guaranteed.
-            </p>
-            <button class="btn-secondary" (click)="viewApplication(enrollment)">
-              Payment & application
-            </button>
-          </article>
-        } @empty {
-          <p class="muted section-empty">No pending applications.</p>
-        }
-      </section>
-      <section id="this-week" class="panel agenda" aria-labelledby="agenda-heading">
+        </button>
+      }
+    </div>
+    <div
+      id="dashboard-panel-this-week"
+      role="tabpanel"
+      aria-labelledby="dashboard-tab-this-week"
+      tabindex="0"
+      [hidden]="activeTab() !== 'this-week'"
+      class="weekly-panels"
+    >
+      <section class="panel agenda" aria-labelledby="agenda-heading">
         <h2 id="agenda-heading">This week’s agenda</h2>
         <ul class="agenda-list">
           @for (
@@ -174,7 +111,51 @@
           }
         </ul>
       </section>
-      <section id="past-groups" class="panel past-groups" aria-labelledby="past-heading">
+    </div>
+    <div
+      id="dashboard-panel-applications"
+      role="tabpanel"
+      aria-labelledby="dashboard-tab-applications"
+      tabindex="0"
+      [hidden]="activeTab() !== 'applications'"
+    >
+      <section class="panel applications" aria-labelledby="applications-heading">
+        <h2 id="applications-heading">Pending applications</h2>
+        @for (enrollment of pending(); track enrollment.id) {
+          <article class="application-card">
+            <div class="group-intro">
+              <app-course-motif [title]="enrollment.courseTitle" />
+              <div>
+                <h3>{{ enrollment.courseTitle }}</h3>
+                <p class="meta">{{ enrollment.groupName }}</p>
+                <app-status-badge status="PENDING" />
+              </div>
+            </div>
+            @if (enrollment.expiresAt) {
+              <p class="deadline">
+                Expires {{ enrollment.expiresAt | date: "d MMM y 'at' HH:mm" : 'UTC' }} UTC.
+              </p>
+            }
+            <p class="meta">
+              Awaiting manual payment and administrator approval. A seat is not guaranteed.
+            </p>
+            <button class="btn-secondary" (click)="viewApplication(enrollment)">
+              Payment & application
+            </button>
+          </article>
+        } @empty {
+          <p class="muted section-empty">No pending applications.</p>
+        }
+      </section>
+    </div>
+    <div
+      id="dashboard-panel-past-groups"
+      role="tabpanel"
+      aria-labelledby="dashboard-tab-past-groups"
+      tabindex="0"
+      [hidden]="activeTab() !== 'past-groups'"
+    >
+      <section class="panel past-groups" aria-labelledby="past-heading">
         <h2 id="past-heading">Past groups and applications</h2>
         <ul class="history-list">
           @for (enrollment of history(); track enrollment.id) {
@@ -203,7 +184,15 @@
         </ul>
       </section>
     </div>
-    <app-student-testimonials [enrollments]="enrollments()" />
+    <div
+      id="dashboard-panel-your-voice"
+      role="tabpanel"
+      aria-labelledby="dashboard-tab-your-voice"
+      tabindex="0"
+      [hidden]="activeTab() !== 'your-voice'"
+    >
+      <app-student-testimonials [enrollments]="enrollments()" />
+    </div>
   }
 </div>
 @if (selectedApplication(); as enrollment) {

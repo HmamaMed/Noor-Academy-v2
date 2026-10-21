@@ -1,0 +1,113 @@
+:host {
+  display: block;
+}
+.dashboard-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.15fr);
+  gap: var(--noor-space-24);
+  align-items: stretch;
+}
+.next-class {
+  position: relative;
+  overflow: hidden;
+}
+.next-class > :not(.next-decoration) {
+  position: relative;
+  z-index: 1;
+}
+.next-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.next-class h2 {
+  margin-block: 1rem 0.5rem;
+  max-width: 26ch;
+  font-size: var(--noor-type-app-h1-size);
+  line-height: var(--noor-type-app-h1-line);
+  padding-right: 3rem;
+}
+.class-facts {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+  margin-block: 1.5rem;
+}
+.class-facts li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.next-decoration {
+  position: absolute;
+  width: 8rem;
+  height: 15rem;
+  bottom: -2rem;
+  right: -3rem;
+  opacity: 0.65;
+  pointer-events: none;
+}
+.dashboard-snapshot {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.dashboard-snapshot h2 {
+  font-size: 1.125rem;
+}
+.dashboard-stats {
+  display: grid;
+  gap: 1rem;
+}
+.dashboard-stats > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.dashboard-stats dt {
+  color: var(--noor-text-muted);
+  font-size: 0.875rem;
+}
+.dashboard-stats dd {
+  font: 500 1.75rem/1.2 var(--noor-font-display);
+  color: var(--noor-primary);
+}
+.dashboard-snapshot > .text-link {
+  margin-top: auto;
+  font-size: 0.875rem;
+}
+@media (max-width: 767px) {
+  .dashboard-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dashboard-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .dashboard-stats > div {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .dashboard-stats dt {
+    font-size: 0.75rem;
+  }
+  .next-class h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    padding-right: 0;
+  }
+  .next-class .btn-primary {
+    width: 100%;
+  }
+  .next-decoration {
+    width: 5rem;
+    right: -2rem;
+    opacity: 0.3;
+  }
+  .next-label {
+    flex-wrap: wrap;
+  }
+}
