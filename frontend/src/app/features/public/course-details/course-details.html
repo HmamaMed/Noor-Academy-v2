@@ -26,16 +26,9 @@
   } @else if (course(); as course) {
     <header class="detail-heading">
       <div>
-        <span class="eyebrow">Learn with clarity</span>
+        <span class="eyebrow">Learn with Noor</span>
         <h1 class="public-title">{{ course.title }}</h1>
         <p class="lead whitespace-pre-line">{{ course.description }}</p>
-        <a
-          [routerLink]="[]"
-          fragment="available-groups"
-          [queryParamsHandling]="'preserve'"
-          class="text-link mt-4"
-          >View available groups <app-icon name="arrow"
-        /></a>
       </div>
       <app-course-image [course]="course" />
     </header>
@@ -70,12 +63,6 @@
             No groups are scheduled for this course yet. Please check again later.
           </p>
         } @else {
-          @if (intentGroupId) {
-            <p class="notice mb-4">
-              Review your selected group below. An application is only sent when you choose Submit
-              application.
-            </p>
-          }
           @if (enrollmentError()) {
             <div class="notice notice-error mb-4" role="alert">
               <div>
@@ -124,14 +111,34 @@
                       }
                     </div>
                   </div>
-                  <div>
-                    <app-icon name="users" />
-                    <p>
-                      {{ group.remainingSeats }}
-                      {{ group.remainingSeats === 1 ? 'seat' : 'seats' }} remaining · capacity
-                      {{ group.roomCapacity }}
-                    </p>
+                </div>
+                @let seats = seatAvailability(group);
+                <div
+                  class="seat-availability"
+                  [class.seats-low]="seats.remaining > 0 && seats.percentage <= 25"
+                  [class.seats-closed]="availability(group) !== 'OPEN'"
+                >
+                  <div class="seat-label">
+                    <span>Seats remaining</span
+                    ><strong
+                      >{{ seats.remaining }}<span> / {{ seats.capacity }}</span></strong
+                    >
                   </div>
+                  @if (seats.capacity > 0) {
+                    <div
+                      class="seat-track"
+                      role="meter"
+                      [attr.aria-label]="'Seats remaining in ' + group.groupName"
+                      aria-valuemin="0"
+                      [attr.aria-valuemax]="seats.capacity"
+                      [attr.aria-valuenow]="seats.remaining"
+                      [attr.aria-valuetext]="
+                        seats.remaining + ' of ' + seats.capacity + ' seats remaining'
+                      "
+                    >
+                      <span [style.width.%]="seats.percentage"></span>
+                    </div>
+                  }
                 </div>
                 @if (enrollmentFor(group); as enrollment) {
                   @if (enrollment.status === 'CONFIRMED') {
@@ -189,60 +196,27 @@
   }
 </div>
 @if (reviewGroup(); as group) {
-  <app-dialog label="Review your application" [busy]="applying()" (closed)="closeReview()">
+  <app-dialog label="Confirm application" [busy]="applying()" (closed)="closeReview()">
     <div class="dialog-heading">
-      <div>
-        <span class="eyebrow mb-2">Application</span>
-        <h2>Review your application</h2>
-      </div>
+      <h2>Apply to this group?</h2>
       <button
+        type="button"
         class="icon-button"
-        aria-label="Close application review"
+        aria-label="Close application confirmation"
         (click)="closeReview()"
         [disabled]="applying()"
       >
         <app-icon name="close" />
       </button>
     </div>
-    <p class="muted">Check the class details before submitting your application.</p>
-    <section class="panel review-summary">
-      <h3>{{ course()?.title }} · {{ group.groupName }}</h3>
-      <div class="group-meta">
-        <div>
-          <app-icon name="user" />
-          <p>{{ group.teacherName }}</p>
-        </div>
-        <div>
-          <app-icon name="pin" />
-          <p>{{ group.roomName }}</p>
-        </div>
-        <div>
-          <app-icon name="calendar" />
-          <p>{{ group.startDate | date: 'd MMM y' }} – {{ group.endDate | date: 'd MMM y' }}</p>
-        </div>
-        <div>
-          <app-icon name="clock" />
-          <div>
-            @for (session of group.sessions; track $index) {
-              <p>
-                {{ session.dayOfWeek | titlecase }} · {{ session.startTime.slice(0, 5) }}–{{
-                  session.endTime.slice(0, 5)
-                }}
-              </p>
-            }
-          </div>
-        </div>
-        <div>
-          <app-icon name="users" />
-          <p>{{ group.remainingSeats }} seats remaining</p>
-        </div>
-      </div>
-    </section>
-    <div class="notice notice-warning">
-      <app-icon name="info" />
+    <p class="confirmation-copy">
+      Send your application for <strong>{{ group.groupName }}</strong> in {{ course()?.title }}.
+    </p>
+    <div class="confirmation-next">
+      <app-icon name="clock" />
       <p>
-        Applying does not guarantee a seat. Your request expires after 72 hours unless an
-        administrator confirms enrollment after payment.
+        You’ll have up to 72 hours to arrange payment and receive admin confirmation. Applying does
+        not reserve a seat.
       </p>
     </div>
     @if (error()) {
@@ -257,15 +231,17 @@
       </div>
     }
     <div class="form-actions">
-      <button class="btn-secondary" (click)="closeReview()" [disabled]="applying()">Back</button
+      <button type="button" class="btn-secondary" (click)="closeReview()" [disabled]="applying()">
+        Cancel</button
       ><button
+        type="button"
         class="btn-primary"
         (click)="submitApplication()"
         [disabled]="
           applying() || enrollmentLoading() || enrollmentError() || availability(group) !== 'OPEN'
         "
       >
-        {{ applying() ? 'Applying…' : 'Submit application' }}
+        {{ applying() ? 'Applying…' : 'Confirm application' }}
       </button>
     </div>
   </app-dialog>

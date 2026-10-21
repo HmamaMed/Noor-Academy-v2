@@ -74,6 +74,11 @@ export class CourseDetails implements OnInit {
     });
   }
   enrollmentFor(group: Group) { return this.enrollments().find(e => e.groupId === group.id && e.status !== 'CANCELLED'); }
+  protected seatAvailability(group: Group) {
+    const capacity = Math.max(0, group.roomCapacity);
+    const remaining = Math.min(capacity, Math.max(0, group.remainingSeats));
+    return { capacity, remaining, percentage: capacity ? remaining / capacity * 100 : 0 };
+  }
   availability(group: Group) {
     if (group.status === 'COMPLETED') return 'COMPLETED';
     if (group.status === 'CANCELLED' || group.status === 'DRAFT') return 'INACTIVE';

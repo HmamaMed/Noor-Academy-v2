@@ -181,7 +181,7 @@ One primary destination throughout: course exploration. Vary composition, while 
 
 ### Header and hero
 
-Header: wordmark links home; Courses; in-page How enrollment works; Sign in; Explore courses. Hero eyebrow: LEARN WITH CLARITY. H1: A brighter path to learning. Body: Explore Noor Academy's courses, choose a class that fits your schedule, and keep your learning materials in one place. Primary: Explore courses. Secondary: How enrollment works. Use one deliberate abstract learning illustration and a plain ivory fallback.
+Header: wordmark links home; Courses; in-page How enrollment works; Sign in; Explore courses. Hero eyebrow: LEARN WITH NOOR. H1: A brighter path to learning. Body: Explore Noor Academy's courses, choose a class that fits your schedule, and keep your learning materials in one place. Primary: Explore courses. Secondary: How enrollment works. Use one deliberate abstract learning illustration and a plain ivory fallback.
 
 
 ### Benefits and course preview
