@@ -11,10 +11,11 @@ import { Icon } from '../../../shared/design/icon';
 import { CourseMotif } from '../../../shared/design/course-motif';
 import { NoorDialog } from '../../../shared/design/dialog';
 import { nextSession } from '../../../shared/utils/schedule';
+import { DashboardBreadcrumb } from '../../../shared/components/dashboard-breadcrumb';
 
 @Component({
   selector: 'app-teacher-dashboard',
-  imports: [StatusBadge, RouterLink, DatePipe, TitleCasePipe, Icon, CourseMotif, NoorDialog],
+  imports: [StatusBadge, RouterLink, DatePipe, TitleCasePipe, Icon, CourseMotif, NoorDialog, DashboardBreadcrumb],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css',
 })

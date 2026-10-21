@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-@Component({ selector: 'app-admin-layout', imports: [RouterOutlet], templateUrl: './admin-layout.html' })
+import { DashboardBreadcrumb } from '../../../shared/components/dashboard-breadcrumb';
+@Component({ selector: 'app-admin-layout', imports: [RouterOutlet, DashboardBreadcrumb], templateUrl: './admin-layout.html' })
 export class AdminLayout {}

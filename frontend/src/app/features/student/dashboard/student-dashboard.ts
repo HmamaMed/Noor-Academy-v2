@@ -13,6 +13,7 @@ import { dateKey, nextSession, weeklySessions } from '../../../shared/utils/sche
 import { StudentTestimonials } from './student-testimonials';
 import { EnrollmentPayment } from '../../../shared/components/enrollment-payment';
 import { StudentOverview } from './student-overview';
+import { DashboardBreadcrumb } from '../../../shared/components/dashboard-breadcrumb';
 
 type DashboardTab = 'this-week' | 'applications' | 'past-groups' | 'your-voice';
 
@@ -29,6 +30,7 @@ type DashboardTab = 'this-week' | 'applications' | 'past-groups' | 'your-voice';
     StudentTestimonials,
     EnrollmentPayment,
     StudentOverview,
+    DashboardBreadcrumb,
   ],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',

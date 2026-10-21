@@ -1,4 +1,5 @@
 <div class="app-content teacher-dashboard">
+  <app-dashboard-breadcrumb />
   <header class="page-heading"><div><h1>Ready for your next class.</h1><p>Here’s your upcoming session and assigned groups.</p><p class="meta">Upcoming classes use your local time ({{ localZone }}).</p></div></header>
   @if (loading()) {
     <div role="status" aria-live="polite"><p class="muted">Loading your assigned groups…</p><div class="panel skeleton-card" aria-hidden="true"><div class="skeleton"></div><div class="skeleton"></div></div></div>
