@@ -44,7 +44,7 @@ public class CourseService {
     @Transactional
     public CourseResponse create(CourseRequest request, MultipartFile image) {
         Course course = Course.builder().title(request.title()).description(request.description())
-                .syllabus(request.syllabus()).build();
+                .syllabus(request.syllabus()).price(request.price()).totalSessions(request.totalSessions()).build();
         changeImage(course, image, false);
         return courseMapper.toResponse(courseRepository.saveAndFlush(course));
     }
@@ -60,6 +60,8 @@ public class CourseService {
         course.setTitle(request.title());
         course.setDescription(request.description());
         course.setSyllabus(request.syllabus());
+        course.setPrice(request.price());
+        course.setTotalSessions(request.totalSessions());
         return courseMapper.toResponse(courseRepository.saveAndFlush(course));
     }
 

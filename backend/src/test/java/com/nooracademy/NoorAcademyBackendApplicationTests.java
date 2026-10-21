@@ -77,7 +77,7 @@ class NoorAcademyBackendApplicationTests {
         otherTeacher = create("otherteacher", Role.TEACHER); otherTeacherToken = token(otherTeacher);
         student = create("student", Role.STUDENT); studentToken = token(student);
         otherStudent = create("otherstudent", Role.STUDENT); otherStudentToken = token(otherStudent);
-        courseId = courses.create(new CourseRequest("Arabic", "Learn Arabic", "Reading")).id();
+        courseId = courses.create(new CourseRequest("Arabic", "Learn Arabic", "Reading", null, null)).id();
         roomId = rooms.create(new RoomRequest("Room A", 1)).id();
         groupId = groups.create(request(roomId, teacher.getId(), LocalDate.now().plusDays(1), LocalDate.now().plusDays(30))).id();
         groups.updateStatus(groupId, new GroupStatusUpdateRequest(GroupStatus.ACTIVE));

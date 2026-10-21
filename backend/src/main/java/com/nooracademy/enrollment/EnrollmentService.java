@@ -172,7 +172,8 @@ public class EnrollmentService {
                 e.getGroup().getRoom().getName(),
                 e.getGroup().getStartDate(), e.getGroup().getEndDate(),
                 e.getGroup().getSessions().stream().map(s -> new com.nooracademy.session.dto.SessionResponse(
-                        s.getId(), s.getDayOfWeek(), s.getStartTime(), s.getEndTime())).toList()
+                        s.getId(), s.getDayOfWeek(), s.getStartTime(), s.getEndTime())).toList(),
+                e.getGroup().getCourse().getPrice(), e.getGroup().getCourse().getTotalSessions()
         );
     }
 }

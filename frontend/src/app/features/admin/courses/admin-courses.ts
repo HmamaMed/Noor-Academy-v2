@@ -8,10 +8,19 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CourseService } from '../../../core/services/course.service';
 import { Course, CourseImageSettings } from '../../../core/models/course.model';
 import { CourseImage } from '../../../shared/design/course-image';
+import { CourseFacts } from '../../../shared/components/course-facts';
 
 @Component({
   selector: 'app-admin-courses',
-  imports: [NoorDialog, ReactiveFormsModule, AdminConfirm, Icon, EmptyState, CourseImage],
+  imports: [
+    NoorDialog,
+    ReactiveFormsModule,
+    AdminConfirm,
+    Icon,
+    EmptyState,
+    CourseImage,
+    CourseFacts,
+  ],
   templateUrl: './admin-courses.html',
   styleUrls: ['../admin.css', './admin-courses.css'],
 })
@@ -36,6 +45,16 @@ export class AdminCourses extends AdminEditor implements OnInit {
     title: ['', Validators.required],
     description: [''],
     syllabus: [''],
+    price: this.fb.control<number | null>(null, [
+      Validators.min(0),
+      Validators.max(99999999.99),
+      Validators.pattern(/^\d+(\.\d{1,2})?$/),
+    ]),
+    totalSessions: this.fb.control<number | null>(null, [
+      Validators.min(1),
+      Validators.max(10000),
+      Validators.pattern(/^\d+$/),
+    ]),
   });
 
   protected deleteTarget = signal<Course | null>(null);
@@ -168,13 +187,15 @@ export class AdminCourses extends AdminEditor implements OnInit {
       title: course.title,
       description: course.description ?? '',
       syllabus: course.syllabus ?? '',
+      price: course.price ?? null,
+      totalSessions: course.totalSessions ?? null,
     });
   }
 
   cancelEdit(): void {
     this.resetImages();
     this.editingId.set(null);
-    this.form.reset({ title: '', description: '', syllabus: '' });
+    this.form.reset({ title: '', description: '', syllabus: '', price: null, totalSessions: null });
   }
 
   submit(): void {

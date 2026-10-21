@@ -260,6 +260,11 @@
         </div>
       }
     </dl>
+    <app-course-facts
+      [price]="item.coursePrice"
+      [totalSessions]="item.courseTotalSessions"
+      [detailed]="true"
+    />
     <app-payment-receipt [enrollment]="item" />
     @if (item.status === 'PENDING') {
       <div class="notice notice-warning">

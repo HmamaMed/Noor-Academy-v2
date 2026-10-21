@@ -29,6 +29,7 @@
         <thead>
           <tr>
             <th scope="col">Course title</th>
+            <th scope="col">Price & sessions</th>
             <th scope="col">Actions</th>
           </tr>
         </thead>
@@ -39,6 +40,9 @@
                 <div class="course-record-title">
                   <app-course-image [course]="course" /><span>{{ course.title }}</span>
                 </div>
+              </td>
+              <td data-label="Price & sessions">
+                <app-course-facts [price]="course.price" [totalSessions]="course.totalSessions" />
               </td>
               <td>
                 <div class="row-actions">
@@ -117,6 +121,53 @@
           @if (invalid('title')) {
             <p id="record-title-error" class="field-error">Enter a course title.</p>
           }
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="course-price">Full course fee (MAD)</label>
+            <input
+              id="course-price"
+              type="number"
+              formControlName="price"
+              min="0"
+              max="99999999.99"
+              step="0.01"
+              inputmode="decimal"
+              [attr.aria-invalid]="invalid('price')"
+              aria-describedby="course-price-help course-price-error"
+            />
+            <p class="field-help" id="course-price-help">
+              Set 0 for a free course. Leave blank to show “Price on request.”
+            </p>
+            @if (invalid('price')) {
+              <p class="field-error" id="course-price-error">
+                Enter a nonnegative amount up to 99,999,999.99 MAD, with at most two decimal places.
+              </p>
+            }
+          </div>
+          <div class="form-field">
+            <label for="course-total-sessions">Total sessions</label>
+            <input
+              id="course-total-sessions"
+              type="number"
+              formControlName="totalSessions"
+              min="1"
+              max="10000"
+              step="1"
+              inputmode="numeric"
+              [attr.aria-invalid]="invalid('totalSessions')"
+              aria-describedby="course-sessions-help course-sessions-error"
+            />
+            <p class="field-help" id="course-sessions-help">
+              Total lessons included in the full course. Weekly times are set for each group. Leave
+              blank until confirmed.
+            </p>
+            @if (invalid('totalSessions')) {
+              <p class="field-error" id="course-sessions-error">
+                Enter a whole number from 1 to 10,000.
+              </p>
+            }
+          </div>
         </div>
         <div class="form-field course-cover-editor">
           <label for="course-image-file">Course image <span class="muted">(optional)</span></label>

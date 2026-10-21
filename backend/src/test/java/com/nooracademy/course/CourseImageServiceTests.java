@@ -16,7 +16,7 @@ class CourseImageServiceTests {
     R2Storage storage;
     CourseService service;
     Course course;
-    final CourseRequest request = new CourseRequest("Learning", "Description", "Syllabus");
+    final CourseRequest request = new CourseRequest("Learning", "Description", "Syllabus", null, null);
     @BeforeEach void prepare() {
         repository = mock(CourseRepository.class); storage = mock(R2Storage.class);
         service = new CourseService(repository, Mappers.getMapper(CourseMapper.class), storage);

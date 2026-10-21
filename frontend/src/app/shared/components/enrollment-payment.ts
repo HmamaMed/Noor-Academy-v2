@@ -5,10 +5,11 @@ import { PaymentService, PaymentSettings } from '../../core/services/payment.ser
 import { ContactService } from '../../core/services/contact.service';
 import { Icon } from '../design/icon';
 import { PaymentReceipt } from './payment-receipt';
+import { CourseFacts } from './course-facts';
 
 @Component({
   selector: 'app-enrollment-payment',
-  imports: [Icon, PaymentReceipt],
+  imports: [Icon, PaymentReceipt, CourseFacts],
   templateUrl: './enrollment-payment.html',
   styleUrl: './enrollment-payment.css',
 })

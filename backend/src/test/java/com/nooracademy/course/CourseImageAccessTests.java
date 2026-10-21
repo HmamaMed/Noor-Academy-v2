@@ -19,7 +19,7 @@ class CourseImageAccessTests {
     AnnotationConfigApplicationContext context;
     CourseController controller;
     CourseService service;
-    final CourseRequest metadata = new CourseRequest("Science", "Learn", "Discover");
+    final CourseRequest metadata = new CourseRequest("Science", "Learn", "Discover", null, null);
     final MockMultipartFile image = new MockMultipartFile("image", "cover.png", "image/png", new byte[]{1});
     @Configuration @EnableMethodSecurity
     static class Config {
@@ -52,7 +52,7 @@ class CourseImageAccessTests {
     }
     @Test void administratorCanSaveImageAndPublicVisitorsCanLoadTheCover() {
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("admin", "", "ROLE_ADMIN"));
-        var saved = new CourseResponse(1L, "Science", "Learn", "Discover", "/api/courses/1/image?v=new");
+        var saved = new CourseResponse(1L, "Science", "Learn", "Discover", "/api/courses/1/image?v=new", null, null);
         when(service.create(metadata, image)).thenReturn(saved);
         assertEquals(saved, controller.createWithImage(metadata, image));
         SecurityContextHolder.clearContext();

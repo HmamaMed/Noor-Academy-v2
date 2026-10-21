@@ -29,6 +29,12 @@
         <span class="eyebrow">Learn with Noor</span>
         <h1 class="public-title">{{ course.title }}</h1>
         <p class="lead whitespace-pre-line">{{ course.description }}</p>
+        <app-course-facts
+          class="mt-6"
+          [price]="course.price"
+          [totalSessions]="course.totalSessions"
+          [detailed]="true"
+        />
       </div>
       <app-course-image [course]="course" />
     </header>
@@ -218,6 +224,11 @@
     <p class="confirmation-copy">
       Send your application for <strong>{{ group.groupName }}</strong> in {{ course()?.title }}.
     </p>
+    <app-course-facts
+      class="mb-4"
+      [price]="course()?.price"
+      [totalSessions]="course()?.totalSessions"
+    />
     <div class="confirmation-next">
       <app-icon name="clock" />
       <p>

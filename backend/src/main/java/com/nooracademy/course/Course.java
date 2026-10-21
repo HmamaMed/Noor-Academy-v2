@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "courses")
@@ -34,6 +35,12 @@ public class Course {
 
     @Column(columnDefinition = "TEXT")
     private String syllabus;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "total_sessions")
+    private Integer totalSessions;
 
     @Column(name = "image_key")
     private String imageKey;

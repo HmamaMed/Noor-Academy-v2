@@ -36,6 +36,8 @@ describe('Course application confirmation', () => {
     title: 'Arabic',
     description: 'Reading and conversation.',
     syllabus: 'Weekly practice.',
+    price: 1500,
+    totalSessions: 24,
   };
   const group: Group = {
     id: 2,
@@ -127,6 +129,8 @@ describe('Course application confirmation', () => {
     expect(meter.getAttribute('aria-valuemax')).toBe('12');
     expect(meter.getAttribute('aria-valuetext')).toBe('8 of 12 seats filled, 4 remaining');
     expect(dialog.textContent).toContain('Evening class');
+    expect(dialog.textContent).toContain('1,500');
+    expect(dialog.textContent).toContain('24 sessions');
     expect(dialog.textContent).not.toContain(group.teacherName);
     expect(dialog.textContent).not.toContain('18:00');
     expect(apply).not.toHaveBeenCalled();

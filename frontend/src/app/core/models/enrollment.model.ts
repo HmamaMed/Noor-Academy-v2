@@ -19,4 +19,6 @@ export interface Enrollment {
   startDate: string;
   endDate: string;
   sessions: SessionSlot[];
+  coursePrice?: number | null;
+  courseTotalSessions?: number | null;
 }

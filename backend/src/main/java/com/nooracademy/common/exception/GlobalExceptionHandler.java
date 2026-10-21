@@ -49,6 +49,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "Validation failed", request, fieldErrors);
     }
 
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleUnreadableBody(Exception ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "Some values could not be read. Check the field types and try again.", request, null);
+    }
+
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleIntegrity(Exception ex, HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, "This record conflicts with existing data or is still in use", request, null);

@@ -20,6 +20,8 @@ public record EnrollmentResponse(
         String roomName,
         java.time.LocalDate startDate,
         java.time.LocalDate endDate,
-        java.util.List<com.nooracademy.session.dto.SessionResponse> sessions
+        java.util.List<com.nooracademy.session.dto.SessionResponse> sessions,
+        java.math.BigDecimal coursePrice,
+        Integer courseTotalSessions
 ) {
 }

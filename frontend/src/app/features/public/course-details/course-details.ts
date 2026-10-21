@@ -15,9 +15,10 @@ import { NoorDialog } from '../../../shared/design/dialog';
 import { Icon } from '../../../shared/design/icon';
 import { CourseImage } from '../../../shared/design/course-image';
 import { EnrollmentPayment } from '../../../shared/components/enrollment-payment';
+import { CourseFacts } from '../../../shared/components/course-facts';
 
 @Component({
-  selector: 'app-course-details', imports: [RouterLink, DatePipe, TitleCasePipe, StatusBadge, NoorDialog, Icon, CourseImage, EnrollmentPayment],
+  selector: 'app-course-details', imports: [RouterLink, DatePipe, TitleCasePipe, StatusBadge, NoorDialog, Icon, CourseImage, EnrollmentPayment, CourseFacts],
   templateUrl: './course-details.html', styleUrl: './course-details.css',
 })
 export class CourseDetails implements OnInit {

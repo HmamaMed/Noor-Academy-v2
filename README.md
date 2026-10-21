@@ -64,6 +64,12 @@ Visitors can send enquiries through the footer’s contact form without an accou
 
 In **Messages → Footer & location**, set the public email/phone, Instagram, Facebook, and WhatsApp links, location name/address, and latitude/longitude. Both coordinates are required for the map; the editor includes a preview. The footer’s map and address open the pinned location in Google Maps. With an address alone, they open a Google Maps address search. The map preview uses OpenStreetMap. Empty social/contact fields stay hidden; paste full public profile URLs and save to show their icons. WhatsApp links use `https://wa.me/` followed by the international phone number with digits only. Until a location is configured, the footer shows an illustration and invites visitors to ask about class locations. Flyway migration V7 creates the inbox and footer settings when the backend starts.
 
+## Course price and length
+
+In **Admin → Courses**, enter the **full course fee in MAD** and **total sessions**. The session count is the planned total number of lessons for the course; group schedules still define weekly days and times. Fees accept up to two decimal places, and session counts must be whole numbers from 1 to 10,000. Leave either value blank until it is confirmed. An unset fee appears as **Price on request**; an explicit zero appears as **Free**.
+
+The homepage, catalog, course details, application confirmation, payment instructions, and admin enrollment review show these details. Payment instructions use the course’s currently published fee; staff still verify the actual payment before confirming a place. Flyway migration **V10** adds nullable price and session fields when the backend starts, preserving existing courses without inventing prices or lengths.
+
 ## Payment options and receipts
 
 In **Admin → Payments**, publish the bank name, account holder, RIB, visiting hours, and instructions for each method. Leave all three bank fields blank until the real details are ready. The visiting address and Google Maps pin come from **Admin → Messages → Footer & location**.

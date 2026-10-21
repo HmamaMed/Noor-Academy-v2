@@ -24,6 +24,7 @@ import { AdminConfirm } from '../admin-confirm';
 import { RouterLink } from '@angular/router';
 import { PaymentService } from '../../../core/services/payment.service';
 import { PaymentReceipt } from '../../../shared/components/payment-receipt';
+import { CourseFacts } from '../../../shared/components/course-facts';
 
 @Component({
   selector: 'app-admin-enrollments',
@@ -37,6 +38,7 @@ import { PaymentReceipt } from '../../../shared/components/payment-receipt';
     AdminConfirm,
     RouterLink,
     PaymentReceipt,
+    CourseFacts,
   ],
   templateUrl: './admin-enrollments.html',
   styleUrl: '../admin.css',

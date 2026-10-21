@@ -7,7 +7,13 @@ import { environment } from '../../../environments/environment';
 describe('Course image request compatibility', () => {
   let service: CourseService;
   let http: HttpTestingController;
-  const metadata = { title: 'Science', description: 'Learn together', syllabus: 'Discovery' };
+  const metadata = {
+    title: 'Science',
+    description: 'Learn together',
+    syllabus: 'Discovery',
+    price: 1234.5,
+    totalSessions: 24,
+  };
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],

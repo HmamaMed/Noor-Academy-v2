@@ -120,4 +120,42 @@ describe('Course cover editing', () => {
       null,
     );
   });
+  it('preserves an explicit free price and the session count when editing', () => {
+    const component = create();
+    component.startEdit({ ...course, price: 0, totalSessions: 12 });
+    expect(component['form'].controls.price.value).toBe(0);
+    expect(component['form'].controls.totalSessions.value).toBe(12);
+    component.cancelEdit();
+    expect(component['form'].controls.price.value).toBeNull();
+    expect(component['form'].controls.totalSessions.value).toBeNull();
+  });
+  it('rejects negative prices, excessive precision, and fractional session counts before saving', () => {
+    const component = create();
+    component.startCreate();
+    component['form'].controls.title.setValue('Science');
+    for (const value of [
+      { price: -1, totalSessions: 12 },
+      { price: 12.345, totalSessions: 12 },
+      { price: 200, totalSessions: 1.5 },
+      { price: 200, totalSessions: 0 },
+    ]) {
+      component['form'].patchValue(value);
+      component.submit();
+      expect(service.create).not.toHaveBeenCalled();
+    }
+  });
+  it('keeps the entered price and length after a failed save so the admin can retry', () => {
+    service.create.mockReturnValue(throwError(() => ({ error: { message: 'Please retry.' } })));
+    const component = create();
+    component.startCreate();
+    component['form'].patchValue({ title: 'Science', price: 1234.5, totalSessions: 24 });
+    component.submit();
+    expect(service.create).toHaveBeenCalledWith(
+      expect.objectContaining({ price: 1234.5, totalSessions: 24 }),
+      null,
+    );
+    expect(component['form'].controls.price.value).toBe(1234.5);
+    expect(component['form'].controls.totalSessions.value).toBe(24);
+    expect(component['editorOpen']()).toBe(true);
+  });
 });
